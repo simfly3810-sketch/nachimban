@@ -99,7 +99,7 @@ h1 { font-size: clamp(30px, 5.2vw, 48px); line-height: 1.2; margin: 0 0 14px; }
 .head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px 24px; flex-wrap: wrap; margin-bottom: 22px; }
 h2 { font-size: clamp(22px, 3.4vw, 30px); margin: 0; }
 .sub { color: var(--ink2); margin: 0; font-size: 14px; }
-.chip { display: inline-block; font-size: 12px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--ink2); background: var(--surface); }
+.chip { display: inline-block; white-space: nowrap; flex: none; font-size: 12px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--ink2); background: var(--surface); }
 .chip.seal { border-color: var(--seal); color: var(--seal); }
 .chip.acc { border-color: var(--accent); color: var(--accent); }
 .sample { margin: 0 0 18px; }
@@ -107,6 +107,7 @@ h2 { font-size: clamp(22px, 3.4vw, 30px); margin: 0; }
 .today { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 20px; }
 .quote { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 26px 26px 22px; }
 .quote blockquote { margin: 0 0 14px; font-family: var(--f-display); font-size: clamp(20px, 3vw, 27px); line-height: 1.5; font-weight: 500; text-wrap: balance; }
+.qbasis { margin: 12px 0 0; font-size: 12px; color: var(--ink2); }
 .quote cite { font-style: normal; color: var(--ink2); font-size: 13px; }
 .flow { background: var(--surface2); border-radius: 14px; padding: 22px; display: grid; gap: 6px; align-content: start; }
 .flow .big { font-family: var(--f-display); font-size: 34px; line-height: 1.15; }
@@ -182,6 +183,14 @@ h2 { font-size: clamp(22px, 3.4vw, 30px); margin: 0; }
 .tsyn .kicker { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 2px; }
 .tsyn .best { color: var(--ink2); font-size: 13px; }
 .tover { margin-bottom: 22px; }
+.tsyn.big { padding: 22px 24px; border: 1px solid var(--line); gap: 10px; }
+.tsyn.big p { font-size: 16px; line-height: 1.7; }
+.tsyn.big .kicker { font-size: 15px; letter-spacing: .04em; color: var(--ink); font-family: var(--f-display); }
+.tsyn.big .best { font-size: 14px; }
+.tdet { margin: 0 0 20px; font-size: 13px; color: var(--ink2); }
+.tdet summary { cursor: pointer; }
+.tdet .tnote { margin: 10px 0 0; }
+.tbasis { font-size: 14px; margin: 26px 0 0; color: var(--ink2); font-weight: 500; }
 .tsum { margin: 10px 0 0; font-size: 13px; color: var(--ink2); }
 .tnote { font-size: 13px; color: var(--ink2); margin: 0 0 20px; max-width: 60em; }
 .tfixed { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-bottom: 22px; }
@@ -241,13 +250,11 @@ table.heat { border-collapse: separate; border-spacing: 3px; width: 100%; min-wi
 }
 </style>
 
-</head>
-<body>
 <div class="wrap">
   <header class="top">
     <div class="brand"><span class="seal" aria-hidden="true">羅</span><b>나침반</b><small>羅盤</small></div>
     <nav class="nav" aria-label="섹션 이동">
-      <a href="#today">오늘</a><a href="#traits">전체 특성</a><a href="#planets">행성</a><a href="#tarot">타로</a><a href="#fields">분야별</a><a href="#year">월별</a>
+      <a href="#today">오늘</a><a href="#traits">전체 특성</a><a href="#planets">행성</a><a href="#tarot">타로 종합</a><a href="#fields">분야별</a><a href="#year">월별</a>
     </nav>
   </header>
 
@@ -1146,7 +1153,7 @@ var E = {
   planetLon: planetLon, allBodies: allBodies, meanNode: meanNode, ayanamsa: ayanamsa,
   buildReport: buildReport, monthRows: monthRows, pillars: pillars, sunLon: sunLon, moonLon: moonLon, jd: jd, jdn: jdn,
   angles: angles, houseOf: houseOf, ziwei: ziwei, lunarOf: lunarOf, gateOf: gateOf, humanDesign: humanDesign,
-  tenGod: tenGod, g: g, gk: gk, quoteFor: function (dayStem, seed) { var q = QUOTES[stemEl(dayStem)]; return q[seed % q.length]; },
+  tenGod: tenGod, g: g, gk: gk, quoteFor: function (el, seed) { var q = QUOTES[el]; return q[seed % q.length]; }, stemEl: stemEl,
   data: { STEM_KO: STEM_KO, STEM_HJ: STEM_HJ, BR_KO: BR_KO, BR_HJ: BR_HJ, ANIMAL: ANIMAL, EL: EL, EL_HJ: EL_HJ, EL_INFO: EL_INFO, SIGNS: SIGNS, CATS: CATS, GOD_GROUP: GOD_GROUP, JU_NAME: JU_NAME }
 };
 if (typeof module !== 'undefined' && module.exports) module.exports = E; else root.Engine = E;
@@ -1223,7 +1230,13 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
   /* ---------- 오늘 ---------- */
   function renderToday(rep) {
     var tp = E.pillars(TY, TM, TD, 12, 0, false);
-    var q = E.quoteFor(tp.day[0], TY * 400 + TM * 31 + TD);
+    var te = E.stemEl(tp.day[0]), yo = rep.S.yong, mo = rep.S.most;
+    var q = E.quoteFor(yo, TY * 400 + TM * 31 + TD + rep.P.day[0] * 17 + rep.P.day[1] * 5 + rep.P.month[1] * 3);
+    var rel = te === yo ? '오늘 일진이 내 보강 오행(' + EL[yo] + ')과 같아, 기운이 받쳐 주는 날입니다.'
+      : (te + 1) % 5 === yo ? '오늘 일진(' + EL[te] + ')이 내 보강 오행(' + EL[yo] + ')을 키워 주는 날입니다.'
+      : te === mo ? '오늘 일진(' + EL[te] + ')이 내게 이미 많은 기운이라 과해지기 쉬우니 속도를 조절하세요.'
+      : (te + 2) % 5 === yo ? '오늘 일진(' + EL[te] + ')이 내 보강 오행(' + EL[yo] + ')을 누르는 날이라 무리한 약속과 지출을 줄이세요.'
+      : '오늘 일진(' + EL[te] + ')은 내 보강 오행(' + EL[yo] + ')과 크게 부딪히지 않는 평범한 날입니다.';
     var god = E.tenGod(rep.P.day[0], tp.day[0]);
     var tags = { '비견': '동료·경쟁', '겁재': '경쟁·지출', '식신': '여유·표현', '상관': '재주·돌파', '편재': '활동·변동 수입', '정재': '안정 수입', '편관': '압박·도전', '정관': '질서·인정', '편인': '직관·변칙 학습', '정인': '배움·후원' };
     var nm = rep.input.name ? esc(rep.input.name) + '님의 ' : '';
@@ -1231,8 +1244,8 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
     $('#today').innerHTML =
       '<div class="head"><h2 id="t-h">오늘의 명언</h2><p class="sub nums">' + TY + '년 ' + TM + '월 ' + TD + '일 (' + dow + ') · 일진 ' + E.g(tp.day) + '일</p></div>' +
       (state.sample ? '<p class="sample"><span class="chip seal">예시</span> <span class="sub">1990년 5월 15일 14:30 입력으로 계산한 결과입니다. 본인 정보를 넣고 나침반을 돌리면 바뀝니다.</span></p>' : '') +
-      '<div class="today"><figure class="quote" style="margin:0"><blockquote>“' + esc(q[0]) + '”</blockquote><cite>— ' + esc(q[1]) + '</cite></figure>' +
-      '<div class="flow"><p class="kicker">' + nm + '오늘의 흐름</p><div class="big">' + god.name + '</div><p>' + tags[god.name] + '. 오늘의 일진이 내 일간(' + D.STEM_HJ[rep.P.day[0]] + ')에게 ' + god.name + '으로 작용합니다.</p>' + todayTarot(rep) + '</div></div>';
+      '<div class="today"><figure class="quote" style="margin:0"><blockquote>“' + esc(q[0]) + '”</blockquote><cite>— ' + esc(q[1]) + '</cite><p class="qbasis">고르는 기준: 내 사주에서 보강이 필요한 오행(' + EL[yo] + ')에 맞는 문장 중, 내 일주와 오늘 날짜로 한 구절을 정합니다. 사람마다, 날마다 달라집니다.</p></figure>' +
+      '<div class="flow"><p class="kicker">' + nm + '오늘의 흐름</p><div class="big">' + god.name + '</div><p>' + tags[god.name] + '. 오늘의 일진이 내 일간(' + D.STEM_HJ[rep.P.day[0]] + ')에게 ' + god.name + '으로 작용합니다.</p><p><b>' + rel + '</b></p>' + todayTarot(rep) + '</div></div>';
   }
 
   /* ---------- 전체 특성 ---------- */
@@ -1305,10 +1318,10 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
     var basis = e.basis === 'tradition' ? '<span class="chip acc">전통 대응</span>' : '<span class="chip">키워드 대응</span>';
     return '<div class="trow">' + tface(e) + '<div><div class="tname"><b>' + esc(E.tarot.name(e)) + '</b>' + basis + '</div><p class="tsrc">' + esc(e.src) + (e.role ? ' · ' + esc(e.role) : '') + '</p><p>' + esc(E.tarot.text(e, cat)) + '</p></div></div>';
   }
-  function synthHtml(sy, title) {
+  function synthHtml(sy, title, big) {
     if (!sy) return '';
     var rel = { same: '사주와 같은 방향', near: '사주와 대체로 비슷', diff: '사주와 다른 방향' }[sy.saju.relation];
-    return '<div class="tsyn"><p class="kicker">' + title + ' <span class="chip acc">카드 흐름 ' + sy.label + '</span><span class="chip ' + (sy.saju.relation === 'diff' ? 'seal' : 'acc') + '">' + rel + '</span></p>' +
+    return '<div class="tsyn' + (big ? ' big' : '') + '"><p class="kicker">' + title + ' <span class="chip acc">타로 흐름: ' + sy.label + '</span><span class="chip ' + (sy.saju.relation === 'diff' ? 'seal' : 'acc') + '">' + rel + '</span></p>' +
       sy.lines.map(function (l) { return '<p>' + esc(l) + '</p>'; }).join('') +
       '<p><b>' + esc(sy.saju.text) + '</b></p><p class="best">' + esc(sy.saju.bestText) + '</p></div>';
   }
@@ -1335,9 +1348,10 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
     }).join('') + '</div>';
   }
   function renderTarot(rep) {
-    var T = rep.tarot, h = '<div class="head"><h2 id="tr-h">타로 대응</h2><p class="sub">계산된 결과마다 대응하는 카드를 함께 읽습니다.</p></div>';
-    h += '<p class="tnote"><span class="chip acc">전통 대응</span> 별자리, 행성, 요일, 수비학 숫자는 골든던 계열의 대응표를 따릅니다. <span class="chip">키워드 대응</span> 십성, 오행 슈트, 자미두수 주성, 휴먼디자인 라인은 정통 대응표가 없어 의미가 비슷한 카드를 연결한 것입니다. 역행하는 행성은 역방향 카드로 읽습니다. 종합 해석의 순풍·혼재·긴장은 카드마다 제가 정한 점수(−2~+2)의 평균이 높은 쪽, 중간, 낮은 쪽을 나눈 것이고, 사주 쪽은 앞으로 15개월의 월별 점수 평균(3.3점 이상 순풍, 2.7점 이하 긴장)입니다.</p>';
-    h += '<div class="tover">' + synthHtml(T.synth.overall, '전체 종합 해석') + '</div>';
+    var T = rep.tarot, h = '<div class="head"><h2 id="tr-h">타로로 읽는 종합 해석</h2><p class="sub">사주·점성·수비학 등 계산 결과를 타로 카드로 옮겨, 하나의 흐름으로 요약했습니다.</p></div>';
+    h += '<div class="tover">' + synthHtml(T.synth.overall, '전체 종합 해석', true) + '</div>';
+    h += '<details class="tdet"><summary>대응 기준과 점수 계산 방법 보기</summary><p class="tnote"><span class="chip acc">전통 대응</span> 별자리, 행성, 요일, 수비학 숫자는 골든던 계열의 대응표를 따릅니다. <span class="chip">키워드 대응</span> 십성, 오행 슈트, 자미두수 주성, 휴먼디자인 라인은 정통 대응표가 없어 의미가 비슷한 카드를 연결한 것입니다. 역행하는 행성은 역방향 카드로 읽습니다. 종합 해석의 순풍·혼재·긴장은 카드마다 제가 정한 점수(−2~+2)의 평균이 높은 쪽, 중간, 낮은 쪽을 나눈 것이고, 사주 쪽은 앞으로 15개월의 월별 점수 평균(3.3점 이상 순풍, 2.7점 이하 긴장)입니다.</p></details>';
+    h += '<h3 class="tbasis">종합 해석의 근거가 된 카드</h3>';
     h += '<div class="tfixed"><div><p class="kicker" style="margin:12px 0 0">생일 카드</p>' + T.birth.map(function (e) { return trow(e, null); }).join('') + '</div>';
     h += '<div><p class="kicker" style="margin:12px 0 0">오늘의 카드</p>' + todayTarot(rep) + '</div></div>';
     h += '<div class="tsysgrid">';
