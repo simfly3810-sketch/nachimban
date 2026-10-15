@@ -1,0 +1,1530 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>나침반</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@500;700&display=swap">
+<style>
+/* Layout: 좌측 입력 폼 + 우측 나침반 다이얼(보강 방향 바늘) → 오늘의 명언 → 전체 특성 → 분야별 탭 → 연간 월별 히트맵 */
+:root {
+  --bg: #E8EDE9; --surface: #F5F8F5; --surface2: #DDE5E0;
+  --ink: #17262A; --ink2: #4A5B5E; --line: #C3CFC9;
+  --accent: #1E6A66; --accent-ink: #F5F8F5;
+  --seal: #B4382B; --seal-ink: #FBF3F1;
+  --f-display: 'Noto Serif KR', 'Nanum Myeongjo', 'Batang', serif;
+  --f-body: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1A1C; --surface: #16252A; --surface2: #1D3036;
+    --ink: #E3EDE9; --ink2: #9DB0AD; --line: #2A3D41;
+    --accent: #66C2B7; --accent-ink: #0F1A1C;
+    --seal: #E0705F; --seal-ink: #1A0F0D;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F1A1C; --surface: #16252A; --surface2: #1D3036;
+  --ink: #E3EDE9; --ink2: #9DB0AD; --line: #2A3D41;
+  --accent: #66C2B7; --accent-ink: #0F1A1C;
+  --seal: #E0705F; --seal-ink: #1A0F0D;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--f-body); font-size: 15px; line-height: 1.7;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 56px;
+  word-break: keep-all; overflow-wrap: break-word;
+}
+.wrap { max-width: 1080px; margin: 0 auto; }
+h1, h2, h3, .serif { font-family: var(--f-display); font-weight: 700; text-wrap: balance; letter-spacing: -0.01em; }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.nums { font-variant-numeric: tabular-nums; }
+
+/* header */
+.top { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 18px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 10px; }
+.seal { width: 30px; height: 30px; background: var(--seal); color: var(--seal-ink); display: grid; place-items: center; font-family: var(--f-display); font-size: 17px; font-weight: 700; transform: rotate(-4deg); border-radius: 3px; }
+.brand b { font-family: var(--f-display); font-size: 20px; letter-spacing: 0.02em; }
+.brand small { color: var(--ink2); font-size: 12px; letter-spacing: 0.12em; }
+.nav { display: flex; gap: 6px; flex-wrap: wrap; }
+.nav a { color: var(--ink2); text-decoration: none; padding: 6px 12px; border-radius: 999px; font-size: 13px; }
+.nav a:hover { background: var(--surface2); color: var(--ink); }
+
+/* hero */
+.hero { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 36px; align-items: center; padding-block: 24px 40px; }
+.eyebrow { font-size: 12px; letter-spacing: 0.16em; color: var(--accent); font-weight: 700; margin: 0 0 10px; }
+h1 { font-size: clamp(30px, 5.2vw, 48px); line-height: 1.2; margin: 0 0 14px; }
+.lede { color: var(--ink2); margin: 0 0 22px; max-width: 34em; }
+.form { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: grid; gap: 14px; }
+.row2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.field { display: grid; gap: 5px; min-width: 0; }
+.field > label, .field > .lab { font-size: 12px; color: var(--ink2); font-weight: 500; }
+.field input[type=text], .field input[type=date], .field input[type=time], .field select {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; width: 100%; min-width: 0; min-height: 42px;
+}
+.field input:disabled { opacity: .45; }
+.seg { display: flex; gap: 6px; flex-wrap: wrap; }
+.seg label { cursor: pointer; }
+.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.seg span { display: inline-block; padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--bg); font-size: 14px; }
+.seg input:checked + span { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.seg input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+.check { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink2); }
+.check input { width: 18px; height: 18px; accent-color: var(--accent); }
+.go { background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 10px; padding: 13px 18px; font-weight: 700; font-size: 16px; cursor: pointer; min-height: 48px; }
+.go:hover { filter: brightness(1.08); }
+.fine { font-size: 12px; color: var(--ink2); margin: 0; }
+.err { color: var(--seal); font-size: 13px; margin: 0; min-height: 1em; }
+
+.dial { display: grid; gap: 10px; justify-items: center; min-width: 0; }
+.dial svg { width: 100%; max-width: 440px; height: auto; display: block; }
+.dial-cap { text-align: center; font-size: 14px; color: var(--ink2); margin: 0; max-width: 30em; }
+.dial-cap b { color: var(--ink); font-family: var(--f-display); font-size: 17px; }
+.needle { transform-origin: 200px 200px; transition: transform 1.1s cubic-bezier(.2, .8, .2, 1); }
+@media (prefers-reduced-motion: reduce) { .needle { transition: none; } html { scroll-behavior: auto; } }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; font-size: 12px; color: var(--ink2); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
+
+/* sections */
+.block { padding-block: 40px; border-top: 1px solid var(--line); scroll-margin-top: 8px; }
+.head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px 24px; flex-wrap: wrap; margin-bottom: 22px; }
+h2 { font-size: clamp(22px, 3.4vw, 30px); margin: 0; }
+.sub { color: var(--ink2); margin: 0; font-size: 14px; }
+.chip { display: inline-block; font-size: 12px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--ink2); background: var(--surface); }
+.chip.seal { border-color: var(--seal); color: var(--seal); }
+.chip.acc { border-color: var(--accent); color: var(--accent); }
+.sample { margin: 0 0 18px; }
+
+.today { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 20px; }
+.quote { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 26px 26px 22px; }
+.quote blockquote { margin: 0 0 14px; font-family: var(--f-display); font-size: clamp(20px, 3vw, 27px); line-height: 1.5; font-weight: 500; text-wrap: balance; }
+.quote cite { font-style: normal; color: var(--ink2); font-size: 13px; }
+.flow { background: var(--surface2); border-radius: 14px; padding: 22px; display: grid; gap: 6px; align-content: start; }
+.flow .big { font-family: var(--f-display); font-size: 34px; line-height: 1.15; }
+.flow p { margin: 0; color: var(--ink2); font-size: 14px; }
+.kicker { font-size: 12px; letter-spacing: .12em; color: var(--ink2); margin: 0; font-weight: 500; }
+
+.traits { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 32px; }
+.story h3 { font-size: 22px; margin: 4px 0 12px; }
+.story p { margin: 0 0 12px; }
+.pillars { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.pil { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 6px 12px; text-align: center; display: grid; gap: 2px; }
+.pil.me { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.pil .nm { font-size: 11px; color: var(--ink2); }
+.pil .god { font-size: 11px; color: var(--accent); font-weight: 700; min-height: 1.4em; }
+.pil .hj { font-family: var(--f-display); font-size: clamp(28px, 5vw, 40px); line-height: 1.15; }
+.pil .ko { font-size: 11px; color: var(--ink2); }
+.pil .sep { height: 1px; background: var(--line); margin: 6px 10px; }
+.pil.empty { opacity: .55; align-content: center; }
+.elbars { margin-top: 18px; display: grid; gap: 7px; }
+.elrow { display: grid; grid-template-columns: 52px minmax(0, 1fr) 34px; align-items: center; gap: 10px; font-size: 13px; }
+.elrow .bar { height: 10px; background: var(--surface2); border-radius: 5px; overflow: hidden; }
+.elrow .bar i { display: block; height: 100%; background: var(--accent); border-radius: 5px; }
+.elrow.yong .lab { color: var(--accent); font-weight: 700; }
+.elrow.most .bar i { background: var(--seal); }
+.elnote { font-size: 12px; color: var(--ink2); margin: 6px 0 0; }
+.systems { margin-top: 28px; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+.sys { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: grid; gap: 4px; align-content: start; min-width: 0; }
+.sys .n { font-size: 12px; color: var(--accent); font-weight: 700; letter-spacing: .04em; }
+.sys .v { font-family: var(--f-display); font-size: 16px; line-height: 1.45; }
+.sys .d { font-size: 13px; color: var(--ink2); }
+
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px; }
+.tab { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 9px 18px; cursor: pointer; font-weight: 500; min-height: 42px; }
+.tab[aria-selected=true] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 24px; }
+.panel .lead { font-family: var(--f-display); font-size: clamp(18px, 2.6vw, 23px); line-height: 1.5; margin: 0 0 16px; font-weight: 500; text-wrap: balance; }
+.lines { list-style: none; margin: 0; padding: 0; display: grid; }
+.lines li { display: grid; grid-template-columns: 78px minmax(0, 1fr); gap: 14px; padding: 12px 0; border-top: 1px solid var(--line); }
+.src { font-size: 12px; font-weight: 700; color: var(--accent); padding-top: 2px; }
+.pnote { margin: 14px 0 0; font-size: 12px; color: var(--ink2); }
+
+.ctrl { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+.ctrl select { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; min-height: 42px; }
+.cats { display: flex; gap: 6px; flex-wrap: wrap; }
+.cats button { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 7px 14px; cursor: pointer; font-size: 13px; min-height: 36px; }
+.cats button[aria-pressed=true] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.yhead { background: var(--surface2); border-radius: 14px; padding: 18px 22px; display: flex; gap: 8px 24px; flex-wrap: wrap; align-items: baseline; margin-bottom: 16px; }
+.yhead .big { font-family: var(--f-display); font-size: 28px; font-weight: 700; }
+.yhead p { margin: 0; flex: 1 1 260px; min-width: 0; }
+.yhead { margin-bottom: 12px; }
+.ychips { display: flex; gap: 6px; flex-wrap: wrap; flex-basis: 100%; }
+.ysub { flex-basis: 100% !important; color: var(--ink2); font-size: 13px; margin: 0; }
+.sumbox { background: var(--surface2); border-radius: 10px; padding: 12px 14px; margin: 10px 0 4px; font-weight: 500; }
+.ptab { border-collapse: collapse; width: 100%; min-width: 440px; font-size: 14px; }
+.ptab th, .ptab td { text-align: left; padding: 9px 12px; border-top: 1px solid var(--line); }
+.ptab thead th { border-top: 0; font-size: 12px; color: var(--ink2); font-weight: 500; }
+.ptab tbody th { font-weight: 500; }
+.ptab td { font-variant-numeric: tabular-nums; }
+.tface { width: 52px; aspect-ratio: 5 / 8; border: 1.5px solid currentColor; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 5px 3px 6px; background: var(--surface2); flex: none; }
+.tface svg { width: 62%; height: auto; margin: auto; }
+.tface .rn { font-family: var(--f-display); font-size: 11px; font-weight: 700; line-height: 1; letter-spacing: .04em; }
+.tface.rev { transform: rotate(180deg); }
+.su-major { color: var(--ink); border-color: var(--seal); }
+.su-w { color: var(--seal); } .su-c { color: var(--accent); } .su-s { color: var(--ink2); } .su-p { color: var(--ink); }
+.trow { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 14px; padding: 12px 0; border-top: 1px solid var(--line); align-items: start; }
+.trow p { margin: 0; font-size: 14px; }
+.tname { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.tname b { font-family: var(--f-display); font-size: 16px; }
+.tsrc { color: var(--ink2); font-size: 12px !important; margin-bottom: 2px !important; }
+.tblock { margin-top: 18px; border-top: 2px solid var(--ink); padding-top: 12px; }
+.tsyn { margin-top: 14px; background: var(--surface2); border-radius: 12px; padding: 14px 16px; display: grid; gap: 6px; }
+.tsyn p { margin: 0; font-size: 14px; }
+.tsyn .kicker { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 2px; }
+.tsyn .best { color: var(--ink2); font-size: 13px; }
+.tover { margin-bottom: 22px; }
+.tsum { margin: 10px 0 0; font-size: 13px; color: var(--ink2); }
+.tnote { font-size: 13px; color: var(--ink2); margin: 0 0 20px; max-width: 60em; }
+.tfixed { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-bottom: 22px; }
+.tfixed > div { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 6px 18px 12px; min-width: 0; }
+.tfixed .trow:first-of-type { border-top: 0; }
+.tsysgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 18px 24px; }
+.tsys { min-width: 0; }
+.tsys h3 { font-size: 17px; margin: 0 0 2px; }
+.tchips { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px; }
+.tchip { font-size: 11px; padding: 2px 8px; border-radius: 999px; background: var(--surface2); color: var(--ink2); white-space: nowrap; }
+.flow .trow { border-top: 1px solid var(--line); padding: 10px 0 0; margin-top: 6px; grid-template-columns: 44px minmax(0, 1fr); gap: 12px; }
+.flow .tface { width: 44px; }
+.ygrid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 20px; align-items: start; }
+.tscroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+table.heat { border-collapse: separate; border-spacing: 3px; width: 100%; min-width: 360px; }
+.heat th { font-weight: 500; font-size: 12px; color: var(--ink2); padding: 6px 2px; text-align: center; }
+.heat th.mh, .heat td.mh { text-align: left; padding-left: 8px; white-space: nowrap; }
+.heat td.mh { font-size: 13px; }
+.heat td.mh small { color: var(--ink2); margin-left: 4px; font-family: var(--f-display); }
+.heat td { padding: 0; }
+.cell { width: 100%; border: 0; border-radius: 6px; min-height: 34px; cursor: pointer; font-weight: 700; font-size: 13px; background: var(--surface2); color: var(--ink); }
+.s1 { background: color-mix(in srgb, var(--seal) 42%, var(--surface)); }
+.s2 { background: color-mix(in srgb, var(--seal) 18%, var(--surface)); }
+.s3 { background: color-mix(in srgb, var(--accent) 10%, var(--surface)); }
+.s4 { background: color-mix(in srgb, var(--accent) 28%, var(--surface)); }
+.s5 { background: color-mix(in srgb, var(--accent) 48%, var(--surface)); }
+.dim { opacity: .28; }
+.heat tr.sel td.mh { color: var(--accent); font-weight: 700; }
+.heat tr.sel .cell { box-shadow: 0 0 0 2px var(--ink); }
+.detail { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; min-width: 0; }
+.detail h3 { margin: 0 0 4px; font-size: 20px; }
+.detail .tags { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0 12px; }
+.nrow { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
+.nrow .c { font-weight: 700; font-size: 13px; }
+.dots { display: flex; gap: 3px; margin-top: 5px; }
+.dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--line); }
+.dots i.on { background: var(--accent); }
+.dots.low i.on { background: var(--seal); }
+.nrow p { margin: 0; font-size: 14px; }
+.nrow.hl { background: color-mix(in srgb, var(--accent) 8%, var(--surface)); margin-inline: -8px; padding-inline: 8px; border-radius: 8px; }
+.mlist .nrow { grid-template-columns: 64px minmax(0, 1fr); }
+
+.cover { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px 24px; margin: 0; padding: 0; list-style: none; }
+.cover li { font-size: 13px; color: var(--ink2); padding: 8px 0; border-top: 1px solid var(--line); }
+.cover b { color: var(--ink); font-weight: 700; display: block; font-size: 13px; }
+.disc { margin-top: 18px; font-size: 13px; color: var(--ink2); max-width: 60em; }
+
+@media (max-width: 860px) {
+  .tfixed { grid-template-columns: minmax(0, 1fr); }
+  .hero, .today, .traits, .ygrid { grid-template-columns: minmax(0, 1fr); }
+  .hero { gap: 24px; }
+  .lines li { grid-template-columns: 62px minmax(0, 1fr); gap: 10px; }
+}
+@media (max-width: 480px) {
+  .row2 { grid-template-columns: minmax(0, 1fr); }
+  .panel { padding: 18px; }
+}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><span class="seal" aria-hidden="true">羅</span><b>나침반</b><small>羅盤</small></div>
+    <nav class="nav" aria-label="섹션 이동">
+      <a href="#today">오늘</a><a href="#traits">전체 특성</a><a href="#planets">행성</a><a href="#tarot">타로</a><a href="#fields">분야별</a><a href="#year">월별</a>
+    </nav>
+  </header>
+
+  <section class="hero" aria-labelledby="h1">
+    <div>
+      <p class="eyebrow">사주 · 점성 · 수비학 · 자미두수 · 휴먼디자인 · 타로</p>
+      <h1 id="h1">여러 체계로 한 사람의 좌표를 읽습니다</h1>
+      <p class="lede">생년월일과 태어난 시각을 넣으면 전체 특성과 오늘의 명언을 먼저 보여 드리고, 건강·연애·직장·직업·재물·이사 순서로 풀이합니다. 연도를 고르면 월별 이슈까지 확인할 수 있습니다.</p>
+      <form class="form" id="form" novalidate>
+        <div class="row2">
+          <div class="field"><label for="f-name">이름 (선택)</label><input id="f-name" type="text" autocomplete="off" maxlength="12" placeholder="예: 민서"></div>
+          <div class="field"><span class="lab" id="g-lab">성별 (선택)</span>
+            <div class="seg" role="radiogroup" aria-labelledby="g-lab">
+              <label><input type="radio" name="gender" value="" checked><span>선택 안 함</span></label>
+              <label><input type="radio" name="gender" value="f"><span>여성</span></label>
+              <label><input type="radio" name="gender" value="m"><span>남성</span></label>
+            </div>
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field"><label for="f-date">생년월일 (양력)</label><input id="f-date" type="date" value="1990-05-15" min="1900-01-01" max="2100-12-31" required></div>
+          <div class="field"><label for="f-time">태어난 시각</label><input id="f-time" type="time" value="14:30"></div>
+        </div>
+        <div class="row2">
+          <label class="check" for="f-unk"><input id="f-unk" type="checkbox">시각을 모릅니다</label>
+          <div class="field"><label for="f-city">출생지</label><select id="f-city"></select></div>
+        </div>
+        <p class="err" id="err" role="alert"></p>
+        <button class="go" type="submit">나침반 돌리기</button>
+        <p class="fine">입력한 정보는 이 페이지 안에서만 계산되고 저장하거나 전송하지 않습니다. 시각은 한국 표준시 기준입니다.</p>
+      </form>
+    </div>
+    <div class="dial">
+      <div id="compass" aria-hidden="false"></div>
+      <p class="dial-cap" id="dial-cap"></p>
+      <div class="legend"><span><i style="background:var(--accent)"></i>사주 기둥의 지지</span><span><i style="background:var(--seal)"></i>바늘: 보강 방향</span><span><i style="border:2px solid var(--seal)"></i>쏠림 방향</span></div>
+    </div>
+  </section>
+
+  <div id="results">
+    <section class="block" id="today" aria-labelledby="t-h"></section>
+    <section class="block" id="traits" aria-labelledby="o-h"></section>
+    <section class="block" id="planets" aria-labelledby="p-h"></section>
+    <section class="block" id="tarot" aria-labelledby="tr-h"></section>
+    <section class="block" id="fields" aria-labelledby="f-h"></section>
+    <section class="block" id="year" aria-labelledby="y-h"></section>
+  </div>
+
+  <section class="block" aria-labelledby="c-h">
+    <div class="head"><h2 id="c-h">계산 범위</h2><p class="sub">체계마다 계산한 항목과 아직 넣지 못한 항목입니다.</p></div>
+    <ul class="cover">
+      <li><b>사주명리</b>연·월·일·시주(태양 황경으로 절기 경계 계산), 오행 분포, 십성, 신강·신약과 보강 오행 간이 판정, 대운(성별 선택 시)과 세운. 월별 점수는 월 천간 1, 월지 0.6, 세운 0.4, 대운 0.3 비중으로 합산하고 원국에 도움이 되는지 여부를 더합니다. 야자시 구분과 지역 시차 보정, 형·파·해와 공망은 하지 않습니다.</li>
+      <li><b>서양 점성 · 플라시더스</b>태양·달, 수성~명왕성, 라후·케투(평균 교점), 상승궁, MC, 플라시더스 하우스. 행성은 근사 궤도요소로 계산해 다른 천문 라이브러리와 대조했을 때 대부분 0.02° 이내, 목성 약 0.1°, 토성 약 0.3° 이내(1900~2100)입니다. 각도 간 어스펙트와 소행성은 포함하지 않습니다.</li>
+      <li><b>인도 점성</b>라히리 아야남샤 기준 항성 라시와 나크샤트라·파다, 라그나, 각 행성의 라시와 항성 하우스(통별자리 방식). 다샤(시기 주기)는 포함하지 않습니다.</li>
+      <li><b>태국 점성</b>출생 요일의 행성·색·성향(수요일 18시 이후는 라후). 세부 길흉 일 계산은 포함하지 않습니다.</li>
+      <li><b>수비학</b>생명수, 개인년수·개인월수. 이름수는 포함하지 않습니다.</li>
+      <li><b>자미두수</b>음력 변환, 명궁, 오행국, 자미·천부 계열 14주성 배치와 12궁 중 해당 궁. 보조성과 사화는 포함하지 않습니다.</li>
+      <li><b>휴먼디자인 (일부)</b>태양·지구의 게이트와 라인, 프로파일. 타입·권위·센터는 모든 행성 위치가 필요해 포함하지 않습니다.</li>
+      <li><b>타로</b>메이저 아르카나 22장을 사용하고, 카드를 뽑는 기능 없이 계산된 결과에 대응하는 카드를 보여 줍니다. 별자리·행성·요일·수비학은 골든던 계열 대응, 십성·오행 슈트·자미두수 주성·휴먼디자인 라인은 의미가 비슷한 카드를 연결한 것으로 정통 대응표가 아닙니다. 마이너 아르카나는 슈트 단위로만 쓰고 개별 카드는 해석하지 않습니다. 종합 해석은 카드별 톤 점수(−2~+2)의 평균과 사주 월별 점수의 15개월 평균을 비교한 규칙 기반 결과입니다.</li>
+      <li><b>토정비결</b>144괘 원문 데이터가 필요해 아직 포함하지 않았습니다.</li>
+    </ul>
+    <p class="disc">이 페이지의 풀이는 전통 이론을 규칙으로 옮긴 참고 정보입니다. 건강, 재물, 이사 같은 중요한 결정은 전문가와 상담하고 본인의 판단을 우선하세요.</p>
+  </section>
+</div>
+
+<script>
+(function (root) {
+'use strict';
+var rad = Math.PI / 180;
+function norm(x) { return ((x % 360) + 360) % 360; }
+function mod(a, n) { return ((a % n) + n) % n; }
+function sin(d) { return Math.sin(d * rad); }
+function cos(d) { return Math.cos(d * rad); }
+
+/* ---------- 기본 데이터 ---------- */
+var STEM_KO = ['갑','을','병','정','무','기','경','신','임','계'];
+var STEM_HJ = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+var BR_KO = ['자','축','인','묘','진','사','오','미','신','유','술','해'];
+var BR_HJ = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+var ANIMAL = ['쥐','소','호랑이','토끼','용','뱀','말','양','원숭이','닭','개','돼지'];
+var EL = ['목','화','토','금','수'];
+var EL_HJ = ['木','火','土','金','水'];
+var BR_EL = [4,2,0,0,2,1,1,2,3,3,2,4];
+var GOD_GROUP = ['비겁','식상','재성','관성','인성'];
+var GOD_NAMES = [['비견','겁재'],['식신','상관'],['편재','정재'],['편관','정관'],['편인','정인']];
+var CATS = ['건강','연애','직장','직업','재물','이사'];
+
+var SIGNS = ['양자리','황소자리','쌍둥이자리','게자리','사자자리','처녀자리','천칭자리','전갈자리','사수자리','염소자리','물병자리','물고기자리'];
+var SIGN_KW = ['개척·직진','안정·감각','호기심·소통','감수성·보호','자신감·표현','분석·정돈','균형·조화','집중·변혁','자유·확장','책임·인내','독립·혁신','공감·상상'];
+var SIGN_BODY = ['머리·얼굴','목·갑상선','어깨·팔·폐','위·가슴','심장·등','장·소화기','신장·허리','생식기·배설계','간·허벅지','무릎·뼈·피부','종아리·혈액순환','발·면역계'];
+var HOUSE_KW = ['자아와 첫인상','재물과 소유','소통과 배움','가정과 뿌리','연애와 창작','건강과 일상 업무','파트너와 계약','공유 자산과 변화','이동·확장·신념','직업과 사회적 위치','인맥과 미래 계획','내면과 휴식'];
+
+var VENUS_KW = ['직진적이고 주도적인 사랑','안정적이고 감각적이며 천천히 깊어지는 사랑','대화와 유머로 끌리는 사랑','보호하고 돌보는 애정','당당하고 화려한 표현','세심하게 챙기는 헌신','균형과 조화, 우아한 관계','깊고 몰입이 강한 사랑','자유롭고 모험적인 연애','신중하고 책임감 있는 관계','친구 같고 독립적인 관계','로맨틱하고 헌신적인 사랑'];
+var MARS_KW = ['속도와 돌파','꾸준함과 끈기','멀티태스킹과 기동성','감정이 동력이 되는 방어적 추진','주도권과 인정 욕구','정밀함과 실무 집중','협상과 조율','집요함과 전략','확장과 도전','계획과 성취 지향','독자적 방식과 혁신','직관과 유동적 추진'];
+var MERC_KW = ['빠르고 직설적인 사고','신중하고 현실적인 사고','재빠른 정보 처리와 언변','감정으로 받아들이는 사고','자신 있는 표현과 설득','분석적이고 꼼꼼한 사고','균형 잡힌 판단과 협상','깊이 파고드는 사고','큰 그림과 낙관적 사고','체계적이고 실용적인 사고','독창적이고 객관적인 사고','직관적이고 상상력 있는 사고'];
+var NAKS = [
+['아슈위니','빠른 시작·치유'],['바라니','인내·책임'],['크리티카','정화·날카로움'],['로히니','풍요·매력'],
+['므리가쉬라','탐구·호기심'],['아르드라','변화·정화'],['푸나르바수','회복·낙관'],['푸샤','양육·돌봄'],
+['아슐레샤','통찰·집요함'],['마가','권위·전통'],['푸르바팔구니','즐거움·창조'],['우타라팔구니','후원·성실'],
+['하스타','솜씨·손재주'],['치트라','안목·창조'],['스와티','독립·유연'],['비샤카','목표 집중·결단'],
+['아누라다','우정·헌신'],['제슈타','책임·보호'],['물라','뿌리 탐색'],['푸르바샤다','불굴·승리'],
+['우타라샤다','정직·승리'],['슈라바나','경청·배움'],['다니슈타','풍요·리듬'],['샤타비샤','치유·비밀'],
+['푸르바바드라파다','열정·변혁'],['우타라바드라파다','깊이·안정'],['레바티','완성·인도']
+];
+
+var THAI = [
+{ d:'일요일', p:'태양', c:'빨강', k:'책임·리더십' },
+{ d:'월요일', p:'달', c:'노랑', k:'감정·돌봄' },
+{ d:'화요일', p:'화성', c:'분홍', k:'용기·행동' },
+{ d:'수요일(낮)', p:'수성', c:'초록', k:'소통·지능' },
+{ d:'목요일', p:'목성', c:'주황', k:'학습·덕망' },
+{ d:'금요일', p:'금성', c:'하늘색', k:'매력·예술' },
+{ d:'토요일', p:'토성', c:'보라', k:'인내·성실' },
+{ d:'수요일(밤)', p:'라후', c:'회색·검정', k:'변칙·돌파' }
+];
+
+var LP = {
+1:'독립·개척', 2:'협력·섬세함', 3:'표현·창조', 4:'질서·기반', 5:'자유·변화', 6:'책임·사랑', 7:'탐구·내면',
+8:'성취·권력', 9:'완성·봉사', 11:'직관·영감', 22:'큰 구조를 세우는 사람', 33:'헌신·치유'
+};
+
+var ZSTAR_KW = {
+'자미':'존귀·리더십','천기':'기획·지략','태양':'발산·명예','무곡':'재물·결단','천동':'온화·복','염정':'열정·승부',
+'천부':'안정·관리','태음':'섬세·축적','탐랑':'다재·욕망','거문':'언변·분석','천상':'보좌·조율','천량':'원칙·보호','칠살':'돌파·개혁','파군':'변화·개척'
+};
+var PALACES = ['명궁','형제궁','부처궁','자녀궁','재백궁','질액궁','천이궁','교우궁','관록궁','전택궁','복덕궁','부모궁'];
+var NAYIN_EL = [3,1,0,2,3,1,4,2,3,0,4,2,1,0,4,3,1,0,2,3,1,4,2,3,0,4,2,1,0,4]; // 목0 화1 토2 금3 수4 중 납음 오행
+var JU_NUM = { 4:2, 0:3, 3:4, 2:5, 1:6 }; // 수2 목3 금4 토5 화6
+var JU_NAME = { 2:'수이국', 3:'목삼국', 4:'금사국', 5:'토오국', 6:'화육국' };
+
+var GATES = [41,19,13,49,30,55,37,63,22,36,25,17,21,51,42,3,27,24,2,23,8,20,16,35,45,12,15,52,39,53,62,56,31,33,7,4,29,59,40,64,47,6,46,18,48,57,32,50,28,44,1,43,14,34,9,5,26,11,10,58,38,54,61,60];
+var HD_LINE = ['', '탐구가', '은둔자', '실험가', '관계자', '해결사', '롤모델'];
+
+var DM_IMG = [
+'곧게 뻗는 큰 나무. 시작과 성장을 이끄는 힘이 강하고, 굽히는 일에는 서툽니다.',
+'바위틈에서도 자라는 풀과 덩굴. 유연하게 사람과 상황에 맞추며 끈질기게 길을 찾습니다.',
+'한낮의 태양. 공개적이고 화끈하며 주변을 밝히지만 작은 일에는 무심할 수 있습니다.',
+'어둠 속의 촛불과 화로. 섬세하고 집중력이 좋으며 한 사람, 한 일에 오래 불을 붙입니다.',
+'큰 산. 믿음직하고 묵직하며 쉽게 움직이지 않지만 한번 움직이면 판이 바뀝니다.',
+'곡식을 키우는 논밭. 포용력과 실속이 있고 길러내고 조율하는 일에 강합니다.',
+'원석과 쇠. 결단이 빠르고 의리가 있으며 옳고 그름이 분명해 단호해 보입니다.',
+'다듬어진 보석. 감각이 예민하고 미적 기준과 자존심이 높으며 완성도에 집착합니다.',
+'큰 강과 바다. 스케일이 크고 흐름을 읽는 눈이 있으며 자유로운 이동을 좋아합니다.',
+'비와 이슬. 조용히 스며드는 직관과 공감으로 상황을 먼저 감지합니다.'
+];
+var EL_INFO = [
+{ organ:'간·담·눈·근육·신경', care:'아침 산책과 스트레칭, 푸른 채소, 눈과 목 근육 풀어주기', color:'청록·초록', dir:'동쪽', season:'봄', jobs:'교육·출판·섬유·의류·조경·기획' },
+{ organ:'심장·소장·혈압·혈액순환', care:'햇볕 쬐기, 가벼운 유산소, 따뜻한 식사, 과열 전 쉬어가기', color:'빨강·주황', dir:'남쪽', season:'여름', jobs:'방송·미디어·조명·IT·외식·뷰티·에너지' },
+{ organ:'위·비장·소화기', care:'규칙적인 식사 시간, 곡물 위주 식단, 복부 온찜질', color:'노랑·황토', dir:'중앙(남서·북동)', season:'환절기', jobs:'부동산·건설·농업·중개·행정·자산관리' },
+{ organ:'폐·대장·호흡기·피부', care:'호흡 운동, 실내 환기와 습도 관리, 매운 음식 줄이기', color:'흰색·은색', dir:'서쪽', season:'가을', jobs:'금융·법·기계·의료기기·정밀가공·공직' },
+{ organ:'신장·방광·귀·생식기·하체', care:'수분 섭취, 하체 보온, 충분한 수면, 밤샘 줄이기', color:'남색·검정', dir:'북쪽', season:'겨울', jobs:'유통·물류·무역·여행·연구·수산·상담' }
+];
+var BR_PARTNER = ['영리하고 감수성이 깊은','성실하고 말수가 적은','활동적이고 자기주장이 뚜렷한','다정하고 센스 있는','존재감이 크고 야망 있는','세련되고 예리한','열정적이고 표현이 솔직한','정이 많고 보살피는','재치 있고 실행력 좋은','깔끔하고 원칙적인','의리 있고 신념이 강한','포용력 있고 자유로운'];
+var YEOKMA = { 2:8, 6:8, 10:8, 8:2, 0:2, 4:2, 11:5, 3:5, 7:5, 5:11, 9:11, 1:11 }; // 삼합 그룹 -> 역마 지지
+
+var QUOTES = [
+[['천 리 길도 한 걸음부터 시작된다.','노자 『도덕경』'],['배우고 때때로 익히면 또한 기쁘지 아니한가.','공자 『논어』'],['허물이 있으면 고치기를 꺼리지 말라.','공자 『논어』']],
+[['아는 것을 안다 하고 모르는 것을 모른다 하는 것, 이것이 아는 것이다.','공자 『논어』'],['배움은 그칠 수 없다.','순자 『권학』'],['하늘이 큰 임무를 내리려 할 때는 먼저 그 마음과 뜻을 괴롭게 한다.','맹자']],
+[['족함을 아는 사람이 부유하다.','노자 『도덕경』'],['덕이 있으면 외롭지 않고 반드시 이웃이 있다.','공자 『논어』'],['큰 그릇은 늦게 이루어진다.','노자 『도덕경』']],
+[['세 사람이 길을 가면 그중에 반드시 나의 스승이 있다.','공자 『논어』'],['남을 아는 사람은 지혜롭고 자신을 아는 사람은 밝다.','노자 『도덕경』'],['군자는 화합하되 같아지지 않는다.','공자 『논어』']],
+[['가장 좋은 것은 물과 같다.','노자 『도덕경』'],['물이 깊지 않으면 큰 배를 띄울 힘이 없다.','장자 『소요유』'],['부드러운 것이 굳센 것을 이긴다.','노자 『도덕경』']]
+];
+
+/* ---------- 천문 계산 ---------- */
+function jd(y, m, d, h, mi) {
+  if (m <= 2) { y -= 1; m += 12; }
+  var A = Math.floor(y / 100), B = 2 - A + Math.floor(A / 4);
+  return Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + d + B - 1524.5 + (h + (mi || 0) / 60) / 24;
+}
+function jdn(y, m, d) {
+  var a = Math.floor((14 - m) / 12), yy = y + 4800 - a, mm = m + 12 * a - 3;
+  return d + Math.floor((153 * mm + 2) / 5) + 365 * yy + Math.floor(yy / 4) - Math.floor(yy / 100) + Math.floor(yy / 400) - 32045;
+}
+function sunLon(J) {
+  var T = (J - 2451545) / 36525;
+  var L0 = 280.46646 + 36000.76983 * T + 0.0003032 * T * T;
+  var M = 357.52911 + 35999.05029 * T - 0.0001537 * T * T;
+  var C = (1.914602 - 0.004817 * T - 0.000014 * T * T) * sin(M) + (0.019993 - 0.000101 * T) * sin(2 * M) + 0.000289 * sin(3 * M);
+  var om = 125.04 - 1934.136 * T;
+  return norm(L0 + C - 0.00569 - 0.00478 * sin(om));
+}
+function moonLon(J) {
+  var T = (J - 2451545) / 36525;
+  var Lp = 218.3164477 + 481267.88123421 * T;
+  var D = 297.8501921 + 445267.1114034 * T;
+  var M = 357.5291092 + 35999.0502909 * T;
+  var Mp = 134.9633964 + 477198.8675055 * T;
+  var F = 93.272095 + 483202.0175233 * T;
+  return norm(Lp + 6.288774 * sin(Mp) + 1.274027 * sin(2 * D - Mp) + 0.658314 * sin(2 * D) + 0.213618 * sin(2 * Mp)
+    - 0.185116 * sin(M) - 0.114332 * sin(2 * F) + 0.058793 * sin(2 * D - 2 * Mp) + 0.057066 * sin(2 * D - M - Mp)
+    + 0.053322 * sin(2 * D + Mp) + 0.045758 * sin(2 * D - M) - 0.040923 * sin(M - Mp) - 0.034720 * sin(D) - 0.030383 * sin(M + Mp));
+}
+function ayanamsa(J) { return 23.853 + 0.013969 * ((J - 2451545) / 365.25); }
+
+function angles(J, lat, lonE) {
+  var T = (J - 2451545) / 36525;
+  var gmst = norm(280.46061837 + 360.98564736629 * (J - 2451545) + 0.000387933 * T * T);
+  var ramc = norm(gmst + lonE);
+  var eps = 23.439291 - 0.0130042 * T;
+  var tanPhi = Math.tan(lat * rad);
+  var asc = norm(Math.atan2(cos(ramc), -(sin(ramc) * cos(eps) + tanPhi * sin(eps))) / rad);
+  var mc = norm(Math.atan2(sin(ramc), cos(ramc) * cos(eps)) / rad);
+  function lamFromRA(ra) { return norm(Math.atan2(sin(ra), cos(ra) * cos(eps)) / rad); }
+  function decOf(lam) { return Math.asin(sin(eps) * sin(lam)) / rad; }
+  function dsa(dec) { var x = -tanPhi * Math.tan(dec * rad); return Math.acos(Math.max(-1, Math.min(1, x))) / rad; }
+  function cusp(kind) {
+    var ra = ramc + ({ 11: 30, 12: 60, 2: 120, 3: 150 })[kind];
+    for (var i = 0; i < 40; i++) {
+      var lam = lamFromRA(ra), D = dsa(decOf(lam)), N = 180 - D;
+      if (kind === 11) ra = ramc + D / 3;
+      else if (kind === 12) ra = ramc + 2 * D / 3;
+      else if (kind === 2) ra = ramc + D + N / 3;
+      else ra = ramc + D + 2 * N / 3;
+    }
+    return lamFromRA(ra);
+  }
+  var c11 = cusp(11), c12 = cusp(12), c2 = cusp(2), c3 = cusp(3);
+  var cusps = [asc, c2, c3, norm(mc + 180), norm(c11 + 180), norm(c12 + 180), norm(asc + 180), norm(c2 + 180), norm(c3 + 180), mc, c11, c12];
+  return { asc: asc, mc: mc, cusps: cusps };
+}
+function houseOf(lon, cusps) {
+  for (var i = 0; i < 12; i++) {
+    var a = cusps[i], b = cusps[(i + 1) % 12];
+    var span = norm(b - a), off = norm(lon - a);
+    if (off < span) return i + 1;
+  }
+  return 1;
+}
+
+/* ---------- 행성 (JPL 근사 궤도요소, 1800~2050 유효) ---------- */
+var PL_KO = ['수성','금성','화성','목성','토성','천왕성','해왕성','명왕성'];
+// [a,da, e,de, I,dI, L,dL, varpi,dvarpi, Omega,dOmega, b,c,s,f]
+var ELM = [
+  [0.38709927,0.00000037, 0.20563593,0.00001906, 7.00497902,-0.00594749, 252.25032350,149472.67411175, 77.45779628,0.16047689, 48.33076593,-0.12534081, 0,0,0,0],
+  [0.72333566,0.00000390, 0.00677672,-0.00004107, 3.39467605,-0.00078890, 181.97909950,58517.81538729, 131.60246718,0.00268329, 76.67984255,-0.27769418, 0,0,0,0],
+  [1.52371034,0.00001847, 0.09339410,0.00007882, 1.84969142,-0.00813131, -4.55343205,19140.30268499, -23.94362959,0.44441088, 49.55953891,-0.29257343, 0,0,0,0],
+  [5.20288700,-0.00011607, 0.04838624,-0.00013253, 1.30439695,-0.00183714, 34.39644051,3034.74612775, 14.72847983,0.21252668, 100.47390909,0.20469106, 0,0,0,0],
+  [9.53667594,-0.00125060, 0.05386179,-0.00050991, 2.48599187,0.00193609, 49.95424423,1222.49362201, 92.59887831,-0.41897216, 113.66242448,-0.28867794, 0,0,0,0],
+  [19.18916464,-0.00196176, 0.04725744,-0.00004397, 0.77263783,-0.00242939, 313.23810451,428.48202785, 170.95427630,0.40805281, 74.01692503,0.04240589, 0,0,0,0],
+  [30.06992276,0.00026291, 0.00859048,0.00005105, 1.77004347,0.00035372, -55.12002969,218.45945325, 44.96476227,-0.32241464, 131.78422574,-0.00508664, 0,0,0,0],
+  [39.48211675,-0.00031596, 0.24882730,0.00005170, 17.14001206,0.00004818, 238.92903833,145.20780515, 224.06891629,-0.04062942, 110.30393684,-0.01183482, 0,0,0,0]
+];
+var ELM_EARTH = [1.00000261,0.00000562, 0.01671123,-0.00004392, -0.00001531,-0.01294668, 100.46457166,35999.37244981, 102.93768193,0.32327364, 0,0, 0,0,0,0];
+function keplerE(M, e) {
+  M = norm(M); if (M > 180) M -= 360;
+  var ed = e / rad, En = M + ed * sin(M);
+  for (var i = 0; i < 20; i++) {
+    var dM = M - (En - ed * sin(En)), dE = dM / (1 - e * cos(En));
+    En += dE; if (Math.abs(dE) < 1e-10) break;
+  }
+  return En;
+}
+function helio(el, T) {
+  var a = el[0] + el[1] * T, e = el[2] + el[3] * T, I = el[4] + el[5] * T, L = el[6] + el[7] * T,
+      w = el[8] + el[9] * T, O = el[10] + el[11] * T;
+  var M = L - w + el[12] * T * T + el[13] * cos(el[15] * T) + el[14] * sin(el[15] * T);
+  var Ek = keplerE(M, e), om = w - O;
+  var xp = a * (cos(Ek) - e), yp = a * Math.sqrt(1 - e * e) * sin(Ek);
+  var co = cos(om), so = sin(om), cO = cos(O), sO = sin(O), cI = cos(I), sI = sin(I);
+  return [
+    (co * cO - so * sO * cI) * xp + (-so * cO - co * sO * cI) * yp,
+    (co * sO + so * cO * cI) * xp + (-so * sO + co * cO * cI) * yp,
+    (so * sI) * xp + (co * sI) * yp
+  ];
+}
+function planetLon(i, J) { // 지구 중심 황경(분점 기준 날짜), 광행시간 1회 보정
+  var T = (J - 2451545) / 36525, E0 = helio(ELM_EARTH, T);
+  var P = helio(ELM[i], T), d = Math.sqrt(Math.pow(P[0] - E0[0], 2) + Math.pow(P[1] - E0[1], 2) + Math.pow(P[2] - E0[2], 2));
+  var Tl = T - d * 0.0057755183 / 36525;
+  P = helio(ELM[i], Tl);
+  var lon = norm(Math.atan2(P[1] - E0[1], P[0] - E0[0]) / rad);
+  return norm(lon + 1.3968878 * T + 0.00030707 * T * T);
+}
+function meanNode(J) {
+  var T = (J - 2451545) / 36525;
+  return norm(125.0445479 - 1934.1362891 * T + 0.0020754 * T * T + T * T * T / 467441);
+}
+function lonSpeed(fn, J) { var d = fn(J + 0.5) - fn(J - 0.5); return ((d + 540) % 360) - 180; }
+function allBodies(J) { // [{id,ko,lon,retro}] 태양~명왕성, 라후, 케투
+  var out = [];
+  out.push({ id: 'sun', ko: '태양', lon: sunLon(J), retro: false });
+  out.push({ id: 'moon', ko: '달', lon: moonLon(J), retro: false });
+  for (var i = 0; i < 8; i++) {
+    out.push({ id: 'p' + i, ko: PL_KO[i], lon: planetLon(i, J), retro: lonSpeed(function (x) { return planetLon(i, x); }, J) < 0 });
+  }
+  var n = meanNode(J);
+  out.push({ id: 'rahu', ko: '라후(북교점)', lon: n, retro: true });
+  out.push({ id: 'ketu', ko: '케투(남교점)', lon: norm(n + 180), retro: true });
+  return out;
+}
+
+/* ---------- 사주 ---------- */
+function idx60(s, b) { for (var n = 0; n < 60; n++) if (n % 10 === s && n % 12 === b) return n; return 0; }
+function pillars(y, mo, d, h, mi, hk) {
+  var J = jd(y, mo, d, (hk ? h : 12) - 9, hk ? mi : 0);
+  var lon = sunLon(J);
+  var sy = y;
+  if (mo <= 2 && lon >= 270 && lon < 315) sy = y - 1;
+  var ys = mod(sy - 4, 10), yb = mod(sy - 4, 12);
+  var mIdx = Math.floor(norm(lon - 315) / 30);
+  var mb = (2 + mIdx) % 12;
+  var ms = (((ys % 5) * 2 + 2) % 10 + mIdx) % 10;
+  var di = mod(jdn(y, mo, d) - 11, 60);
+  var ds = di % 10, db = di % 12;
+  var P = { year: [ys, yb], month: [ms, mb], day: [ds, db], hour: null, sajuYear: sy };
+  if (hk) {
+    var hb = Math.floor(((h + 1) % 24) / 2);
+    var hs = (((ds % 5) * 2) % 10 + hb) % 10;
+    P.hour = [hs, hb];
+  }
+  return P;
+}
+function stemEl(s) { return Math.floor(s / 2); }
+function tenGod(dStem, sStem) {
+  var dEl = stemEl(dStem), sEl = stemEl(sStem), rel;
+  if (sEl === dEl) rel = 0;
+  else if (sEl === (dEl + 1) % 5) rel = 1;
+  else if (sEl === (dEl + 2) % 5) rel = 2;
+  else if ((sEl + 2) % 5 === dEl) rel = 3;
+  else rel = 4;
+  var same = (dStem % 2) === (sStem % 2);
+  return { group: rel, name: GOD_NAMES[rel][same ? 0 : 1] };
+}
+function elGroup(dEl, e) {
+  if (e === dEl) return 0;
+  if (e === (dEl + 1) % 5) return 1;
+  if (e === (dEl + 2) % 5) return 2;
+  if ((e + 2) % 5 === dEl) return 3;
+  return 4;
+}
+function g(s) { return STEM_HJ[s[0]] + BR_HJ[s[1]]; }
+function gk(s) { return STEM_KO[s[0]] + BR_KO[s[1]]; }
+
+function analyzeSaju(P) {
+  var chars = [];
+  ['year', 'month', 'day', 'hour'].forEach(function (k) {
+    if (!P[k]) return;
+    chars.push({ pos: k, kind: 's', el: stemEl(P[k][0]), w: 1, isDay: k === 'day' });
+    chars.push({ pos: k, kind: 'b', el: BR_EL[P[k][1]], w: k === 'month' ? 2 : 1 });
+  });
+  var cnt = [0, 0, 0, 0, 0], w = [0, 0, 0, 0, 0];
+  chars.forEach(function (c) { cnt[c.el]++; w[c.el] += c.w; });
+  var dEl = stemEl(P.day[0]);
+  var total = w.reduce(function (a, b) { return a + b; }, 0);
+  var self = w[dEl] + w[(dEl + 4) % 5];
+  var strong = self / total >= 0.5;
+  var groups = [0, 0, 0, 0, 0];
+  chars.forEach(function (c) { if (c.isDay) return; groups[elGroup(dEl, c.el)]++; });
+  var cand = strong ? [(dEl + 1) % 5, (dEl + 2) % 5, (dEl + 3) % 5] : [dEl, (dEl + 4) % 5];
+  var yong = cand[0];
+  cand.forEach(function (e) { if (w[e] < w[yong]) yong = e; });
+  var minC = Math.min.apply(null, cnt), maxC = Math.max.apply(null, cnt);
+  var weak = cnt.indexOf(minC), most = cnt.indexOf(maxC);
+  return { cnt: cnt, w: w, dEl: dEl, strong: strong, ratio: self / total, groups: groups, yong: yong, weak: weak, most: most, minC: minC, maxC: maxC };
+}
+
+/* ---------- 수비학 ---------- */
+function reduceNum(n, keepMaster) {
+  while (n > 9 && !(keepMaster && (n === 11 || n === 22 || n === 33))) {
+    var s = 0; String(n).split('').forEach(function (c) { s += +c; }); n = s;
+  }
+  return n;
+}
+
+/* ---------- 음력 / 자미두수 ---------- */
+function lunarOf(y, m, d) {
+  var f = new Intl.DateTimeFormat('en-u-ca-chinese', { year: 'numeric', month: 'numeric', day: 'numeric', timeZone: 'UTC' });
+  var o = {};
+  f.formatToParts(new Date(Date.UTC(y, m - 1, d, 12))).forEach(function (p) { o[p.type] = p.value; });
+  return { year: +o.relatedYear, month: parseInt(o.month, 10), leap: /[^0-9]/.test(o.month), day: +o.day };
+}
+function ziwei(L, hourBranch) {
+  var month = L.month;
+  if (L.leap && L.day > 15) month = L.month + 1;
+  if (month > 12) month = 1;
+  var ming = mod(2 + (month - 1) - hourBranch, 12);
+  var ys = mod(L.year - 4, 10);
+  var yin = ((ys % 5) * 2 + 2) % 10;
+  var stemOf = function (b) { return (yin + mod(b - 2, 12)) % 10; };
+  var n = idx60(stemOf(ming), ming);
+  var ju = JU_NUM[NAYIN_EL[Math.floor(n / 2)]];
+  var x = 0; while ((L.day + x) % ju !== 0) x++;
+  var q = (L.day + x) / ju;
+  var z = 2 + (q - 1);
+  z = mod(x % 2 ? z - x : z + x, 12);
+  var t = mod(4 - z, 12);
+  var at = {};
+  function put(name, b) { b = mod(b, 12); (at[b] = at[b] || []).push(name); }
+  put('자미', z); put('천기', z - 1); put('태양', z - 3); put('무곡', z - 4); put('천동', z - 5); put('염정', z - 8);
+  put('천부', t); put('태음', t + 1); put('탐랑', t + 2); put('거문', t + 3); put('천상', t + 4); put('천량', t + 5); put('칠살', t + 6); put('파군', t + 10);
+  function palace(k) {
+    var b = mod(ming - k, 12), s = at[b] || [], borrowed = false;
+    if (!s.length) { s = at[mod(b + 6, 12)] || []; borrowed = true; }
+    return { name: PALACES[k], branch: b, stars: s, borrowed: borrowed };
+  }
+  return { ming: ming, ju: ju, juName: JU_NAME[ju], ziwei: z, tianfu: t, at: at, palace: palace, month: month, ganji: STEM_HJ[stemOf(ming)] + BR_HJ[ming] };
+}
+function starsText(p) {
+  if (!p.stars.length) return '주성 없음';
+  return p.stars.join('·') + (p.borrowed ? '(대궁 차용)' : '') + ' — ' + p.stars.map(function (s) { return ZSTAR_KW[s]; }).join(' / ');
+}
+
+/* ---------- 휴먼디자인 ---------- */
+function gateOf(lon) {
+  var pos = norm(lon - 302) / 5.625, gi = Math.floor(pos);
+  return { gate: GATES[gi], line: Math.floor((pos - gi) * 6) + 1 };
+}
+function humanDesign(J) {
+  var lon = sunLon(J), target = norm(lon - 88), Jd = J - 91;
+  for (var i = 0; i < 12; i++) {
+    var diff = ((target - sunLon(Jd) + 540) % 360) - 180;
+    Jd += diff / 0.9856;
+  }
+  var dl = sunLon(Jd);
+  var pSun = gateOf(lon), pEarth = gateOf(norm(lon + 180)), dSun = gateOf(dl), dEarth = gateOf(norm(dl + 180));
+  return { pSun: pSun, pEarth: pEarth, dSun: dSun, dEarth: dEarth, profile: pSun.line + '/' + dSun.line,
+    profileName: HD_LINE[pSun.line] + ' / ' + HD_LINE[dSun.line] };
+}
+
+/* ---------- 월별 점수 ---------- */
+var BR_MAIN = [9, 5, 0, 1, 4, 2, 3, 5, 6, 7, 4, 8];
+var DELTA = {
+  '비견': [0,-1,0,0,-1,0], '겁재': [-1,-1,-1,0,-2,0],
+  '식신': [1,1,0,1,1,0], '상관': [0,0,-1,2,1,1],
+  '편재': [0,1,0,1,1,1], '정재': [0,1,1,1,2,0],
+  '편관': [-1,0,1,1,0,0], '정관': [0,1,2,1,1,0],
+  '편인': [0,-1,0,1,-1,1], '정인': [1,0,1,1,0,2]
+};
+var GOD_TAG = { '비견':'동료·경쟁','겁재':'경쟁·지출','식신':'여유·표현','상관':'재주·돌파','편재':'활동·변동 수입','정재':'안정 수입','편관':'압박·도전','정관':'질서·인정','편인':'직관·변칙 학습','정인':'배움·후원' };
+var YEAR_THEME = { '비견':'독립과 자기주장의 해','겁재':'경쟁과 지출 관리의 해','식신':'표현과 결실의 해','상관':'변화와 재능 발휘의 해','편재':'활동 범위가 넓어지는 해','정재':'수입과 생활이 안정되는 해','편관':'도전과 압박 속에서 성장하는 해','정관':'직책과 신뢰가 쌓이는 해','편인':'전환과 새 공부의 해','정인':'배움과 후원, 안정의 해' };
+var BANK = [
+['체력은 받쳐주지만 과로와 경쟁 스트레스가 몸에 쌓입니다.','주변 경쟁자나 친구 관계가 연애 흐름에 끼어들 수 있습니다.','동료와 협업이 늘고 주도권 다툼도 생깁니다.','내 방식대로 일하거나 독립하고 싶은 마음이 커집니다.','지출과 나눔이 늘어 모으기보다 새기 쉬운 시기입니다.','동거인이나 공동 명의 문제로 결정이 늦어집니다.'],
+['표현하고 움직일수록 컨디션이 좋아지지만 먹는 양은 조절하세요.','말과 센스가 살아나 호감을 얻기 쉬운 달입니다.','의견이 많아지고 상사와 부딪힐 수 있어 표현 수위가 중요합니다.','아이디어와 기술이 돋보여 새 프로젝트와 창작에 유리합니다.','재주로 버는 흐름입니다. 부업·콘텐츠·기술 수입을 점검하세요.','새로운 환경에 대한 호기심이 커져 거처 변화를 구상하게 됩니다.'],
+['활동량이 늘어 바쁘지만 식습관과 수면이 흐트러지기 쉽습니다.','인연이 눈에 띄게 늘고 현실적인 만남이 진행됩니다.','실적과 성과가 수치로 평가받는 시기입니다.','수익과 연결되는 일, 영업과 거래에 기회가 옵니다.','수입 기회가 열립니다. 들어온 만큼 관리하는 것이 핵심입니다.','부동산과 거래 이야기가 오가며 실제 계약으로 이어질 수 있습니다.'],
+['긴장과 압박이 몸으로 나타나기 쉽습니다. 어깨, 위장, 수면을 챙기세요.','책임감 있는 상대가 나타나거나 관계가 진지한 단계로 넘어갑니다.','책임과 평가가 무거워지지만 인정받을 기회도 함께 옵니다.','자격, 직책, 조직 내 위치를 정리하기 좋은 시기입니다.','정기 수입은 안정되나 세금, 공과금, 벌금성 지출에 유의하세요.','회사나 가족 사정으로 이동·배치 변화가 생길 수 있습니다.'],
+['쉬고 회복하기 좋은 달입니다. 검진과 휴식 계획이 잘 맞습니다.','마음은 깊어지지만 표현이 느려 상대가 답답해할 수 있습니다.','배움, 서류, 후원자의 도움으로 자리가 안정됩니다.','공부, 자격, 계약 문서 작업에 유리합니다.','당장의 큰 수익보다 문서·계약·교육에 쓰는 비용이 늘 수 있습니다.','계약서와 서류 절차가 순조로워 집 구하기와 이사 절차가 잘 풀립니다.']
+];
+var BR_ADD = [
+['월지의 힘이 받쳐 체력은 유지되지만 쉬는 시간을 따로 잡으세요.','친구·지인 모임이 많아져 연애에 쓸 시간이 줄어듭니다.','역할 분담을 문서로 분명히 해 두면 마찰이 줄어듭니다.','독립적으로 움직일 여지가 커져 개인 프로젝트에 힘이 실립니다.','함께 쓰는 돈이 생기기 쉬우니 금전 거래는 기록을 남기세요.','함께 사는 사람과 의견 조율이 필요합니다.'],
+['몸을 쓰고 표현하는 활동이 컨디션에 도움이 됩니다.','말과 표현이 풍부해져 호감을 사기 쉽습니다.','의견을 낼 기회가 많아지니 표현 수위를 조절하세요.','아이디어를 결과물로 만들기 좋은 흐름이 겹칩니다.','재능과 기술이 수입으로 이어질 통로가 함께 열립니다.','환경을 바꾸고 싶은 마음이 커집니다.'],
+['활동량과 식사량이 함께 늘어 체중과 소화를 점검하세요.','현실적인 만남과 관계 진전이 눈에 띄게 늘어납니다.','성과와 실적이 평가에 반영되기 쉽습니다.','거래, 영업, 계약처럼 결과가 숫자로 나오는 일에 유리합니다.','월지로 수입 기회가 들어오는 길이 열려 있습니다.','집과 자산 관련 이야기가 구체화되기 쉽습니다.'],
+['긴장이 몸에 쌓이기 쉬우니 어깨와 수면을 챙기세요.','책임감 있는 사람과의 진지한 관계가 부각됩니다.','책임과 평가가 따르는 대신 인정받을 자리도 함께 열립니다.','직책, 자격, 조직 내 위치를 정리하기 좋습니다.','정해진 지출(세금, 공과금)과 규칙에 유의하세요.','회사나 가족 사정으로 이동 이야기가 나올 수 있습니다.'],
+['충분히 쉬고 회복하는 쪽이 잘 맞습니다.','마음은 깊어지지만 표현이 느려질 수 있습니다.','선배나 후원자, 문서의 도움이 자리를 받쳐 줍니다.','공부와 자격, 서류 작업에 힘이 실립니다.','교육·문서에 쓰는 비용이 늘 수 있으나 장기적으로 도움이 됩니다.','계약서와 서류 절차가 순조롭습니다.']
+];
+var CENTER = [0, 0.1, 0.3, 0.9, 0.2, 0.5];
+var DAE_NOTE = ['경쟁과 동료, 독립 욕구가 커지는 10년입니다.','표현과 재능을 밖으로 내는 10년입니다.','수입과 현실적 성과를 좇는 10년입니다.','직책과 책임, 평가가 따르는 10년입니다.','배움과 후원, 기반을 다지는 10년입니다.'];
+var DAE_WORK = ['동료와 경쟁하며 자기 영역을 넓히는 시기라 협업 규칙이 중요합니다.','재능을 드러내고 결과물을 만드는 시기입니다.','성과와 수입이 직접 평가받는 시기입니다.','직책과 평가가 커지며 인정받을 기회도 함께 오는 시기입니다.','배움과 자격, 후원자를 얻기 좋은 시기입니다.'];
+var DAE_MONEY = ['지출과 나눔이 늘기 쉬워 관리가 핵심입니다.','재능으로 버는 통로가 열립니다.','수입 기회가 커지는 시기입니다.','고정 수입은 안정되나 규칙과 비용에 유의해야 합니다.','당장의 수익보다 기반을 쌓는 시기입니다.'];
+var EL_TRAIT = ['성장과 기획, 인정 욕구','열정과 표현','신뢰와 중재','결단과 원칙','지혜와 유연함'];
+
+function favOf(rep, group) { return rep.S.strong ? (group >= 1 && group <= 3) : (group === 0 || group === 4); }
+function clampRound(x) { return Math.max(1, Math.min(5, Math.round(x))); }
+function lifeAge(rep, J) { return (J - rep.J) / 365.2425; }
+function nowJ() { var n = new Date(); return jd(n.getUTCFullYear(), n.getUTCMonth() + 1, n.getUTCDate(), 0, 0); }
+
+function findTerm(J0, dir) {
+  var idx = Math.floor(norm(sunLon(J0) - 315) / 30), t = J0, step = 0.25 * dir;
+  for (var i = 0; i < 400; i++) {
+    var nt = t + step;
+    if (Math.floor(norm(sunLon(nt) - 315) / 30) !== idx) {
+      var a = t, b = nt;
+      for (var k = 0; k < 40; k++) { var mid = (a + b) / 2; if (Math.floor(norm(sunLon(mid) - 315) / 30) === idx) a = mid; else b = mid; }
+      return (a + b) / 2;
+    }
+    t = nt;
+  }
+  return t;
+}
+function daeunOf(rep) {
+  var gd = rep.input.gender;
+  if (gd !== 'm' && gd !== 'f') return null;
+  var P = rep.P, yang = P.year[0] % 2 === 0, forward = (gd === 'm') === yang;
+  var term = findTerm(rep.J, forward ? 1 : -1), start = Math.abs(term - rep.J) / 3;
+  var m60 = idx60(P.month[0], P.month[1]), list = [];
+  for (var i = 1; i <= 9; i++) {
+    var n = mod(m60 + (forward ? i : -i), 60);
+    list.push({ start: start + (i - 1) * 10, end: start + i * 10, stem: n % 10, branch: n % 12, gz: STEM_HJ[n % 10] + BR_HJ[n % 12] });
+  }
+  return { forward: forward, start: start, list: list };
+}
+function luckAt(rep, age) {
+  var d = rep.daeun; if (!d) return null;
+  for (var i = 0; i < d.list.length; i++) if (age >= d.list[i].start && age < d.list[i].end) return d.list[i];
+  return null;
+}
+function luckInfo(rep, luck) {
+  if (!luck) return null;
+  var dS = rep.P.day[0], g1 = tenGod(dS, luck.stem), g2 = tenGod(dS, BR_MAIN[luck.branch]);
+  return { gz: luck.gz, god: g1.name, bgod: g2.name, group: g1.group, from: Math.floor(luck.start), to: Math.floor(luck.end), note: DAE_NOTE[g1.group] };
+}
+
+function transitInfo(rep, J) {
+  var out = {};
+  [['jup', 3], ['sat', 4]].forEach(function (k) {
+    var lon = planetLon(k[1], J), sign = Math.floor(lon / 30);
+    var house = rep.cuspsLon ? houseOf(lon, rep.cuspsLon) : mod(sign - rep.west.sunSign, 12) + 1;
+    out[k[0]] = { sign: sign, deg: lon % 30, house: house, solar: !rep.cuspsLon, retro: lonSpeed(function (x) { return planetLon(k[1], x); }, J) < 0 };
+  });
+  return out;
+}
+
+function monthSummary(sc) {
+  var h = sc[0], l = sc[1], w = sc[2], j = sc[3], m = sc[4], mv = sc[5], s = [];
+  if (w <= 2 && m <= 2) s.push('직장과 재물이 함께 약해지는 달입니다. 큰 결정과 큰 지출은 미루는 편이 안전합니다.');
+  else if (w <= 2 && (m >= 4 || j >= 4)) s.push('조직 안에서는 마찰이 있어도 재능과 수입 쪽은 열려 있는 달입니다. 개인 작업, 부업, 이직 준비처럼 바깥 활동에 힘이 실립니다.');
+  else if (w >= 4 && m >= 4) s.push('직장과 재물이 함께 좋아지는 달입니다. 성과를 내고 수입을 정리하기 좋습니다.');
+  else if (w >= 4 && m <= 2) s.push('직장에서는 인정받지만 지출이 새기 쉬운 달입니다. 고정비를 점검하세요.');
+  else if (w <= 2) s.push('직장 안에서 부담이 커지는 달입니다. 역할 범위를 확인하고 말을 아끼세요.');
+  else if (m <= 2) s.push('지출이 먼저 눈에 띄는 달입니다. 모으기보다 지키는 쪽이 맞습니다.');
+  else if (w >= 4) s.push('직장에서 힘이 실리는 달입니다.');
+  else if (m >= 4) s.push('수입 흐름이 받쳐 주는 달입니다.');
+  else s.push('큰 기복 없이 정리하며 가는 달입니다.');
+  if (h <= 2) s.push('체력 관리를 먼저 챙기세요.');
+  if (mv >= 4) s.push('이동이나 거처 변화를 구상하기 좋습니다.');
+  return s.join(' ');
+}
+
+function monthRows(rep, Y) {
+  var P = rep.P, S = rep.S, dS = P.day[0], dB = P.day[1], gender = rep.input.gender;
+  var yp = [mod(Y - 4, 10), mod(Y - 4, 12)];
+  var yg = tenGod(dS, yp[0]), ybg = tenGod(dS, BR_MAIN[yp[1]]);
+  var yFav = favOf(rep, yg.group);
+  var yRel = mod(dB + 6, 12) === yp[1] ? -1 : ((dB + yp[1]) % 12 === 1 ? 1 : 0);
+  var rows = [];
+  for (var m = 1; m <= 12; m++) {
+    var MP = pillars(Y, m, 15, 12, 0, true), ms = MP.month[0], mb = MP.month[1];
+    var god = tenGod(dS, ms), bgod = tenGod(dS, BR_MAIN[mb]);
+    var fs = favOf(rep, god.group), fb = favOf(rep, bgod.group);
+    var luck = luckAt(rep, lifeAge(rep, jd(Y, m, 15, 3, 0)));
+    var lg = null, lbg = null, lf = false;
+    if (luck) { lg = tenGod(dS, luck.stem); lbg = tenGod(dS, BR_MAIN[luck.branch]); lf = favOf(rep, lg.group); }
+    var x = [], wsum = 2.2 + (luck ? 0.45 : 0);
+    for (var i = 0; i < 6; i++) {
+      var v = 3 - CENTER[i] * wsum + DELTA[god.name][i] + 0.6 * DELTA[bgod.name][i] + 0.4 * DELTA[yg.name][i] + 0.2 * DELTA[ybg.name][i]
+        + (fs ? 0.4 : -0.4) + (fb ? 0.2 : -0.2) + (yFav ? 0.3 : -0.3);
+      if (luck) v += 0.3 * DELTA[lg.name][i] + 0.15 * DELTA[lbg.name][i] + (lf ? 0.2 : -0.2);
+      x.push(v);
+    }
+    if (gender === 'm' && god.group === 2) x[1] += 1;
+    if (gender === 'f' && god.group === 3) x[1] += 1;
+    if (gender === 'f' && god.name === '상관') x[1] -= 1;
+    var flags = [], notes = BANK[god.group].slice();
+    if (bgod.group !== god.group) { for (var c = 0; c < 6; c++) notes[c] += ' ' + BR_ADD[bgod.group][c]; }
+    else flags.push('동기');
+    if (mod(dB + 6, 12) === mb) { x[0] -= 1; x[1] -= 1; flags.push('충'); notes[0] += ' 일지와 충이 겹쳐 컨디션 기복에 유의하세요.'; notes[1] += ' 일지와 충이 들어 감정 기복과 다툼이 생기기 쉽습니다.'; notes[5] += ' 충이 들어 이동·변동 가능성이 커집니다.'; }
+    else if ((dB + mb) % 12 === 1) { x[1] += 1; x[2] += 1; flags.push('합'); notes[1] += ' 일지와 합이 들어 인연이 잘 맺어집니다.'; notes[2] += ' 합이 들어 협력과 조율이 잘 됩니다.'; }
+    var be = BR_EL[mb], me = stemEl(ms);
+    if (be === S.yong || me === S.yong) { x[0] += 1; x[4] += 1; flags.push('보강'); notes[0] += ' 보강 오행(' + EL[S.yong] + ')이 들어와 몸이 가벼운 달입니다.'; notes[4] += ' 보강 오행이 들어와 흐름이 받쳐줍니다.'; }
+    else if (S.cnt[be] >= 3) { x[0] -= 1; flags.push('쏠림'); notes[0] += ' 이미 많은 ' + EL[be] + ' 기운이 더해져 쏠림에 주의하세요.'; }
+    if (yRel === -1) { x[0] -= 0.4; x[1] -= 0.4; x[5] -= 0.4; } else if (yRel === 1) { x[1] += 0.3; x[2] += 0.3; }
+    var sc = x.map(clampRound), best = 0, low = 0;
+    for (var k = 1; k < 6; k++) { if (sc[k] > sc[best]) best = k; if (sc[k] < sc[low]) low = k; }
+    rows.push({ month: m, hj: g(MP.month), ko: gk(MP.month), god: god.name, bgod: bgod.name, group: god.group, tag: GOD_TAG[god.name], fav: fs,
+      scores: sc, notes: notes, flags: flags, best: best, low: low, summary: monthSummary(sc), be: be,
+      pm: reduceNum(reduceNum(rep.numerology.m + rep.numerology.d, false) + reduceNum(Y, false) + m, false),
+      transit: transitInfo(rep, jd(Y, m, 15, 3, 0)) });
+  }
+  var rel = yRel === -1 ? ' 일지와 충이 들어 환경과 관계의 변동이 큰 해입니다.' : yRel === 1 ? ' 일지와 합이 들어 인연과 협력이 잘 맺어지는 해입니다.' : '';
+  var gn = GOD_GROUP[yg.group];
+  var favText = yFav
+    ? ' 사주 원국에 ' + (S.strong ? '힘을 쓸 곳을 만들어 주는' : '부족한 힘을 채워 주는') + ' ' + gn + ' 운이라 부담이 덜합니다.'
+    : ' 사주 원국에 ' + (S.strong ? '이미 강한 힘을 더하는' : '힘을 더 쓰게 만드는') + ' ' + gn + ' 운이라 무리하지 않는 운영이 필요합니다.';
+  if (S.groups[yg.group] === 0) favText += ' 원국에 없던 ' + gn + ' 기운이 들어오는 해입니다.';
+  var py = reduceNum(reduceNum(rep.numerology.m, false) + reduceNum(rep.numerology.d, false) + reduceNum(Y, false), false);
+  var yl = luckInfo(rep, luckAt(rep, lifeAge(rep, jd(Y, 7, 1, 3, 0))));
+  return { year: Y, ganji: g(yp), ko: gk(yp), animal: ANIMAL[yp[1]], god: yg.name, bgod: ybg.name, fav: yFav,
+    theme: YEAR_THEME[yg.name] + '.' + rel + favText, personalYear: py, rows: rows, luck: yl,
+    transit: { start: transitInfo(rep, jd(Y, 1, 1, 3, 0)), end: transitInfo(rep, jd(Y, 12, 31, 3, 0)) } };
+}
+
+/* ---------- 종합 리포트 ---------- */
+function buildReport(inp) {
+  var y = inp.y, m = inp.m, d = inp.d, hk = !!inp.hk, h = inp.h || 0, mi = inp.mi || 0;
+  var city = inp.city || { lat: 37.5665, lon: 126.978 };
+  var J = jd(y, m, d, (hk ? h : 12) - 9, hk ? mi : 0);
+  var P = pillars(y, m, d, h, mi, hk);
+  var S = analyzeSaju(P);
+  var sun = sunLon(J), moon = moonLon(J), ay = ayanamsa(J);
+  var sid = norm(moon - ay);
+  var signSun = Math.floor(sun / 30), signMoon = Math.floor(moon / 30);
+  var nk = Math.floor(sid / (360 / 27));
+  var west = { sunSign: signSun, moonSign: signMoon, sunDeg: sun % 30, moonDeg: moon % 30, asc: null, mc: null, sunHouse: null, moonHouse: null };
+  if (hk) {
+    var A = angles(J, city.lat, city.lon);
+    west.asc = Math.floor(A.asc / 30); west.ascDeg = A.asc % 30;
+    west.mc = Math.floor(A.mc / 30); west.mcDeg = A.mc % 30;
+    west.sunHouse = houseOf(sun, A.cusps); west.moonHouse = houseOf(moon, A.cusps);
+    west.cuspSigns = A.cusps.map(function (c) { return Math.floor(c / 30); });
+  }
+  var vedic = { moonSid: sid, rashi: Math.floor(sid / 30), sunRashi: Math.floor(norm(sun - ay) / 30), nak: nk, nakName: NAKS[nk][0], nakKw: NAKS[nk][1], pada: Math.floor((sid % (360 / 27)) / (360 / 108)) + 1, ayanamsa: ay };
+  var wd = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
+  var thai = THAI[wd === 3 && hk && h >= 18 ? 7 : wd];
+  var lpD = reduceNum(d, true), lpM = reduceNum(m, true), lpY = reduceNum(y, true);
+  var life = reduceNum(lpM + lpD + lpY, true);
+  var numer = { life: life, kw: LP[life], day: d, m: m, d: d, dayNum: reduceNum(d, true) };
+  var zw = null, lunar = null;
+  try { lunar = lunarOf(y, m, d); } catch (e) { lunar = null; }
+  if (lunar && hk) zw = ziwei(lunar, Math.floor(((h + 1) % 24) / 2));
+  var hd = humanDesign(J);
+  var cuspsLon = null, lagna = null;
+  if (hk) { var A2 = angles(J, city.lat, city.lon); cuspsLon = A2.cusps; lagna = Math.floor(norm(A2.asc - ay) / 30); vedic.lagna = lagna; vedic.lagnaDeg = norm(A2.asc - ay) % 30; }
+  var planets = allBodies(J).map(function (b) {
+    var sd = norm(b.lon - ay);
+    return { id: b.id, ko: b.ko, retro: b.retro, lon: b.lon, sign: Math.floor(b.lon / 30), deg: b.lon % 30,
+      house: cuspsLon ? houseOf(b.lon, cuspsLon) : null,
+      sid: sd, rashi: Math.floor(sd / 30), sdeg: sd % 30,
+      vhouse: lagna !== null ? mod(Math.floor(sd / 30) - lagna, 12) + 1 : null };
+  });
+  var rep = { J: J, input: inp, P: P, S: S, west: west, vedic: vedic, thai: thai, numerology: numer, lunar: lunar, zw: zw, hd: hd, sun: sun, moon: moon, planets: planets, cuspsLon: cuspsLon };
+  rep.daeun = daeunOf(rep);
+  var mEl = BR_EL[P.month[1]], dE = S.dEl, deuk = (mEl === dE || mEl === (dE + 4) % 5);
+  rep.dmText = DM_IMG[P.day[0]] + ' ' + (deuk ? '태어난 달(' + BR_KO[P.month[1]] + '월)에서 힘을 얻어 기질이 뚜렷하게 드러납니다.' : '태어난 달(' + BR_KO[P.month[1]] + '월)에서 힘을 얻지 못해 주변 환경과 사람에게서 힘을 보충하는 편입니다.') + ' 가장 많은 ' + EL[S.most] + ' 기운이 ' + EL_TRAIT[S.most] + '의 색을 더합니다.';
+  rep.categories = buildCategories(rep);
+  rep.tarot = tarotReport(rep);
+  rep.overview = buildOverview(rep);
+  return rep;
+}
+
+function buildOverview(r) {
+  var P = r.P, S = r.S, dEl = S.dEl, out = {};
+  out.headline = STEM_KO[P.day[0]] + EL[dEl] + '(' + STEM_HJ[P.day[0]] + ') 일간 · ' + (S.strong ? '자기 기운이 강한 구조' : '주변의 도움에 힘을 얻는 구조');
+  out.lines = [];
+  out.lines.push(r.dmText);
+  out.lines.push(S.strong
+    ? '자기 기운이 충분해 스스로 판을 짜는 편입니다. 힘을 쓸 곳(표현·재물·직책)이 있을 때 빛이 납니다. 쓰지 않는 힘은 고집이나 피로로 돌아옵니다.'
+    : '환경과 사람의 영향을 많이 받는 대신, 협력과 지원을 받을 때 힘이 크게 납니다. 혼자 다 짊어지기보다 기댈 자리를 정해 두는 것이 유리합니다.');
+  out.lines.push(EL[S.weak] + ' 기운이 ' + (S.minC === 0 ? '거의 없고' : '가장 적고') + ', ' + EL[S.most] + ' 기운이 가장 많습니다. 균형을 위해 ' + EL[S.yong] + '(' + EL_INFO[S.yong].color + ' · ' + EL_INFO[S.yong].dir + ' · ' + EL_INFO[S.yong].season + ')의 기운을 보강하는 것이 좋습니다.');
+  out.systems = [];
+  out.systems.push({ name: '사주명리', value: (P.hour ? '' : '(시주 제외) ') + g(P.year) + ' · ' + g(P.month) + ' · ' + g(P.day) + (P.hour ? ' · ' + g(P.hour) : ''), note: '일간 ' + STEM_KO[P.day[0]] + EL[dEl] + ' · ' + ANIMAL[P.year[1]] + '띠' });
+  var w = r.west;
+  out.systems.push({ name: '서양 점성 (플라시더스)', value: '태양 ' + SIGNS[w.sunSign] + ' · 달 ' + SIGNS[w.moonSign] + (w.asc !== null ? ' · 상승 ' + SIGNS[w.asc] : ''), note: SIGN_KW[w.sunSign] + (w.sunHouse ? ' · 태양 ' + w.sunHouse + '하우스(' + HOUSE_KW[w.sunHouse - 1] + ')' : ' · 태어난 시각을 넣으면 상승궁과 하우스가 계산됩니다') });
+  var v = r.vedic;
+  out.systems.push({ name: '인도 점성 (항성)', value: '달 ' + SIGNS[v.rashi] + ' · ' + v.nakName + ' ' + v.pada + '파다', note: v.nakKw + ' · 태양 ' + SIGNS[v.sunRashi] + '(항성)' });
+  out.systems.push({ name: '태국 점성', value: r.thai.d + ' · ' + r.thai.p + ' · ' + r.thai.c, note: r.thai.k });
+  out.systems.push({ name: '수비학', value: '생명수 ' + r.numerology.life, note: r.numerology.kw });
+  if (r.zw) {
+    var mp = r.zw.palace(0);
+    out.systems.push({ name: '자미두수', value: '명궁 ' + BR_HJ[r.zw.ming] + ' · ' + r.zw.juName + ' · ' + mp.stars.join('·') + (mp.borrowed ? '(차용)' : ''), note: mp.stars.map(function (s) { return ZSTAR_KW[s]; }).join(' / ') });
+  } else out.systems.push({ name: '자미두수', value: '시각 필요', note: '태어난 시각을 넣으면 명궁과 12궁 주성이 계산됩니다' });
+  out.systems.push({ name: '휴먼디자인 (일부)', value: '태양 ' + r.hd.pSun.gate + '.' + r.hd.pSun.line + ' · 지구 ' + r.hd.pEarth.gate + '.' + r.hd.pEarth.line + ' · 프로파일 ' + r.hd.profile, note: r.hd.profileName });
+  return out;
+}
+
+function palaceLine(r, k, label) {
+  if (!r.zw) return null;
+  return { src: '자미두수', text: label + '(' + BR_HJ[r.zw.palace(k).branch] + ') ' + starsText(r.zw.palace(k)) };
+}
+function houseLine(r, house, label) {
+  var w = r.west;
+  if (w.cuspSigns) return { src: '서양', text: label + '의 시작점은 ' + SIGNS[w.cuspSigns[house - 1]] + '입니다. 이 영역의 주제는 ' + HOUSE_KW[house - 1] + '입니다.' };
+  return null;
+}
+
+function plOf(r, id) { for (var i = 0; i < r.planets.length; i++) if (r.planets[i].id === id) return r.planets[i]; return null; }
+function pTxt(p, house) { return SIGNS[p.sign] + ' ' + Math.floor(p.deg) + '°' + (p.retro && p.id !== 'rahu' && p.id !== 'ketu' ? '(역행)' : '') + (house && p.house ? ', ' + p.house + '하우스(' + HOUSE_KW[p.house - 1] + ')' : ''); }
+
+function buildCategories(r) {
+  var S = r.S, P = r.P, dEl = S.dEl, G = S.groups, c = {};
+  var gender = r.input.gender;
+  var ven = plOf(r, 'p1'), mar = plOf(r, 'p2'), mer = plOf(r, 'p0'), jup = plOf(r, 'p3'), sat = plOf(r, 'p4'), rah = plOf(r, 'rahu');
+  /* 건강 */
+  var h = [];
+  h.push({ src: '사주', text: EL[S.weak] + ' 기운이 ' + (S.minC === 0 ? '거의 없어' : '적어') + ' ' + EL_INFO[S.weak].organ + ' 쪽이 먼저 약해지기 쉽습니다.' });
+  h.push({ src: '사주', text: S.maxC >= 3 ? EL[S.most] + ' 기운이 많아 ' + EL_INFO[S.most].organ + ' 쪽이 과열·쏠림되지 않게 주의하세요.' : '오행이 비교적 고르게 퍼져 있어 한쪽으로 크게 치우친 약점은 적습니다.' });
+  h.push({ src: '생활', text: '보강 오행 ' + EL[S.yong] + ': ' + EL_INFO[S.yong].care + '.' });
+  h.push({ src: '서양', text: '태양궁 ' + SIGNS[r.west.sunSign] + '은(는) ' + SIGN_BODY[r.west.sunSign] + ' 부위가 민감한 별자리로 전해집니다.' });
+  var hl = palaceLine(r, 5, '질액궁'); if (hl) h.push(hl);
+  var h6 = houseLine(r, 6, '6하우스'); if (h6) h.push(h6);
+  c.health = { title: '건강', lead: EL[S.weak] + ' 기운을 채우고 ' + EL[S.most] + ' 기운의 쏠림을 풀어주는 방향의 관리가 맞습니다.', lines: h, note: '전통 해석을 바탕으로 한 참고 정보입니다. 증상이 있으면 의료진과 상담하세요.' };
+  /* 연애 */
+  var l = [];
+  var spouseGroup = gender === 'f' ? 3 : gender === 'm' ? 2 : null;
+  l.push({ src: '사주', text: '배우자궁 ' + BR_HJ[P.day[1]] + '(' + ANIMAL[P.day[1]] + '). ' + BR_PARTNER[P.day[1]] + ' 상대에게 끌리고, 육합 지지인 ' + ANIMAL[mod(1 - P.day[1], 12)] + '띠와 잘 맞물리는 구조입니다.' });
+  if (spouseGroup !== null) {
+    var n = G[spouseGroup];
+    l.push({ src: '사주', text: (gender === 'f' ? '관성' : '재성') + '(배우자 별)이 ' + n + '개입니다. ' + (n === 0 ? '인연의 계기가 늦거나 소개·모임을 통해 들어오는 편입니다.' : n <= 2 ? '인연의 기회가 적당히 있어 한 사람에게 집중하기 좋습니다.' : '이성 관계가 넓고 선택지가 많아 마음을 정하는 일이 숙제입니다.') });
+  } else l.push({ src: '사주', text: '성별 입력이 없어 배우자 별은 읽지 않았습니다. 성별을 선택하면 재성·관성 기준으로 더 구체화됩니다.' });
+  l.push({ src: '서양', text: '달은 ' + SIGNS[r.west.moonSign] + '(' + SIGN_KW[r.west.moonSign] + ')에 있어 감정을 표현하는 방식과 편안함을 느끼는 관계의 기준을 보여 줍니다.' });
+  l.push({ src: '서양', text: '금성은 ' + pTxt(ven, true) + '. 끌리는 사랑의 모습은 ' + VENUS_KW[ven.sign] + '입니다.' });
+  l.push({ src: '서양', text: '화성은 ' + pTxt(mar, true) + '. 구애와 갈등에서 드러나는 추진 방식은 ' + MARS_KW[mar.sign] + '입니다.' });
+  l.push({ src: '인도', text: '금성은 항성 기준 ' + SIGNS[ven.rashi] + (ven.vhouse ? ' ' + ven.vhouse + '번째 집' : '') + '에 있습니다. ' + (ven.rashi !== ven.sign ? '서양(트로피컬)에서는 ' + SIGNS[ven.sign] + '로 보므로 두 관점의 차이를 함께 참고하세요.' : '서양 기준과 같은 별자리입니다.') });
+  l.push({ src: '태국', text: r.thai.d + '생(' + r.thai.p + ')은 ' + r.thai.k + ' 성향이 관계에서 두드러집니다. 행운색은 ' + r.thai.c + '입니다.' });
+  var lp = palaceLine(r, 2, '부처궁'); if (lp) l.push(lp);
+  var l7 = houseLine(r, 7, '7하우스'); if (l7) l.push(l7);
+  c.love = { title: '연애', lead: BR_PARTNER[P.day[1]] + ' 사람과 인연이 닿기 쉬운 구조입니다.', lines: l };
+  /* 직장 */
+  var w = [];
+  w.push({ src: '사주', text: '관성(조직·직책의 별)이 ' + G[3] + '개. ' + (G[3] === 0 ? '조직의 틀보다 자율적인 환경에서 성과가 납니다.' : G[3] <= 2 ? '조직 안에서 규칙과 평가를 받아들이며 자리를 잡기 좋은 구조입니다.' : '압박과 책임이 크게 걸리는 구조라 역할 범위를 분명히 해 두는 편이 안전합니다.') });
+  w.push({ src: '사주', text: S.strong ? '자기 기운이 강해 상사의 지시를 그대로 따르기보다 주도권을 가질 때 안정됩니다.' : '자기 기운이 약한 편이라 든든한 상사·멘토를 만났을 때 성과가 크게 납니다.' });
+  w.push({ src: '사주', text: '인성(후원의 별) ' + G[4] + '개, 비겁(동료의 별) ' + G[0] + '개. ' + (G[0] >= 3 ? '동료와 경쟁이 잦아 협업 규칙이 필요합니다.' : '동료 관계는 무난한 편입니다.') });
+  w.push({ src: '서양', text: '토성은 ' + pTxt(sat, true) + '. 시간과 책임이 쌓이며 시험받는 영역입니다.' });
+  w.push({ src: '서양', text: '화성은 ' + SIGNS[mar.sign] + ' — 일을 밀고 나가는 방식은 ' + MARS_KW[mar.sign] + '입니다.' });
+  var wp = palaceLine(r, 8, '관록궁'); if (wp) w.push(wp);
+  var w10 = houseLine(r, 10, '10하우스(MC)'); if (w10) w.push(w10);
+  var cl = luckInfo(r, luckAt(r, lifeAge(r, nowJ())));
+  if (cl) { w.splice(3, 0, { src: '사주', text: '현재 대운은 ' + cl.gz + '(만 ' + cl.from + '~' + cl.to + '세)로 천간 ' + cl.god + ', 지지 ' + cl.bgod + '입니다. ' + DAE_WORK[cl.group] }); }
+  else if (!r.daeun) w.splice(3, 0, { src: '사주', text: '성별을 선택하면 10년 단위 대운 흐름까지 반영됩니다.' });
+  var workLead = G[3] >= 3 ? (S.strong ? '책임이 큰 자리를 감당할 힘이 있어 관리·책임 역할이 잘 맞습니다.' : '조직의 압박이 큰 구조라 후원자와 역할 경계를 분명히 하는 것이 핵심입니다.')
+    : G[3] === 0 ? '조직의 틀보다 자율적인 환경에서 성과가 나는 구조입니다.'
+    : (S.strong ? '조직 안에서 주도적으로 자리를 만들어 가는 구조입니다.' : '협력과 지원 속에서 자리를 잡아 가는 구조입니다.');
+  c.work = { title: '직장', lead: workLead, lines: w };
+  /* 직업 */
+  var j = [];
+  j.push({ src: '사주', text: '보강 오행 ' + EL[S.yong] + ' 계열 분야가 맞습니다: ' + EL_INFO[S.yong].jobs + '.' });
+  var jt = [['독립·협업·프리랜서', G[0]], ['표현·창작·기술·서비스', G[1]], ['사업·영업·금융', G[2]], ['조직·공직·관리', G[3]], ['학문·자격·교육', G[4]]];
+  jt.sort(function (a, b) { return b[1] - a[1]; });
+  j.push({ src: '사주', text: '십성 분포상 가장 두드러진 일하는 방식은 ' + jt[0][0] + ', 그다음은 ' + jt[1][0] + '입니다.' });
+  j.push({ src: '서양', text: '수성은 ' + pTxt(mer, true) + '. 일할 때 드러나는 사고방식은 ' + MERC_KW[mer.sign] + '입니다.' });
+  if (rah.vhouse) j.push({ src: '인도', text: '라후는 항성 기준 ' + rah.vhouse + '번째 집(' + HOUSE_KW[rah.vhouse - 1] + ')에 있어, 이 영역에서 욕망과 성장 과제가 커집니다.' });
+  j.push({ src: '인도', text: '달 ' + r.vedic.nakName + '(' + r.vedic.nakKw + ')은 일할 때의 기질을 보여 줍니다.' });
+  j.push({ src: '수비학', text: '생명수 ' + r.numerology.life + '(' + r.numerology.kw + ')은 오래 할 일의 방향을 가리킵니다.' });
+  if (r.west.mc !== null) j.push({ src: '서양', text: 'MC(천정)는 ' + SIGNS[r.west.mc] + '. 사회에서 보이고 싶은 모습의 키워드는 ' + SIGN_KW[r.west.mc] + '입니다.' });
+  j.push({ src: '휴먼디자인', text: '프로파일 ' + r.hd.profile + '(' + r.hd.profileName + ')은 배우고 공유하는 방식의 단서입니다.' });
+  c.job = { title: '직업', lead: EL[S.yong] + ' 기운의 분야와 ' + jt[0][0] + ' 방식이 잘 맞습니다.', lines: j };
+  /* 재물 */
+  var m = [];
+  var cai = G[2];
+  m.push({ src: '사주', text: '재성(재물의 별)이 ' + cai + '개. ' + (cai === 0 ? '고정 재산보다 재주와 직책으로 버는 구조입니다. 재성 오행(' + EL[(dEl + 2) % 5] + ') 관련 활동이 재물 통로가 됩니다.' : cai <= 2 ? '수입 기회가 적절히 있고 관리하기 좋은 구조입니다.' : '재물 기회는 많으나 감당할 체력과 관리가 필요합니다.') });
+  m.push({ src: '사주', text: (S.strong && cai <= 1) ? '능력은 충분하나 기회를 직접 잡으러 나가야 재물이 붙습니다.' : (!S.strong && cai >= 3) ? '들어오는 돈에 비해 쓰는 일이 많아 저축 구조를 먼저 만들어야 합니다.' : '수입과 지출의 균형은 무난한 편입니다.' });
+  if (G[0] >= 3) m.push({ src: '사주', text: '비겁이 많아 지인과의 금전 거래, 보증, 동업에서 손실이 나기 쉽습니다.' });
+  m.push({ src: '서양', text: '목성은 ' + pTxt(jup, true) + '. 확장과 행운이 들어오는 통로입니다.' });
+  var mp2 = palaceLine(r, 4, '재백궁'); if (mp2) m.push(mp2);
+  var m2 = houseLine(r, 2, '2하우스'); if (m2) m.push(m2);
+  m.push({ src: '수비학', text: '생명수 ' + r.numerology.life + ' · ' + r.numerology.kw + '. 이 방향의 일이 장기 수입을 만듭니다.' });
+  if (cl) m.splice(2, 0, { src: '사주', text: '현재 대운 ' + cl.gz + ': ' + DAE_MONEY[cl.group] });
+  var moneyLead = cai === 0 ? '고정 재산보다 재주와 직책으로 버는 구조입니다. ' + (S.strong ? '직접 나서서 기회를 만들 때 수입이 붙습니다.' : '협력과 후원을 통해 수입이 만들어집니다.')
+    : cai >= 3 ? (S.strong ? '기회가 많고 감당할 힘도 있어 적극적으로 굴릴 수 있는 구조입니다.' : '기회는 많으나 감당할 체력이 모자라 관리가 핵심입니다.')
+    : (S.strong ? '수입 기회가 적절히 있어 꾸준히 불려 가기 좋은 구조입니다.' : '수입 구조를 단단히 하는 쪽이 유리합니다.');
+  c.money = { title: '재물', lead: moneyLead, lines: m, note: '투자 판단이 아니라 성향을 읽는 참고 정보입니다.' };
+  /* 이사 */
+  var mv = [];
+  var yk = YEOKMA[P.year[1]], yk2 = YEOKMA[P.day[1]];
+  var hasYk = [P.year[1], P.month[1], P.day[1]].concat(P.hour ? [P.hour[1]] : []).filter(function (b) { return b === yk || b === yk2; });
+  mv.push({ src: '사주', text: '보강 오행이 ' + EL[S.yong] + '이므로 ' + EL_INFO[S.yong].dir + ' 방향(' + EL_INFO[S.yong].color + ' 계열 환경)이 이로운 쪽입니다.' });
+  mv.push({ src: '사주', text: EL[S.most] + ' 기운이 넘치므로 ' + EL_INFO[S.most].dir + ' 쪽은 우선순위를 낮추는 편이 낫습니다.' });
+  mv.push({ src: '사주', text: hasYk.length ? '역마(' + BR_HJ[yk] + ')가 사주에 있어 이동·이사·해외와 인연이 많은 편입니다.' : '역마가 뚜렷하지 않아 한 곳에 오래 뿌리내릴 때 안정됩니다.' });
+  var mz = palaceLine(r, 6, '천이궁'); if (mz) mv.push(mz);
+  var m4 = houseLine(r, 4, '4하우스(IC)'); if (m4) mv.push(m4);
+  c.move = { title: '이사', lead: EL_INFO[S.yong].dir + ' 방향과 ' + EL_INFO[S.yong].color + ' 계열의 환경이 보강 방향입니다.', lines: mv, dir: S.yong, avoid: S.most };
+  return c;
+}
+
+/* ---------- 타로 대응 ---------- */
+var ROMAN = ['0','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV','XVI','XVII','XVIII','XIX','XX','XXI'];
+var MAJOR = [
+['광대','새로운 시작·모험·순수한 용기','무모함·준비 부족·망설임','계산보다 첫걸음이 중요한 때입니다. 가볍게 시작하세요.','충동적인 결정은 잠시 멈추고 현실 조건을 점검하세요.'],
+['마법사','의지·기술·실행력','속임수·재능 낭비·집중 부족','가진 자원을 모아 지금 실행에 옮기세요.','흩어진 에너지를 한 가지로 모으고 말과 약속을 정직하게 하세요.'],
+['여사제','직관·고요·숨은 정보','억눌린 직관·비밀·정보 부족','서두르지 말고 관찰하며 내면의 소리에 귀 기울이세요.','드러나지 않은 사실이 있습니다. 확인 전에는 결론을 미루세요.'],
+['여황제','풍요·돌봄·창조','과잉보호·의존·창작 정체','돌보고 키우는 일이 결실을 맺습니다. 감각을 충분히 즐기세요.','지나친 돌봄이나 의존이 없는지 살피고 나 자신을 먼저 챙기세요.'],
+['황제','질서·권위·안정','독단·경직·통제 과잉','체계와 원칙을 세우면 일이 단단해집니다.','통제를 줄이고 유연하게 타협할 여지를 두세요.'],
+['교황','전통·조언·배움','관습에 대한 반발·형식주의','검증된 방법과 선배의 조언을 따르는 것이 유리합니다.','낡은 틀이 맞지 않는다면 나만의 기준을 세울 때입니다.'],
+['연인','선택·관계·가치 일치','불화·불일치·우유부단','끌리는 쪽보다 가치가 맞는 쪽을 선택하세요.','어긋난 관계나 선택을 미루지 말고 솔직하게 대화하세요.'],
+['전차','승리·추진·자기 통제','방향 상실·폭주·통제 실패','목표를 정하고 밀어붙이면 돌파할 수 있습니다.','속도보다 방향을 먼저 확인하세요.'],
+['힘','용기·인내·부드러운 통제','자신감 저하·감정 폭발','힘으로 누르기보다 인내와 부드러움으로 이끄세요.','지친 마음부터 돌보고 작은 성공으로 자신감을 회복하세요.'],
+['은둔자','성찰·탐구·거리두기','고립·외로움·회피','잠시 물러나 방향을 점검하는 시간이 필요합니다.','혼자만의 시간이 고립으로 변하지 않게 도움을 청하세요.'],
+['운명의 수레바퀴','전환점·기회·순환','정체·불운 체감·변화 저항','흐름이 바뀌는 때입니다. 올라탈 준비를 하세요.','변화를 거부할수록 힘들어집니다. 통제할 수 있는 것에 집중하세요.'],
+['정의','공정·균형·책임','불공정·회피·편향','사실에 근거해 판단하고 계약과 약속을 점검하세요.','치우친 시각은 없는지, 책임을 피하고 있지 않은지 돌아보세요.'],
+['매달린 사람','멈춤·관점 전환·희생','불필요한 희생·지연·고집','멈추고 다른 각도에서 보면 해법이 보입니다.','의미 없는 기다림이라면 결단하고 내려놓으세요.'],
+['죽음','끝과 새 출발·전환','끝내지 못함·미련·변화 저항','끝낼 것은 정리해야 새것이 들어옵니다.','미련이 길수록 전환이 늦어집니다. 정리할 것부터 정하세요.'],
+['절제','균형·조율·회복','불균형·과잉·조급함','서두르지 말고 비율을 맞추며 조율하세요.','한쪽으로 치우친 생활 리듬부터 바로잡으세요.'],
+['악마','집착·유혹·속박','속박에서 벗어남·자각','나를 붙잡는 습관이나 관계, 지출을 점검하세요.','벗어날 수 있다는 것을 이미 알고 있습니다. 작은 끊기부터 시작하세요.'],
+['탑','급변·붕괴·깨달음','위기 회피·지연된 붕괴','흔들리는 것은 원래 불안정했던 것입니다. 기초부터 다시 세우세요.','피하고 있는 문제가 있다면 더 커지기 전에 직면하세요.'],
+['별','희망·회복·영감','희망 상실·불신','회복의 시기입니다. 꾸준히 가면 길이 열립니다.','기대와 실망 사이를 오가고 있지 않은지 살피고 작은 목표부터 세우세요.'],
+['달','불안·환상·불확실성','혼란의 걷힘·진실이 드러남','보이는 것이 전부가 아닙니다. 확실해질 때까지 큰 결정을 미루세요.','안개가 걷히고 있습니다. 확인된 사실만 기준으로 삼으세요.'],
+['태양','성공·활력·기쁨','일시적 침체·과신','드러내고 즐기세요. 성과가 인정받는 때입니다.','기쁨이 잠시 가려졌을 뿐입니다. 과신만 경계하면 됩니다.'],
+['심판','부활·결단·소명','자기 의심·결정 지연','과거를 정리하고 새로운 부름에 응답할 때입니다.','스스로를 지나치게 비난하지 말고 결정을 더 미루지 마세요.'],
+['세계','완성·성취·통합','마무리 부족·미완성','한 주기를 마무리하고 다음 무대를 준비하세요.','거의 다 왔습니다. 마지막 매듭을 짓는 데 집중하세요.']
+];
+var SIGN_CARD = [4, 5, 6, 7, 8, 9, 11, 13, 14, 15, 17, 18];
+var PLANET_CARD = { sun: 19, moon: 2, p0: 1, p1: 3, p2: 16, p3: 10, p4: 21, p5: 0, p6: 12, p7: 20 };
+var PLANET_ROLE = { sun: '정체성', moon: '감정', p0: '사고와 소통', p1: '사랑과 가치', p2: '추진과 갈등', p3: '확장과 행운', p4: '책임과 시험', p5: '변화', p6: '이상과 혼란', p7: '변혁' };
+var THAI_CARD = [19, 2, 16, 1, 10, 3, 21, 18];
+var ZW_CARD = { '자미': 4, '천기': 1, '태양': 19, '무곡': 7, '천동': 17, '염정': 8, '천부': 3, '태음': 2, '탐랑': 6, '거문': 11, '천상': 14, '천량': 9, '칠살': 13, '파군': 16 };
+var GOD_CARD = [7, 1, 3, 4, 5];
+var HD_CARD = [null, 2, 9, 0, 6, 1, 21];
+var SUIT_BY_EL = ['w', 'w', 'p', 's', 'c'];
+var SUITS = {
+  w: { ko: '완드', domain: '일과 열정', have: '행동하고 시작하는 힘이 기질의 바탕입니다.', need: '불씨를 지피듯 행동과 시작의 기운을 보강하면 균형이 잡힙니다.', excess: '추진력이 넘쳐 조급함이나 소진으로 이어지지 않게 속도를 조절하세요.' },
+  c: { ko: '컵', domain: '감정과 관계', have: '감정과 관계에 민감하게 반응하는 것이 기질의 바탕입니다.', need: '감정을 돌보고 관계를 가꾸는 기운을 보강하면 균형이 잡힙니다.', excess: '감정이 넘쳐 휘둘리지 않도록 경계를 정하세요.' },
+  s: { ko: '소드', domain: '생각과 결정', have: '분석하고 판단하는 힘이 기질의 바탕입니다.', need: '정리하고 결정하는 기운을 보강하면 균형이 잡힙니다.', excess: '생각이 많아 날이 서지 않도록 쉬어 가세요.' },
+  p: { ko: '펜타클', domain: '재물과 현실', have: '현실을 다지고 쌓는 힘이 기질의 바탕입니다.', need: '몸과 돈, 일상의 기반을 다지는 기운을 보강하면 균형이 잡힙니다.', excess: '현실과 안정에 매여 변화를 놓치지 않게 하세요.' }
+};
+var CAT_LENS = ['몸과 컨디션에서는', '관계에서는', '일터에서는', '일의 방향에서는', '돈에서는', '거처와 이동에서는'];
+
+function r22(n) { while (n > 22) n = String(n).split('').reduce(function (a, c) { return a + (+c); }, 0); return n === 22 ? 0 : n; }
+function r9(n) { while (n > 9) n = String(n).split('').reduce(function (a, c) { return a + (+c); }, 0); return n; }
+function cardOf(id) { var m = MAJOR[id]; return { id: id, roman: ROMAN[id], name: m[0], kwUp: m[1], kwRev: m[2], advUp: m[3], advRev: m[4] }; }
+function tEntry(src, role, id, rev, basis) { return { kind: 'card', src: src, role: role, id: id, rev: !!rev, basis: basis }; }
+function tSuit(src, role, el, mode) { var s = SUIT_BY_EL[el]; return { kind: 'suit', src: src, role: role, suit: s, el: el, mode: mode, basis: 'keyword' }; }
+function tText(e, cat) {
+  if (e.kind === 'suit') { var S = SUITS[e.suit]; return S.ko + '(' + S.domain + ') 슈트입니다. ' + S[e.mode]; }
+  var c = cardOf(e.id), kw = e.rev ? c.kwRev : c.kwUp, adv = e.rev ? c.advRev : c.advUp;
+  return (cat != null && cat >= 0 ? CAT_LENS[cat] + ' ' : '') + kw + '의 흐름이 보입니다. ' + adv;
+}
+function tName(e) { if (e.kind === 'suit') return SUITS[e.suit].ko + ' 슈트'; var c = cardOf(e.id); return c.name + (e.rev ? ' (역방향)' : ''); }
+
+function tarotBirth(y, m, d) {
+  var n = m + d + y; while (n > 22) n = String(n).split('').reduce(function (a, c) { return a + (+c); }, 0);
+  var pers = n === 22 ? 0 : n, soul = n === 22 ? 4 : (n > 9 ? r9(n) : n);
+  return { pers: pers, soul: soul === pers ? null : soul };
+}
+function tarotDay(rep, Y, M, D) { return r22(rep.input.m + rep.input.d + Y + M + D); }
+function tarotNumber(n) { return n === 11 ? 11 : n === 22 ? 0 : n === 33 ? 6 : n; }
+
+function tarotReport(rep) {
+  var P = rep.P, S = rep.S, w = rep.west, v = rep.vedic, hasT = !!rep.cuspsLon, out = { systems: [], cats: [[], [], [], [], [], []] };
+  var pl = function (id) { for (var i = 0; i < rep.planets.length; i++) if (rep.planets[i].id === id) return rep.planets[i]; return null; };
+  var pe = function (id, label) { var p = pl(id); var h = p.house ? ', ' + p.house + '하우스' : ''; return tEntry('서양 · ' + p.ko + ' (' + SIGNS[p.sign] + ' ' + Math.floor(p.deg) + '°' + h + ')', PLANET_ROLE[id] + (p.retro ? ' · 역행' : ''), PLANET_CARD[id], p.retro, 'tradition'); };
+  var se = function (sign, label, role) { return tEntry('서양 · ' + label + ' ' + SIGNS[sign], role, SIGN_CARD[sign], false, 'tradition'); };
+  var sun = se(w.sunSign, '태양궁', '정체성'), moon = se(w.moonSign, '달궁', '감정');
+  var asc = hasT ? se(w.asc, '상승궁', '첫인상') : null;
+  var gLuck = luckInfo(rep, luckAt(rep, lifeAge(rep, nowJ())));
+  var godE = gLuck ? tEntry('사주 · 현재 대운 ' + gLuck.gz + ' 천간 ' + gLuck.god, '10년의 주제', GOD_CARD[gLuck.group], false, 'keyword') : null;
+  var dayEl = tSuit('사주 · 일간 ' + STEM_KO[P.day[0]] + EL[S.dEl], '기질', S.dEl, 'have');
+  var needEl = tSuit('사주 · 보강 오행 ' + EL[S.yong], '채울 기운', S.yong, 'need');
+  var excEl = S.maxC >= 3 ? tSuit('사주 · 많은 오행 ' + EL[S.most], '넘치는 기운', S.most, 'excess') : null;
+  var thaiE = tEntry('태국 · ' + rep.thai.d + '생 ' + rep.thai.p, '출생 요일의 행성', THAI_CARD[THAI.indexOf(rep.thai)], false, 'tradition');
+  var vedMoon = tEntry('인도 · 항성 달 ' + SIGNS[v.rashi], '달의 라시', SIGN_CARD[v.rashi], false, 'tradition');
+  var life = tEntry('수비학 · 생명수 ' + rep.numerology.life, '인생의 방향', tarotNumber(rep.numerology.life), false, 'tradition');
+  var zwMing = null, zwWealth = null, zwMove = null, zwWork = null, zwLove = null;
+  if (rep.zw) {
+    var zp = function (k, label) { var pp = rep.zw.palace(k); return pp.stars.length ? tEntry('자미두수 · ' + label + ' ' + pp.stars[0] + (pp.borrowed ? '(차용)' : ''), label + '의 주성', ZW_CARD[pp.stars[0]], false, 'keyword') : null; };
+    zwMing = zp(0, '명궁'); zwWealth = zp(4, '재백궁'); zwMove = zp(6, '천이궁'); zwWork = zp(8, '관록궁'); zwLove = zp(2, '부처궁');
+  }
+  var hd1 = tEntry('휴먼디자인 · 프로파일 ' + rep.hd.profile + ' 의식 라인', HD_LINE[rep.hd.pSun.line], HD_CARD[rep.hd.pSun.line], false, 'keyword');
+  var hd2 = tEntry('휴먼디자인 · 프로파일 ' + rep.hd.profile + ' 무의식 라인', HD_LINE[rep.hd.dSun.line], HD_CARD[rep.hd.dSun.line], false, 'keyword');
+  var bd = tarotBirth(rep.input.y, rep.input.m, rep.input.d);
+  var birthE = [tEntry('수비학 타로 · 생일 카드(성격)', '타고난 성격', bd.pers, false, 'tradition')];
+  if (bd.soul !== null) birthE.push(tEntry('수비학 타로 · 생일 카드(영혼)', '내면의 동기', bd.soul, false, 'tradition'));
+  var compact = function (a) { return a.filter(function (x) { return x; }); };
+  out.birth = birthE;
+  out.overall = compact(birthE.concat([sun, moon, asc, life]));
+  out.systems = [
+    { name: '사주명리', entries: compact([dayEl, needEl, excEl, godE]) },
+    { name: '서양 점성', entries: compact([sun, moon, asc, pe('p0'), pe('p1'), pe('p2'), pe('p3'), pe('p4')]) },
+    { name: '인도 점성', entries: [vedMoon] },
+    { name: '태국 점성', entries: [thaiE] },
+    { name: '수비학', entries: birthE.concat([life]) },
+    { name: '자미두수', entries: compact([zwMing, zwWealth, zwWork, zwLove, zwMove]) },
+    { name: '휴먼디자인', entries: [hd1, hd2] }
+  ];
+  // 분야별
+  var c = out.cats;
+  c[0] = compact([needEl, hasT ? se(w.cuspSigns[5], '6하우스 시작점', '건강과 일상') : sun, pe('p2'), excEl]);
+  c[1] = compact([pe('p1'), moon, hasT ? se(w.cuspSigns[6], '7하우스 시작점', '파트너') : null, zwLove]);
+  c[2] = compact([pe('p4'), hasT ? se(w.mc, 'MC(천정)', '사회적 모습') : sun, godE, zwWork]);
+  c[3] = compact([pe('p0'), life, dayEl, zwMing, hd1]);
+  c[4] = compact([pe('p3'), hasT ? se(w.cuspSigns[1], '2하우스 시작점', '재물과 소유') : sun, zwWealth, godE]);
+  c[5] = compact([hasT ? se(w.cuspSigns[3], '4하우스(IC) 시작점', '거처와 뿌리') : moon, needEl, zwMove]);
+  out.cats = out.cats.map(function (arr) { var seen = {}; return arr.filter(function (e) { var k = e.kind + (e.kind === 'suit' ? e.suit + e.mode : e.id + (e.rev ? 'r' : '')); if (seen[k]) return false; seen[k] = 1; return true; }); });
+  return out;
+}
+var TONE_UP = [1, 2, 0, 2, 1, 1, 1, 2, 2, 0, 1, 1, -1, -1, 1, -2, -2, 2, -1, 2, 1, 2];
+var TONE_REV = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, 1, 0, -1, -1];
+function tarotSynth(rep, Y0, M0) {
+  var cache = {}, months = [], T = rep.tarot;
+  function rowsOf(y) { return cache[y] || (cache[y] = monthRows(rep, y).rows); }
+  var yy = Y0, mm = M0;
+  for (var i = 0; i < 15; i++) { months.push({ Y: yy, m: mm, sc: rowsOf(yy)[mm - 1].scores }); mm++; if (mm > 12) { mm = 1; yy++; } }
+  function lab(v, hi, lo) { return v >= hi ? '순풍' : v <= lo ? '긴장' : '혼재'; }
+  function build(entries, catIdx, isAll) {
+    var seenC = {}, cards = entries.filter(function (e) { if (e.kind !== 'card') return false; var k = e.id + (e.rev ? 'r' : 'u'); if (seenC[k]) return false; seenC[k] = 1; return true; });
+    if (!cards.length) return null;
+    var tone = 0, kws = [], names = [];
+    cards.forEach(function (e) {
+      tone += e.rev ? TONE_REV[e.id] : TONE_UP[e.id];
+      var c = cardOf(e.id); kws.push((e.rev ? c.kwRev : c.kwUp).split('·')[0]); names.push(tName(e));
+    });
+    var avg = tone / cards.length, label = lab(avg, 1.25, 0.4), lines = [];
+    lines.push((isAll ? '전체 구성에 놓인 카드는 ' : '이 분야에 놓인 카드는 ') + names.join(' · ') + '입니다.');
+    lines.push('핵심 키워드는 ' + kws.join(', ') + '입니다.');
+    lines.push(label === '순풍' ? '카드의 에너지가 대체로 앞으로 밀어 주는 배열입니다. 기회가 오면 망설이지 말고 움직이세요.'
+      : label === '긴장' ? '점검과 정리를 요구하는 카드가 많은 배열입니다. 속도를 늦추고 기반과 사실부터 확인하세요.'
+      : '밀어 주는 카드와 점검을 요구하는 카드가 섞인 배열입니다. 추진하되 확인할 부분을 따로 정해 두세요.');
+    var center = cards[0];
+    for (var k = 0; k < cards.length; k++) if (cards[k].basis === 'tradition') { center = cards[k]; break; }
+    var cc = cardOf(center.id);
+    lines.push('전통 대응으로 가장 무게가 실리는 카드는 ' + tName(center) + '입니다. 근거는 ' + center.src + '입니다. ' + (center.rev ? cc.advRev : cc.advUp));
+    var vals = months.map(function (mo) { return { Y: mo.Y, m: mo.m, v: catIdx >= 0 ? mo.sc[catIdx] : mo.sc.reduce(function (a, b) { return a + b; }, 0) / 6 }; });
+    var sum = 0, best = vals[0], worst = vals[0];
+    vals.forEach(function (x) { sum += x.v; if (x.v > best.v) best = x; if (x.v < worst.v) worst = x; });
+    var sAvg = sum / vals.length, sl = lab(sAvg, 3.3, 2.7);
+    var relation = label === sl ? 'same' : (label === '혼재' || sl === '혼재') ? 'near' : 'diff';
+    var f = function (x) { return x.Y + '년 ' + x.m + '월(' + (Math.round(x.v * 10) / 10) + '점)'; };
+    var txt = '사주 월별 흐름(앞으로 15개월 평균 ' + sAvg.toFixed(1) + '점)은 ' + sl + ' 쪽이라 ' +
+      (relation === 'same' ? '카드와 같은 방향입니다.' : relation === 'near' ? '카드와 대체로 비슷하지만 한쪽이 더 뚜렷합니다.' : '카드와 방향이 다릅니다. 카드는 타고난 성향을, 사주는 시기별 흐름을 보여 주니 둘이 다를 때는 시기에 맞춰 나눠 읽으세요.');
+    return { label: label, lines: lines, saju: { avg: sAvg, label: sl, relation: relation, text: txt, bestText: '사주상 가장 좋은 달은 ' + f(best) + ', 가장 약한 달은 ' + f(worst) + '입니다.' } };
+  }
+  return { overall: build(T.overall, -1, true), cats: T.cats.map(function (es, i) { return build(es, i, false); }) };
+}
+function tarotYearCard(rep, Y) { return rep.numerology ? reduceNum(reduceNum(rep.numerology.m, false) + reduceNum(rep.numerology.d, false) + reduceNum(Y, false), false) : 1; }
+
+
+var E = {
+  tarot: { card: cardOf, text: tText, name: tName, birth: tarotBirth, day: tarotDay, report: tarotReport, synth: tarotSynth, yearCard: tarotYearCard, roman: ROMAN, suits: SUITS, number: tarotNumber },
+  planetLon: planetLon, allBodies: allBodies, meanNode: meanNode, ayanamsa: ayanamsa,
+  buildReport: buildReport, monthRows: monthRows, pillars: pillars, sunLon: sunLon, moonLon: moonLon, jd: jd, jdn: jdn,
+  angles: angles, houseOf: houseOf, ziwei: ziwei, lunarOf: lunarOf, gateOf: gateOf, humanDesign: humanDesign,
+  tenGod: tenGod, g: g, gk: gk, quoteFor: function (dayStem, seed) { var q = QUOTES[stemEl(dayStem)]; return q[seed % q.length]; },
+  data: { STEM_KO: STEM_KO, STEM_HJ: STEM_HJ, BR_KO: BR_KO, BR_HJ: BR_HJ, ANIMAL: ANIMAL, EL: EL, EL_HJ: EL_HJ, EL_INFO: EL_INFO, SIGNS: SIGNS, CATS: CATS, GOD_GROUP: GOD_GROUP, JU_NAME: JU_NAME }
+};
+if (typeof module !== 'undefined' && module.exports) module.exports = E; else root.Engine = E;
+})(typeof window !== 'undefined' ? window : this);
+
+</script>
+<script>
+(function () {
+  'use strict';
+  var E = window.Engine, D = E.data;
+  var EL = D.EL;
+  var CAT_KEYS = ['health', 'love', 'work', 'job', 'money', 'move'];
+  var CITIES = [
+    ['서울', 37.5665, 126.978], ['부산', 35.1796, 129.0756], ['대구', 35.8714, 128.6014], ['인천', 37.4563, 126.7052],
+    ['광주', 35.1595, 126.8526], ['대전', 36.3504, 127.3845], ['울산', 35.5384, 129.3114], ['세종', 36.48, 127.289],
+    ['수원', 37.2636, 127.0286], ['제주', 33.4996, 126.5312]
+  ];
+  var NEEDLE = [90, 180, 225, 270, 0];
+  var DIRNAME = ['동쪽', '남쪽', '남서쪽', '서쪽', '북쪽'];
+  var now = new Date();
+  var TY = now.getFullYear(), TM = now.getMonth() + 1, TD = now.getDate();
+  var WEEK = ['일', '월', '화', '수', '목', '금', '토'];
+  var state = { rep: null, tab: 'health', view: String(TY), sel: null, cat: -1, sample: true };
+
+  function $(s, r) { return (r || document).querySelector(s); }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function pt(r, a) { var t = a * Math.PI / 180; return [200 + r * Math.sin(t), 200 - r * Math.cos(t)]; }
+
+  /* ---------- 나침반 ---------- */
+  function compass(rep) {
+    var s = '<svg viewBox="0 0 400 400" role="img" aria-label="사주 지지 12방위와 보강 방향을 보여 주는 나침반">';
+    s += '<circle cx="200" cy="200" r="192" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>';
+    s += '<circle cx="200" cy="200" r="157" fill="none" stroke="var(--line)"/>';
+    s += '<circle cx="200" cy="200" r="100" fill="none" stroke="var(--line)" stroke-dasharray="2 4"/>';
+    s += '<circle cx="200" cy="200" r="58" fill="var(--surface2)" stroke="var(--line)"/>';
+    for (var i = 0; i < 12; i++) {
+      var a = i * 30, p1 = pt(157, a + 15), p2 = pt(192, a + 15);
+      s += '<line x1="' + p1[0].toFixed(1) + '" y1="' + p1[1].toFixed(1) + '" x2="' + p2[0].toFixed(1) + '" y2="' + p2[1].toFixed(1) + '" stroke="var(--line)"/>';
+      var t = pt(174.5, a);
+      s += '<text x="' + t[0].toFixed(1) + '" y="' + t[1].toFixed(1) + '" text-anchor="middle" dominant-baseline="central" font-family="var(--f-display)" font-size="17" font-weight="700" fill="var(--ink)">' + D.BR_HJ[i] + '</text>';
+    }
+    var dirs = [[0, '북', '水'], [90, '동', '木'], [180, '남', '火'], [270, '서', '金']];
+    dirs.forEach(function (d) {
+      var t = pt(80, d[0]);
+      s += '<text x="' + t[0].toFixed(1) + '" y="' + (t[1] - 5).toFixed(1) + '" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="700" fill="var(--ink)">' + d[1] + '</text>';
+      s += '<text x="' + t[0].toFixed(1) + '" y="' + (t[1] + 10).toFixed(1) + '" text-anchor="middle" dominant-baseline="central" font-family="var(--f-display)" font-size="11" fill="var(--ink2)">' + d[2] + '</text>';
+    });
+    s += '<text x="200" y="200" text-anchor="middle" dominant-baseline="central" font-family="var(--f-display)" font-size="26" fill="var(--ink2)" opacity=".7">土</text>';
+    if (rep) {
+      var used = {};
+      [['hour', '시'], ['day', '일'], ['month', '월'], ['year', '년']].forEach(function (k) {
+        var pl = rep.P[k[0]]; if (!pl) return;
+        var b = pl[1]; used[b] = (used[b] || 0) + 1;
+        var r = used[b] === 1 ? 139 : used[b] === 2 ? 118 : 97;
+        var p = pt(r, b * 30);
+        s += '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="11" fill="var(--accent)"/>';
+        s += '<text x="' + p[0].toFixed(1) + '" y="' + (p[1] + 0.5).toFixed(1) + '" text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="700" fill="var(--accent-ink)">' + k[1] + '</text>';
+      });
+      var av = pt(100, NEEDLE[rep.S.most]);
+      s += '<circle cx="' + av[0].toFixed(1) + '" cy="' + av[1].toFixed(1) + '" r="9" fill="var(--surface)" stroke="var(--seal)" stroke-width="2"/>';
+      s += '<path d="M' + (av[0] - 3.2).toFixed(1) + ' ' + (av[1] - 3.2).toFixed(1) + 'l6.4 6.4m0-6.4l-6.4 6.4" stroke="var(--seal)" stroke-width="1.8" fill="none"/>';
+    }
+    s += '<g class="needle" id="needle" style="transform:rotate(0deg)"><path d="M200 44 L209 200 L200 214 L191 200 Z" fill="var(--seal)"/><path d="M200 356 L209 200 L200 214 L191 200 Z" fill="var(--ink2)" opacity=".75"/></g>';
+    s += '<circle cx="200" cy="200" r="6" fill="var(--surface)" stroke="var(--ink)" stroke-width="2"/>';
+    s += '</svg>';
+    $('#compass').innerHTML = s;
+    var ang = rep ? NEEDLE[rep.S.yong] : 0;
+    var nd = $('#needle');
+    requestAnimationFrame(function () { requestAnimationFrame(function () { nd.style.transform = 'rotate(' + (ang + 360) + 'deg)'; }); });
+    var cap = $('#dial-cap');
+    if (rep) cap.innerHTML = '보강 방향 <b>' + DIRNAME[rep.S.yong] + '</b> (' + EL[rep.S.yong] + ' · ' + D.EL_INFO[rep.S.yong].color + ')<br>' + DIRNAME[rep.S.most] + '(' + EL[rep.S.most] + ')은 이미 기운이 가득한 방향입니다.';
+  }
+
+  /* ---------- 오늘 ---------- */
+  function renderToday(rep) {
+    var tp = E.pillars(TY, TM, TD, 12, 0, false);
+    var q = E.quoteFor(tp.day[0], TY * 400 + TM * 31 + TD);
+    var god = E.tenGod(rep.P.day[0], tp.day[0]);
+    var tags = { '비견': '동료·경쟁', '겁재': '경쟁·지출', '식신': '여유·표현', '상관': '재주·돌파', '편재': '활동·변동 수입', '정재': '안정 수입', '편관': '압박·도전', '정관': '질서·인정', '편인': '직관·변칙 학습', '정인': '배움·후원' };
+    var nm = rep.input.name ? esc(rep.input.name) + '님의 ' : '';
+    var dow = WEEK[now.getDay()];
+    $('#today').innerHTML =
+      '<div class="head"><h2 id="t-h">오늘의 명언</h2><p class="sub nums">' + TY + '년 ' + TM + '월 ' + TD + '일 (' + dow + ') · 일진 ' + E.g(tp.day) + '일</p></div>' +
+      (state.sample ? '<p class="sample"><span class="chip seal">예시</span> <span class="sub">1990년 5월 15일 14:30 입력으로 계산한 결과입니다. 본인 정보를 넣고 나침반을 돌리면 바뀝니다.</span></p>' : '') +
+      '<div class="today"><figure class="quote" style="margin:0"><blockquote>“' + esc(q[0]) + '”</blockquote><cite>— ' + esc(q[1]) + '</cite></figure>' +
+      '<div class="flow"><p class="kicker">' + nm + '오늘의 흐름</p><div class="big">' + god.name + '</div><p>' + tags[god.name] + '. 오늘의 일진이 내 일간(' + D.STEM_HJ[rep.P.day[0]] + ')에게 ' + god.name + '으로 작용합니다.</p>' + todayTarot(rep) + '</div></div>';
+  }
+
+  /* ---------- 전체 특성 ---------- */
+  function pillarCard(rep, key, label) {
+    var p = rep.P[key];
+    if (!p) return '<div class="pil empty"><span class="nm">' + label + '</span><span class="hj">–</span><span class="ko">시각 미입력</span></div>';
+    var isDay = key === 'day';
+    var god = isDay ? '일간 (나)' : E.tenGod(rep.P.day[0], p[0]).name;
+    return '<div class="pil' + (isDay ? ' me' : '') + '"><span class="nm">' + label + '</span><span class="god">' + god + '</span>' +
+      '<span class="hj">' + D.STEM_HJ[p[0]] + '</span><span class="ko">' + D.STEM_KO[p[0]] + ' · ' + EL[Math.floor(p[0] / 2)] + '</span><span class="sep"></span>' +
+      '<span class="hj">' + D.BR_HJ[p[1]] + '</span><span class="ko">' + D.BR_KO[p[1]] + ' · ' + D.ANIMAL[p[1]] + '</span></div>';
+  }
+  function renderOverview(rep) {
+    var o = rep.overview, S = rep.S;
+    var nm = rep.input.name ? esc(rep.input.name) + '님 · ' : '';
+    var h = '<div class="head"><h2 id="o-h">전체 특성</h2><p class="sub">' + nm + (rep.P.hour ? '사주 네 기둥 기준' : '시각 없이 세 기둥 기준') + '</p></div>';
+    h += '<div class="traits"><div class="story"><p class="kicker">일간 기준 요약</p><h3>' + esc(o.headline) + '</h3>' +
+      o.lines.map(function (l) { return '<p>' + esc(l) + '</p>'; }).join('') + '</div>';
+    h += '<div><div class="pillars">' + pillarCard(rep, 'hour', '시주') + pillarCard(rep, 'day', '일주') + pillarCard(rep, 'month', '월주') + pillarCard(rep, 'year', '년주') + '</div>';
+    h += '<div class="elbars" aria-label="오행 분포">';
+    for (var i = 0; i < 5; i++) {
+      var cls = (i === S.yong ? ' yong' : '') + (i === S.most ? ' most' : '');
+      h += '<div class="elrow' + cls + '"><span class="lab">' + EL[i] + ' ' + D.EL_HJ[i] + '</span><span class="bar"><i style="width:' + Math.round(S.cnt[i] / 8 * 100) + '%"></i></span><span class="nums">' + S.cnt[i] + '</span></div>';
+    }
+    h += '</div><p class="elnote">굵은 글씨는 보강 오행(' + EL[S.yong] + '), 붉은 막대는 가장 많은 오행(' + EL[S.most] + ')입니다. 월지는 계절의 힘이 커서 강약 계산에서 두 배로 봅니다.</p></div></div>';
+    h += '<div class="systems">' + o.systems.map(function (s, i) {
+      return '<div class="sys"><span class="n">' + esc(s.name) + '</span><span class="v">' + esc(s.value) + '</span><span class="d">' + esc(s.note) + '</span>' + tchips(i) + '</div>';
+    }).join('') + '</div>';
+    $('#traits').innerHTML = h;
+  }
+
+  /* ---------- 분야별 ---------- */
+  function renderFields() {
+    var rep = state.rep, cats = rep.categories;
+    var h = '<div class="head"><h2 id="f-h">분야별 풀이</h2><p class="sub">여섯 가지 주제를 각 체계의 근거와 함께 봅니다.</p></div>';
+    h += '<div class="tabs" role="tablist" aria-label="분야">';
+    CAT_KEYS.forEach(function (k, i) {
+      var sel = state.tab === k;
+      h += '<button class="tab" role="tab" id="tab-' + k + '" aria-selected="' + sel + '" aria-controls="panel" tabindex="' + (sel ? 0 : -1) + '" data-tab="' + k + '">' + D.CATS[i] + '</button>';
+    });
+    h += '</div><div class="panel" role="tabpanel" id="panel" aria-labelledby="tab-' + state.tab + '"></div>';
+    $('#fields').innerHTML = h;
+    renderPanel();
+  }
+  function renderPanel() {
+    var c = state.rep.categories[state.tab];
+    var h = '<p class="lead">' + esc(c.lead) + '</p><ul class="lines">';
+    c.lines.forEach(function (l) { h += '<li><span class="src">' + esc(l.src) + '</span><span>' + esc(l.text) + '</span></li>'; });
+    h += '</ul>';
+    h += tarotBlock(CAT_KEYS.indexOf(state.tab));
+    if (c.note) h += '<p class="pnote">' + esc(c.note) + '</p>';
+    $('#panel').innerHTML = h;
+  }
+
+  /* ---------- 타로 ---------- */
+  var TG = {
+    major: '<path d="M12 2l2.2 7.8L22 12l-7.8 2.2L12 22l-2.2-7.8L2 12l7.8-2.2z"/>',
+    w: '<path d="M6 20L18 4M18 4c-3.5 0-5.5 2-5.5 5.5M18 4c0 3.5-2 5.5-5.5 5.5"/>',
+    c: '<path d="M6 5h12c0 6-2 9-6 9s-6-3-6-9zM12 14v5M8 20h8"/>',
+    s: '<path d="M12 2l2.5 12-2.5 2-2.5-2zM7 16h10M12 16v6"/>',
+    p: '<circle cx="12" cy="12" r="9.5"/><path d="M12 6.5l1.7 4.4h4.7l-3.8 2.8 1.5 4.6-4.1-2.8-4.1 2.8 1.5-4.6-3.8-2.8h4.7z"/>'
+  };
+  function tface(e) {
+    var k = e.kind === 'suit' ? e.suit : 'major';
+    return '<div class="tface su-' + k + (e.rev ? ' rev' : '') + '" role="img" aria-label="' + esc(E.tarot.name(e)) + '">' +
+      (e.kind === 'suit' ? '<span class="rn">&nbsp;</span>' : '<span class="rn">' + E.tarot.roman[e.id] + '</span>') +
+      '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">' + TG[k] + '</svg></div>';
+  }
+  function trow(e, cat) {
+    var basis = e.basis === 'tradition' ? '<span class="chip acc">전통 대응</span>' : '<span class="chip">키워드 대응</span>';
+    return '<div class="trow">' + tface(e) + '<div><div class="tname"><b>' + esc(E.tarot.name(e)) + '</b>' + basis + '</div><p class="tsrc">' + esc(e.src) + (e.role ? ' · ' + esc(e.role) : '') + '</p><p>' + esc(E.tarot.text(e, cat)) + '</p></div></div>';
+  }
+  function synthHtml(sy, title) {
+    if (!sy) return '';
+    var rel = { same: '사주와 같은 방향', near: '사주와 대체로 비슷', diff: '사주와 다른 방향' }[sy.saju.relation];
+    return '<div class="tsyn"><p class="kicker">' + title + ' <span class="chip acc">카드 흐름 ' + sy.label + '</span><span class="chip ' + (sy.saju.relation === 'diff' ? 'seal' : 'acc') + '">' + rel + '</span></p>' +
+      sy.lines.map(function (l) { return '<p>' + esc(l) + '</p>'; }).join('') +
+      '<p><b>' + esc(sy.saju.text) + '</b></p><p class="best">' + esc(sy.saju.bestText) + '</p></div>';
+  }
+  function tarotBlock(ci) {
+    var es = state.rep.tarot.cats[ci];
+    if (!es.length) return '';
+    var rv = es.filter(function (e) { return e.rev; }).length;
+    var h = '<div class="tblock"><p class="kicker">타로로 읽기</p>';
+    es.forEach(function (e) { h += trow(e, ci); });
+    h += synthHtml(state.rep.tarot.synth.cats[ci], '타로 종합 해석');
+    if (rv) h += '<p class="tsum">역방향 ' + rv + '장은 그 에너지가 막히거나 과하게 나타나 점검이 필요한 부분입니다.</p>';
+    h += '</div>';
+    return h;
+  }
+  function todayTarot(rep) {
+    var id = E.tarot.day(rep, TY, TM, TD);
+    return trow({ kind: 'card', id: id, rev: false, src: '수비학 타로 · 생일과 오늘 날짜의 합', role: '오늘의 카드', basis: 'tradition' }, null);
+  }
+  function tchips(i) {
+    var s = state.rep.tarot.systems[i];
+    if (!s || !s.entries.length) return '';
+    return '<div class="tchips" aria-label="타로 대응 카드">' + s.entries.map(function (e) {
+      return '<span class="tchip">' + (e.kind === 'suit' ? esc(E.tarot.name(e)) : E.tarot.roman[e.id] + ' ' + esc(E.tarot.name(e))) + '</span>';
+    }).join('') + '</div>';
+  }
+  function renderTarot(rep) {
+    var T = rep.tarot, h = '<div class="head"><h2 id="tr-h">타로 대응</h2><p class="sub">계산된 결과마다 대응하는 카드를 함께 읽습니다.</p></div>';
+    h += '<p class="tnote"><span class="chip acc">전통 대응</span> 별자리, 행성, 요일, 수비학 숫자는 골든던 계열의 대응표를 따릅니다. <span class="chip">키워드 대응</span> 십성, 오행 슈트, 자미두수 주성, 휴먼디자인 라인은 정통 대응표가 없어 의미가 비슷한 카드를 연결한 것입니다. 역행하는 행성은 역방향 카드로 읽습니다. 종합 해석의 순풍·혼재·긴장은 카드마다 제가 정한 점수(−2~+2)의 평균이 높은 쪽, 중간, 낮은 쪽을 나눈 것이고, 사주 쪽은 앞으로 15개월의 월별 점수 평균(3.3점 이상 순풍, 2.7점 이하 긴장)입니다.</p>';
+    h += '<div class="tover">' + synthHtml(T.synth.overall, '전체 종합 해석') + '</div>';
+    h += '<div class="tfixed"><div><p class="kicker" style="margin:12px 0 0">생일 카드</p>' + T.birth.map(function (e) { return trow(e, null); }).join('') + '</div>';
+    h += '<div><p class="kicker" style="margin:12px 0 0">오늘의 카드</p>' + todayTarot(rep) + '</div></div>';
+    h += '<div class="tsysgrid">';
+    T.systems.forEach(function (s) {
+      h += '<div class="tsys"><h3>' + esc(s.name) + '</h3>';
+      if (!s.entries.length) h += '<p class="sub" style="padding:10px 0">태어난 시각을 입력하면 대응 카드가 나옵니다.</p>';
+      s.entries.forEach(function (e) { h += trow(e, null); });
+      h += '</div>';
+    });
+    h += '</div>';
+    $('#tarot').innerHTML = h;
+  }
+
+  /* ---------- 행성 ---------- */
+  var SIGNS = D.SIGNS;
+  function fmtDeg(d) { var a = Math.floor(d), m = Math.floor((d - a) * 60); return a + '°' + (m < 10 ? '0' : '') + m + '′'; }
+  function renderPlanets(rep) {
+    var w = rep.west, v = rep.vedic, rows = '';
+    function tr(name, a, b, c) { return '<tr><th scope="row">' + name + '</th><td>' + a + '</td><td>' + b + '</td><td>' + c + '</td></tr>'; }
+    if (w.asc !== null) {
+      rows += tr('상승궁 ASC', SIGNS[w.asc] + ' ' + fmtDeg(w.ascDeg), '1하우스', SIGNS[v.lagna] + ' ' + fmtDeg(v.lagnaDeg));
+      rows += tr('천정 MC', SIGNS[w.mc] + ' ' + fmtDeg(w.mcDeg), '10하우스', '–');
+    }
+    rep.planets.forEach(function (p) {
+      var nm = p.ko + (p.retro && p.id !== 'rahu' && p.id !== 'ketu' ? ' ℞' : '');
+      rows += tr(nm, SIGNS[p.sign] + ' ' + fmtDeg(p.deg), p.house ? p.house + '하우스' : '–', SIGNS[p.rashi] + ' ' + fmtDeg(p.sdeg));
+    });
+    $('#planets').innerHTML =
+      '<div class="head"><h2 id="p-h">행성 위치</h2><p class="sub">서양(트로피컬, 플라시더스)과 인도(항성, 라히리) 기준 도·분 단위입니다.</p></div>' +
+      '<div class="tscroll"><table class="ptab"><thead><tr><th scope="col">천체</th><th scope="col">서양 별자리</th><th scope="col">하우스</th><th scope="col">인도 라시</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      '<p class="pnote">℞는 역행입니다. ' + (w.asc === null ? '태어난 시각을 넣으면 상승궁, MC, 하우스가 함께 나옵니다. ' : '') + '다른 앱의 값과 대조할 때는 하우스 방식(플라시더스)과 별자리 기준(트로피컬/항성)을 같게 맞춰 보세요. 행성은 근사 계산이라 목성은 약 0.1°, 토성은 약 0.3° 안팎 차이가 날 수 있습니다.</p>';
+  }
+
+  /* ---------- 연간 ---------- */
+  var FLAG_TXT = { '충': '일지와 충', '합': '일지와 합', '보강': '보강 오행 유입', '쏠림': '오행 쏠림', '동기': '천간·지지가 같은 기운' };
+  function dots(n) {
+    var s = '<span class="dots' + (n <= 2 ? ' low' : '') + '" aria-label="' + n + '점 / 5점">';
+    for (var i = 1; i <= 5; i++) s += '<i class="' + (i <= n ? 'on' : '') + '"></i>';
+    return s + '</span>';
+  }
+  function houseTxt(t) { return t.solar ? '태양 기준 ' + t.house + '번째 자리' : t.house + '하우스'; }
+  function transitLine(Y) {
+    var a = Y.transit.start, b = Y.transit.end;
+    function one(n, x, y) { var s = n + ' ' + SIGNS[x.sign] + (x.retro ? '(역행)' : '') + ' ' + houseTxt(x); if (x.sign !== y.sign) s += ' → ' + SIGNS[y.sign] + ' ' + houseTxt(y); return s; }
+    return '연초 기준 ' + one('목성', a.jup, b.jup) + ' · ' + one('토성', a.sat, b.sat);
+  }
+  function buildItems() {
+    var rep = state.rep, items = [], years = {};
+    function Yd(y) { if (!years[y]) years[y] = E.monthRows(rep, y); return years[y]; }
+    if (state.view === 'span') {
+      var y = TY, m = TM;
+      for (var i = 0; i < 15; i++) { items.push({ Y: y, m: m, r: Yd(y).rows[m - 1] }); m++; if (m > 12) { m = 1; y++; } }
+    } else {
+      var yy = +state.view;
+      Yd(yy).rows.forEach(function (r) { items.push({ Y: yy, m: r.month, r: r }); });
+    }
+    var list = Object.keys(years).map(Number).sort(function (a, b) { return a - b; });
+    return { items: items, years: years, list: list };
+  }
+  function yearHead(Y) {
+    var h = '<div class="yhead"><span class="big">' + Y.ganji + '年 · ' + Y.animal + '띠</span><p>' + esc(Y.theme) + '</p><div class="ychips">';
+    h += '<span class="chip acc">세운 ' + Y.ganji + ' ' + Y.god + (Y.fav ? ' · 원국에 도움' : ' · 원국에 부담') + '</span>';
+    h += Y.luck ? '<span class="chip acc">대운 ' + Y.luck.gz + ' (만 ' + Y.luck.from + '~' + Y.luck.to + '세) 천간 ' + Y.luck.god + '·지지 ' + Y.luck.bgod + '</span>' : '<span class="chip">대운은 성별을 선택하면 반영됩니다</span>';
+    h += '<span class="chip nums">수비학 개인년수 ' + Y.personalYear + ' · 타로 ' + E.tarot.card(Y.personalYear).name + '</span></div>';
+    h += '<p class="ysub">' + (Y.luck ? esc(Y.luck.note) + ' ' : '') + esc(transitLine(Y)) + '</p></div>';
+    return h;
+  }
+  function renderYear() {
+    var B = buildItems(), items = B.items;
+    var ok = false;
+    if (state.sel) items.forEach(function (it) { if (it.Y === state.sel.Y && it.m === state.sel.m) ok = true; });
+    if (!ok) {
+      var pick = null;
+      items.forEach(function (it) { if (it.Y === TY && it.m === TM) pick = it; });
+      if (!pick) { var bs = -1; items.forEach(function (it) { var t = it.r.scores.reduce(function (a, b) { return a + b; }, 0); if (t > bs) { bs = t; pick = it; } }); }
+      state.sel = { Y: pick.Y, m: pick.m };
+    }
+    var ey = TY + Math.floor((TM - 1 + 14) / 12), em = (TM - 1 + 14) % 12 + 1;
+    var opts = '<option value="span"' + (state.view === 'span' ? ' selected' : '') + '>지금부터 15개월 (' + TY + '.' + TM + '~' + ey + '.' + em + ')</option>';
+    for (var y = TY - 3; y <= TY + 7; y++) opts += '<option value="' + y + '"' + (state.view === String(y) ? ' selected' : '') + '>' + y + '년 (1~12월)</option>';
+    var h = '<div class="head"><h2 id="y-h">월별 이슈</h2><p class="sub">기간을 고르면 월마다 여섯 분야의 흐름이 바뀝니다.</p></div>';
+    h += '<div class="ctrl"><label for="sel-year" class="sub">기간</label><select id="sel-year">' + opts + '</select>';
+    h += '<div class="cats" role="group" aria-label="분야 필터"><button data-cat="-1" aria-pressed="' + (state.cat === -1) + '">전체</button>';
+    D.CATS.forEach(function (c, i) { h += '<button data-cat="' + i + '" aria-pressed="' + (state.cat === i) + '">' + c + '</button>'; });
+    h += '</div></div>';
+    B.list.forEach(function (yr) { h += yearHead(B.years[yr]); });
+    h += '<div class="ygrid"><div class="tscroll"><table class="heat"><thead><tr><th class="mh" scope="col">월</th>' + D.CATS.map(function (c, i) { return '<th scope="col"' + (state.cat !== -1 && state.cat !== i ? ' class="dim"' : '') + '>' + c + '</th>'; }).join('') + '</tr></thead><tbody>';
+    items.forEach(function (it) {
+      var r = it.r, sel = it.Y === state.sel.Y && it.m === state.sel.m, lab = state.view === 'span' ? String(it.Y).slice(2) + '.' + it.m : it.m + '월';
+      h += '<tr class="' + (sel ? 'sel' : '') + '"><td class="mh nums">' + lab + '<small>' + r.hj + '</small></td>';
+      r.scores.forEach(function (sc, i) {
+        h += '<td><button class="cell s' + sc + (state.cat !== -1 && state.cat !== i ? ' dim' : '') + ' nums" data-k="' + it.Y + '-' + it.m + '" aria-label="' + it.Y + '년 ' + it.m + '월 ' + D.CATS[i] + ' ' + sc + '점">' + sc + '</button></td>';
+      });
+      h += '</tr>';
+    });
+    h += '</tbody></table></div><div class="detail" id="detail"></div></div>';
+    $('#year').innerHTML = h;
+    renderDetail(items);
+  }
+  function renderDetail(items) {
+    var d = $('#detail'), h;
+    if (state.cat === -1) {
+      var it = null; items.forEach(function (x) { if (x.Y === state.sel.Y && x.m === state.sel.m) it = x; });
+      var r = it.r;
+      h = '<p class="kicker">' + it.Y + '년 ' + r.month + '월</p><h3>' + r.hj + '月 · ' + r.god + ' — ' + r.tag + '</h3>';
+      h += '<div class="sumbox">' + esc(r.summary) + '</div>';
+      var SU = E.tarot.suits[['w', 'w', 'p', 's', 'c'][r.be]];
+      h += trow({ kind: 'card', id: r.pm, rev: false, src: '수비학 타로 · 개인월수 ' + r.pm + ' · 월지 오행 ' + D.EL[r.be] + '은 ' + SU.ko + '(' + SU.domain + ') 기운', role: '이달의 배경', basis: 'tradition' }, null);
+      h += '<div class="tags"><span class="chip acc nums">개인월수 ' + r.pm + '</span><span class="chip">' + (r.fav ? '원국에 도움이 되는 흐름' : '원국에 부담이 되는 흐름') + '</span>' + r.flags.map(function (f) { return '<span class="chip">' + FLAG_TXT[f] + '</span>'; }).join('') + '</div>';
+      for (var i = 0; i < 6; i++) {
+        h += '<div class="nrow' + (i === r.best ? ' hl' : '') + '"><div><span class="c">' + D.CATS[i] + '</span>' + dots(r.scores[i]) + '</div><p>' + esc(r.notes[i]) + (i === r.best ? ' <span class="chip acc">이달의 강점</span>' : i === r.low && r.scores[i] <= 2 ? ' <span class="chip seal">주의</span>' : '') + '</p></div>';
+      }
+    } else {
+      var ci = state.cat;
+      h = '<p class="kicker">' + (state.view === 'span' ? '지금부터 15개월' : state.view + '년') + '</p><h3>' + D.CATS[ci] + ' · 월별 흐름</h3><div class="mlist">';
+      items.forEach(function (x) {
+        h += '<div class="nrow"><div><span class="c nums">' + (state.view === 'span' ? String(x.Y).slice(2) + '.' + x.m : x.m + '월') + '</span>' + dots(x.r.scores[ci]) + '</div><p>' + esc(x.r.notes[ci]) + '</p></div>';
+      });
+      h += '</div>';
+    }
+    d.innerHTML = h;
+  }
+
+  /* ---------- 계산 실행 ---------- */
+  function run(inp, sample) {
+    state.sample = !!sample;
+    state.rep = E.buildReport(inp);
+    state.rep.tarot.synth = E.tarot.synth(state.rep, TY, TM);
+    state.view = String(TY); state.sel = null; state.cat = -1;
+    compass(state.rep);
+    renderToday(state.rep);
+    renderOverview(state.rep);
+    renderPlanets(state.rep);
+    renderTarot(state.rep);
+    renderFields();
+    renderYear();
+  }
+  function readForm() {
+    var v = $('#f-date').value, err = $('#err');
+    err.textContent = '';
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v);
+    if (!m) { err.textContent = '생년월일을 입력해 주세요.'; return null; }
+    var y = +m[1], mo = +m[2], d = +m[3];
+    if (y < 1900 || y > 2100) { err.textContent = '1900년부터 2100년 사이의 날짜를 입력해 주세요.'; return null; }
+    var unk = $('#f-unk').checked, t = $('#f-time').value, h = 0, mi = 0, hk = false;
+    if (!unk) {
+      var tm = /^(\d{2}):(\d{2})$/.exec(t);
+      if (!tm) { err.textContent = '태어난 시각을 입력하거나 “시각을 모릅니다”를 선택해 주세요.'; return null; }
+      h = +tm[1]; mi = +tm[2]; hk = true;
+    }
+    var c = CITIES[+$('#f-city').value] || CITIES[0];
+    var g = (document.querySelector('input[name=gender]:checked') || {}).value || '';
+    return { name: $('#f-name').value.trim(), gender: g, y: y, m: mo, d: d, h: h, mi: mi, hk: hk, city: { lat: c[1], lon: c[2] } };
+  }
+
+  /* ---------- 이벤트 ---------- */
+  $('#f-city').innerHTML = CITIES.map(function (c, i) { return '<option value="' + i + '">' + c[0] + '</option>'; }).join('');
+  $('#f-unk').addEventListener('change', function () { $('#f-time').disabled = this.checked; });
+  $('#form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var inp = readForm(); if (!inp) return;
+    run(inp, false);
+    var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    $('#today').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+  });
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-tab],[data-cat],[data-k]'); if (!t) return;
+    if (t.dataset.tab) { state.tab = t.dataset.tab; renderFields(); var b = $('#tab-' + state.tab); if (b && e.detail === 0) b.focus(); }
+    else if (t.dataset.cat !== undefined) { state.cat = +t.dataset.cat; renderYear(); }
+    else if (t.dataset.k) { var kk = t.dataset.k.split('-'); state.sel = { Y: +kk[0], m: +kk[1] }; state.cat = -1; renderYear(); }
+  });
+  document.addEventListener('change', function (e) {
+    if (e.target.id === 'sel-year') { state.view = e.target.value; state.sel = null; renderYear(); }
+  });
+  document.addEventListener('keydown', function (e) {
+    var t = e.target.closest && e.target.closest('[role=tab]'); if (!t) return;
+    var i = CAT_KEYS.indexOf(state.tab), n = -1;
+    if (e.key === 'ArrowRight') n = (i + 1) % 6; else if (e.key === 'ArrowLeft') n = (i + 5) % 6;
+    else if (e.key === 'Home') n = 0; else if (e.key === 'End') n = 5;
+    if (n < 0) return;
+    e.preventDefault(); state.tab = CAT_KEYS[n]; renderFields(); $('#tab-' + state.tab).focus();
+  });
+
+  /* 예시 입력으로 시작 */
+  run({ name: '', gender: '', y: 1990, m: 5, d: 15, h: 14, mi: 30, hk: true, city: { lat: CITIES[0][1], lon: CITIES[0][2] } }, true);
+})();
+</script>
+
+</body>
+</html>
