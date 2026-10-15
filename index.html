@@ -100,7 +100,7 @@ h1 { font-size: clamp(30px, 5.2vw, 48px); line-height: 1.2; margin: 0 0 14px; }
 h2 { font-size: clamp(22px, 3.4vw, 30px); margin: 0; }
 .sub { color: var(--ink2); margin: 0; font-size: 14px; }
 .chip { display: inline-block; white-space: nowrap; flex: none; font-size: 12px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--ink2); background: var(--surface); }
-.chip.seal { border-color: var(--seal); color: var(--seal); }
+.chip.warn { border-color: var(--seal); color: var(--seal); }
 .chip.acc { border-color: var(--accent); color: var(--accent); }
 .sample { margin: 0 0 18px; }
 
@@ -1243,7 +1243,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
     var dow = WEEK[now.getDay()];
     $('#today').innerHTML =
       '<div class="head"><h2 id="t-h">오늘의 명언</h2><p class="sub nums">' + TY + '년 ' + TM + '월 ' + TD + '일 (' + dow + ') · 일진 ' + E.g(tp.day) + '일</p></div>' +
-      (state.sample ? '<p class="sample"><span class="chip seal">예시</span> <span class="sub">1990년 5월 15일 14:30 입력으로 계산한 결과입니다. 본인 정보를 넣고 나침반을 돌리면 바뀝니다.</span></p>' : '') +
+      (state.sample ? '<p class="sample"><span class="chip warn">예시</span> <span class="sub">1990년 5월 15일 14:30 입력으로 계산한 결과입니다. 본인 정보를 넣고 나침반을 돌리면 바뀝니다.</span></p>' : '') +
       '<div class="today"><figure class="quote" style="margin:0"><blockquote>“' + esc(q[0]) + '”</blockquote><cite>— ' + esc(q[1]) + '</cite><p class="qbasis">고르는 기준: 내 사주에서 보강이 필요한 오행(' + EL[yo] + ')에 맞는 문장 중, 내 일주와 오늘 날짜로 한 구절을 정합니다. 사람마다, 날마다 달라집니다.</p></figure>' +
       '<div class="flow"><p class="kicker">' + nm + '오늘의 흐름</p><div class="big">' + god.name + '</div><p>' + tags[god.name] + '. 오늘의 일진이 내 일간(' + D.STEM_HJ[rep.P.day[0]] + ')에게 ' + god.name + '으로 작용합니다.</p><p><b>' + rel + '</b></p>' + todayTarot(rep) + '</div></div>';
   }
@@ -1321,7 +1321,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
   function synthHtml(sy, title, big) {
     if (!sy) return '';
     var rel = { same: '사주와 같은 방향', near: '사주와 대체로 비슷', diff: '사주와 다른 방향' }[sy.saju.relation];
-    return '<div class="tsyn' + (big ? ' big' : '') + '"><p class="kicker">' + title + ' <span class="chip acc">타로 흐름: ' + sy.label + '</span><span class="chip ' + (sy.saju.relation === 'diff' ? 'seal' : 'acc') + '">' + rel + '</span></p>' +
+    return '<div class="tsyn' + (big ? ' big' : '') + '"><p class="kicker">' + title + ' <span class="chip acc">타로 흐름: ' + sy.label + '</span><span class="chip ' + (sy.saju.relation === 'diff' ? 'warn' : 'acc') + '">' + rel + '</span></p>' +
       sy.lines.map(function (l) { return '<p>' + esc(l) + '</p>'; }).join('') +
       '<p><b>' + esc(sy.saju.text) + '</b></p><p class="best">' + esc(sy.saju.bestText) + '</p></div>';
   }
@@ -1462,7 +1462,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
       h += trow({ kind: 'card', id: r.pm, rev: false, src: '수비학 타로 · 개인월수 ' + r.pm + ' · 월지 오행 ' + D.EL[r.be] + '은 ' + SU.ko + '(' + SU.domain + ') 기운', role: '이달의 배경', basis: 'tradition' }, null);
       h += '<div class="tags"><span class="chip acc nums">개인월수 ' + r.pm + '</span><span class="chip">' + (r.fav ? '원국에 도움이 되는 흐름' : '원국에 부담이 되는 흐름') + '</span>' + r.flags.map(function (f) { return '<span class="chip">' + FLAG_TXT[f] + '</span>'; }).join('') + '</div>';
       for (var i = 0; i < 6; i++) {
-        h += '<div class="nrow' + (i === r.best ? ' hl' : '') + '"><div><span class="c">' + D.CATS[i] + '</span>' + dots(r.scores[i]) + '</div><p>' + esc(r.notes[i]) + (i === r.best ? ' <span class="chip acc">이달의 강점</span>' : i === r.low && r.scores[i] <= 2 ? ' <span class="chip seal">주의</span>' : '') + '</p></div>';
+        h += '<div class="nrow' + (i === r.best ? ' hl' : '') + '"><div><span class="c">' + D.CATS[i] + '</span>' + dots(r.scores[i]) + '</div><p>' + esc(r.notes[i]) + (i === r.best ? ' <span class="chip acc">이달의 강점</span>' : i === r.low && r.scores[i] <= 2 ? ' <span class="chip warn">주의</span>' : '') + '</p></div>';
       }
     } else {
       var ci = state.cat;
