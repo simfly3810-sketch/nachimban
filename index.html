@@ -117,6 +117,13 @@ h2 { font-size: clamp(22px, 3.4vw, 30px); margin: 0; }
 .chat-form input { flex: 1; min-width: 0; font: inherit; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); }
 .chat-form .go { width: auto; padding: 0 18px; margin: 0; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.sinsal { margin-top: 18px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; }
+.sshead { font-size: 13px; font-weight: 600; margin: 12px 0 4px; }
+.ssrow { display: grid; grid-template-columns: 90px auto minmax(0, 1fr); gap: 4px 10px; align-items: baseline; padding: 6px 0; border-top: 1px solid var(--line); font-size: 14px; }
+.ssrow p { margin: 0; color: var(--ink2); font-size: 13px; grid-column: 1 / -1; }
+.ssnone, .ssnote { margin: 8px 0 0; font-size: 12.5px; color: var(--ink2); }
+.guin { margin: 10px 0; padding: 10px 12px; background: var(--surface2); border-radius: 10px; font-size: 13px; }
+.guin p { margin: 6px 0 0; }
 .linkbtn { background: none; border: 0; padding: 0; font: inherit; font-size: 13px; color: var(--ink2); text-decoration: underline; cursor: pointer; }
 
 .today { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 20px; }
@@ -352,7 +359,7 @@ table.heat { border-collapse: separate; border-spacing: 3px; width: 100%; min-wi
   <section class="block" aria-labelledby="c-h">
     <div class="head"><h2 id="c-h">계산 범위</h2><p class="sub">체계마다 계산한 항목과 아직 넣지 못한 항목입니다.</p></div>
     <ul class="cover">
-      <li><b>사주명리</b>연·월·일·시주(태양 황경으로 절기 경계 계산), 오행 분포, 십성, 신강·신약과 보강 오행 간이 판정, 대운(성별 선택 시)과 세운. 월별 점수는 월 천간 1, 월지 0.6, 세운 0.4, 대운 0.3 비중으로 합산하고 원국에 도움이 되는지 여부를 더합니다. 야자시 구분과 지역 시차 보정, 형·파·해와 공망은 하지 않습니다.</li>
+      <li><b>사주명리</b>연·월·일·시주(태양 황경으로 절기 경계 계산), 오행 분포, 십성, 신강·신약과 보강 오행 간이 판정, 대운(성별 선택 시)과 세운. 월별 점수는 월 천간 1, 월지 0.6, 세운 0.4, 대운 0.3 비중으로 합산하고 원국에 도움이 되는지 여부를 더합니다. 귀인·신살은 천을·태극·문창·학당귀인, 금여록, 천덕·월덕귀인, 천의성, 도화·역마·화개를 표시만 하고 점수에는 넣지 않습니다. 야자시 구분과 지역 시차 보정, 형·파·해와 공망, 그 밖의 신살(양인·백호·괴강 등)은 하지 않습니다.</li>
       <li><b>서양 점성 · 플라시더스</b>태양·달, 수성~명왕성, 라후·케투(평균 교점), 상승궁, MC, 플라시더스 하우스. 행성은 근사 궤도요소로 계산해 다른 천문 라이브러리와 대조했을 때 대부분 0.02° 이내, 목성 약 0.1°, 토성 약 0.3° 이내(1900~2100)입니다. 각도 간 어스펙트와 소행성은 포함하지 않습니다.</li>
       <li><b>인도 점성</b>라히리 아야남샤 기준 항성 라시와 나크샤트라·파다, 라그나, 각 행성의 라시와 항성 하우스(통별자리 방식). 다샤(시기 주기)는 포함하지 않습니다.</li>
       <li><b>태국 점성</b>출생 요일의 행성·색·성향(수요일 18시 이후는 라후). 세부 길흉 일 계산은 포함하지 않습니다.</li>
@@ -752,6 +759,69 @@ var EL_TRAIT = ['성장과 기획, 인정 욕구','열정과 표현','신뢰와 
 
 function favOf(rep, group) { return rep.S.strong ? (group >= 1 && group <= 3) : (group === 0 || group === 4); }
 function clampRound(x) { return Math.max(1, Math.min(5, Math.round(x))); }
+/* ---------- 귀인·신살 (자주 쓰는 표준 규칙만) ---------- */
+function hb(s) { return BR_HJ.indexOf(s); }
+function hbs(str) { return str.split('').map(hb); }
+var SS_INFO = {
+  '천을귀인': ['귀인', '가장 대표적인 귀인입니다. 어려울 때 도와주는 사람이나 후원자를 만나기 쉽습니다.'],
+  '태극귀인': ['귀인', '큰 고비를 넘기는 힘이 있고 학문·정신 방면의 인연이 따릅니다.'],
+  '문창귀인': ['귀인', '글, 학문, 시험, 문서에 유리한 기운입니다.'],
+  '학당귀인': ['귀인', '배움과 연구, 자격 취득에 유리한 기운입니다.'],
+  '금여록': ['귀인', '안정된 생활과 배우자·재물 복으로 읽는 기운입니다.'],
+  '천덕귀인': ['귀인', '하늘의 덕으로 재난을 줄이고 도움을 받는다고 보는 기운입니다.'],
+  '월덕귀인': ['귀인', '월의 덕으로 구설과 시비를 줄이고 온화함을 더하는 기운입니다.'],
+  '천의성': ['귀인', '치유, 돌봄, 건강과 인연이 있는 기운입니다. 의료·상담 분야와 잘 맞는다고 봅니다.'],
+  '도화': ['기타', '매력과 인기, 이성 인연이 따르는 기운입니다. 과하면 구설이 생길 수 있습니다.'],
+  '역마': ['기타', '이동, 변화, 출장·해외와 인연이 있는 기운입니다.'],
+  '화개': ['기타', '학문·예술·종교적 감수성이 깊고 혼자 있는 시간이 필요한 기운입니다.']
+};
+var TRI = ['申子辰', '亥卯未', '寅午戌', '巳酉丑'];
+function triOf(b) { for (var i = 0; i < 4; i++) if (hbs(TRI[i]).indexOf(b) >= 0) return i; return -1; }
+var TRI_DOHWA = '酉子卯午', TRI_YEOKMA = '寅巳申亥', TRI_HWAGAE = '辰未戌丑';
+var TYUL = { '甲': '丑未', '戊': '丑未', '庚': '丑未', '乙': '子申', '己': '子申', '丙': '亥酉', '丁': '亥酉', '壬': '巳卯', '癸': '巳卯', '辛': '午寅' };
+var TAEGEUK = ['子午', '子午', '卯酉', '卯酉', '辰戌丑未', '辰戌丑未', '寅亥', '寅亥', '巳申', '巳申'];
+var MUNCHANG = '巳午申酉申酉亥子寅卯', HAKDANG = '亥午寅酉寅酉巳子申卯', GEUMYEO = '辰巳未申未申戌亥丑寅';
+var CHEONDEOK = ['巳', '庚', '丁', '申', '壬', '辛', '亥', '甲', '癸', '寅', '丙', '乙'];
+var WOLDEOK = ['壬', '甲', '丙', '庚'];
+function sinsalRules(P) {
+  var dS = P.day[0], yS = P.year[0], dB = P.day[1], yB = P.year[1], mB = P.month[1];
+  var R = [];
+  var tyul = hbs(TYUL[STEM_HJ[dS]]).concat(hbs(TYUL[STEM_HJ[yS]]));
+  R.push({ name: '천을귀인', br: tyul });
+  R.push({ name: '태극귀인', br: hbs(TAEGEUK[dS]).concat(hbs(TAEGEUK[yS])) });
+  R.push({ name: '문창귀인', br: [hb(MUNCHANG[dS])] });
+  R.push({ name: '학당귀인', br: [hb(HAKDANG[dS])] });
+  R.push({ name: '금여록', br: [hb(GEUMYEO[dS])] });
+  var cd = CHEONDEOK[mB];
+  if (STEM_HJ.indexOf(cd) >= 0) R.push({ name: '천덕귀인', st: [STEM_HJ.indexOf(cd)] }); else R.push({ name: '천덕귀인', br: [hb(cd)] });
+  R.push({ name: '월덕귀인', st: [STEM_HJ.indexOf(WOLDEOK[triOf(mB)])] });
+  R.push({ name: '천의성', br: [(mB + 11) % 12] });
+  var tD = triOf(dB), tY = triOf(yB);
+  R.push({ name: '도화', br: hbs(TRI_DOHWA[tD] + TRI_DOHWA[tY]) });
+  R.push({ name: '역마', br: hbs(TRI_YEOKMA[tD] + TRI_YEOKMA[tY]) });
+  R.push({ name: '화개', br: hbs(TRI_HWAGAE[tD] + TRI_HWAGAE[tY]) });
+  return R;
+}
+function sinsal(P) {
+  var cols = [['년', P.year], ['월', P.month], ['일', P.day], ['시', P.hour]].filter(function (c) { return c[1]; });
+  return sinsalRules(P).map(function (r) {
+    var where = [];
+    cols.forEach(function (c) {
+      if (r.br && r.br.indexOf(c[1][1]) >= 0 && !(r.name === '천의성' && c[0] === '월')) where.push(c[0] + '지');
+      if (r.st && r.st.indexOf(c[1][0]) >= 0) where.push(c[0] + '간');
+    });
+    return { name: r.name, kind: SS_INFO[r.name][0], text: SS_INFO[r.name][1], where: where };
+  }).filter(function (x) { return x.where.length; });
+}
+/* 월지·세운 지지가 귀인·신살 지지에 닿는지 (월·해마다 들어오는 귀인) */
+function guinAt(rep, br) {
+  var out = [];
+  sinsalRules(rep.P).forEach(function (r) {
+    if (r.br && r.br.indexOf(br) >= 0 && ['천을귀인', '문창귀인', '학당귀인', '금여록', '천의성', '도화', '역마', '화개', '태극귀인'].indexOf(r.name) >= 0) out.push({ name: r.name, text: SS_INFO[r.name][1] });
+  });
+  return out;
+}
+
 function lifeAge(rep, J) { return (J - rep.J) / 365.2425; }
 function nowJ() { var n = new Date(); return jd(n.getUTCFullYear(), n.getUTCMonth() + 1, n.getUTCDate(), 0, 0); }
 
@@ -853,7 +923,7 @@ function monthRows(rep, Y) {
     var sc = x.map(clampRound), best = 0, low = 0;
     for (var k = 1; k < 6; k++) { if (sc[k] > sc[best]) best = k; if (sc[k] < sc[low]) low = k; }
     rows.push({ month: m, hj: g(MP.month), ko: gk(MP.month), god: god.name, bgod: bgod.name, group: god.group, tag: GOD_TAG[god.name], fav: fs,
-      scores: sc, notes: notes, flags: flags, best: best, low: low, summary: monthSummary(sc), be: be,
+      scores: sc, notes: notes, flags: flags, best: best, low: low, summary: monthSummary(sc), be: be, br: mb, guin: guinAt(rep, mb),
       pm: reduceNum(reduceNum(rep.numerology.m + rep.numerology.d, false) + reduceNum(Y, false) + m, false),
       transit: transitInfo(rep, jd(Y, m, 15, 3, 0)) });
   }
@@ -866,7 +936,7 @@ function monthRows(rep, Y) {
   var py = reduceNum(reduceNum(rep.numerology.m, false) + reduceNum(rep.numerology.d, false) + reduceNum(Y, false), false);
   var yl = luckInfo(rep, luckAt(rep, lifeAge(rep, jd(Y, 7, 1, 3, 0))));
   return { year: Y, ganji: g(yp), ko: gk(yp), animal: ANIMAL[yp[1]], god: yg.name, bgod: ybg.name, fav: yFav,
-    theme: YEAR_THEME[yg.name] + '.' + rel + favText, personalYear: py, rows: rows, luck: yl,
+    theme: YEAR_THEME[yg.name] + '.' + rel + favText, personalYear: py, br: yp[1], guin: guinAt(rep, yp[1]), rows: rows, luck: yl,
     transit: { start: transitInfo(rep, jd(Y, 1, 1, 3, 0)), end: transitInfo(rep, jd(Y, 12, 31, 3, 0)) } };
 }
 
@@ -1279,7 +1349,7 @@ var E = {
   planetLon: planetLon, allBodies: allBodies, meanNode: meanNode, ayanamsa: ayanamsa,
   buildReport: buildReport, monthRows: monthRows, pillars: pillars, sunLon: sunLon, moonLon: moonLon, jd: jd, jdn: jdn,
   angles: angles, houseOf: houseOf, ziwei: ziwei, lunarOf: lunarOf, gateOf: gateOf, humanDesign: humanDesign,
-  tenGod: tenGod, g: g, gk: gk, quoteFor: function (el, seed) { var q = QUOTES[el]; return q[seed % q.length]; }, stemEl: stemEl,
+  tenGod: tenGod, sinsal: sinsal, guinAt: guinAt, g: g, gk: gk, quoteFor: function (el, seed) { var q = QUOTES[el]; return q[seed % q.length]; }, stemEl: stemEl,
   data: { STEM_KO: STEM_KO, STEM_HJ: STEM_HJ, BR_KO: BR_KO, BR_HJ: BR_HJ, ANIMAL: ANIMAL, EL: EL, EL_HJ: EL_HJ, EL_INFO: EL_INFO, SIGNS: SIGNS, CATS: CATS, GOD_GROUP: GOD_GROUP, JU_NAME: JU_NAME }
 };
 if (typeof module !== 'undefined' && module.exports) module.exports = E; else root.Engine = E;
@@ -1400,6 +1470,12 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
     h += '<div class="systems">' + o.systems.map(function (s, i) {
       return '<div class="sys"><span class="n">' + esc(s.name) + '</span><span class="v">' + esc(s.value) + '</span><span class="d">' + esc(s.note) + '</span>' + '</div>';
     }).join('') + '</div>';
+    var ss = E.sinsal(rep.P), gu = ss.filter(function (x) { return x.kind === '귀인'; }), ot = ss.filter(function (x) { return x.kind !== '귀인'; });
+    function ssRow(x) { return '<div class="ssrow"><b>' + x.name + '</b><span class="chip nums">' + x.where.join('·') + '</span><p>' + esc(x.text) + '</p></div>'; }
+    h += '<div class="sinsal"><p class="kicker">원국의 귀인과 신살</p>' +
+      (gu.length ? '<div class="sshead">귀인 ' + gu.length + '개</div>' + gu.map(ssRow).join('') : '<p class="ssnone">원국에는 이 페이지가 계산하는 귀인이 없습니다. 귀인이 없는 것은 흠이 아니며, 대운·세운·월운에서 들어올 때 작용합니다. 월별 상세에서 귀인이 들어오는 달을 볼 수 있습니다.</p>') +
+      (ot.length ? '<div class="sshead">그 밖의 신살</div>' + ot.map(ssRow).join('') : '') +
+      '<p class="ssnote">천을·태극·문창·학당귀인, 금여록, 천덕·월덕귀인, 천의성, 도화·역마·화개를 계산합니다. 신살은 유파마다 기준표가 다르고 보조 참고용이라, 점수 계산에는 넣지 않았습니다.</p></div>';
     $('#traits').innerHTML = h;
   }
 
@@ -1522,7 +1598,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
     var h = '<div class="yhead"><span class="big">' + Y.ganji + '年 · ' + Y.animal + '띠</span><p>' + esc(Y.theme) + '</p><div class="ychips">';
     h += '<span class="chip acc">세운 ' + Y.ganji + ' ' + Y.god + (Y.fav ? ' · 원국에 도움' : ' · 원국에 부담') + '</span>';
     h += Y.luck ? '<span class="chip acc">대운 ' + Y.luck.gz + ' (만 ' + Y.luck.from + '~' + Y.luck.to + '세) 천간 ' + Y.luck.god + '·지지 ' + Y.luck.bgod + '</span>' : '<span class="chip">대운은 성별을 선택하면 반영됩니다</span>';
-    h += '<span class="chip nums">수비학 개인년수 ' + Y.personalYear + '</span></div>';
+    h += '<span class="chip nums">수비학 개인년수 ' + Y.personalYear + '</span>' + (Y.guin && Y.guin.length ? '<span class="chip acc">올해 들어오는 기운: ' + Y.guin.map(function (g) { return g.name; }).join('·') + '</span>' : '') + '</div>';
     h += '<p class="ysub">' + (Y.luck ? esc(Y.luck.note) + ' ' : '') + esc(transitLine(Y)) + '</p></div>';
     return h;
   }
@@ -1567,6 +1643,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
       h = '<p class="kicker">' + it.Y + '년 ' + r.month + '월</p><h3>' + r.hj + '月 · ' + r.god + ' — ' + r.tag + '</h3>';
       h += '<div class="sumbox">' + esc(r.summary) + '</div>';
       h += tcard(monthTarot(it.Y, r), it.Y + '년 ' + r.month + '월의 카드');
+      if (r.guin && r.guin.length) h += '<div class="guin"><b>이달에 들어오는 귀인·신살</b>' + r.guin.map(function (g) { return '<p><span class="chip acc">' + g.name + '</span> ' + esc(g.text) + '</p>'; }).join('') + '</div>';
       h += '<div class="tags"><span class="chip acc nums">개인월수 ' + r.pm + '</span><span class="chip">' + (r.fav ? '원국에 도움이 되는 흐름' : '원국에 부담이 되는 흐름') + '</span>' + r.flags.map(function (f) { return '<span class="chip">' + FLAG_TXT[f] + '</span>'; }).join('') + '</div>';
       for (var i = 0; i < 6; i++) {
         h += '<div class="nrow' + (i === r.best ? ' hl' : '') + '"><div><span class="c">' + D.CATS[i] + '</span>' + dots(r.scores[i]) + '</div><p>' + esc(r.notes[i]) + (i === r.best ? ' <span class="chip acc">이달의 강점</span>' : i === r.low && r.scores[i] <= 2 ? ' <span class="chip warn">주의</span>' : '') + '</p></div>';
@@ -1663,6 +1740,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
     CATRX.forEach(function (rx, i) { if (o.cat < 0 && rx.test(q)) o.cat = i; });
     var my = /(20\d\d|19\d\d)\s*년/.exec(q), mm = /(\d{1,2})\s*월/.exec(q);
     if (/이직|퇴사|그만두|옮기|전직/.test(q)) o.topic = 'change';
+    else if (/귀인|신살|천을|문창|학당|도화|역마|화개|금여록|천덕|월덕|태극|천운|복이 있|도와줄 사람/.test(q)) o.topic = 'guin';
     else if (/타로|카드/.test(q)) o.topic = 'tarot';
     else if (/오늘|금일/.test(q)) o.topic = 'today';
     else if (/용신|보강|오행|부족한 기운|필요한 기운/.test(q)) o.topic = 'el';
@@ -1742,6 +1820,15 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
     else { out.push(line(T.today, '오늘의 카드')); out.push(line(T.pick, '나의 전체 카드')); }
     return { t: out, src: '타로 · 계산 결과를 종합해 정해진 카드' };
   }
+  function ansGuin(o) {
+    var rep = state.rep, ss = E.sinsal(rep.P), out = [];
+    out.push(ss.length ? '원국에 있는 귀인·신살: ' + ss.map(function (x) { return x.name + '(' + x.where.join('·') + ')'; }).join(', ') + '.' : '원국에는 이 페이지가 계산하는 귀인·신살이 없습니다.');
+    ss.filter(function (x) { return x.kind === '귀인'; }).slice(0, 3).forEach(function (x) { out.push(x.name + ': ' + x.text); });
+    var S = scopeList(o.scope && o.scope.t === 'month' ? null : o.scope), hit = S.list.filter(function (x) { return x.r.guin && x.r.guin.length; });
+    out.push(hit.length ? S.label + ' 중 귀인·신살이 들어오는 달: ' + hit.slice(0, 6).map(function (x) { return fm(x.Y, x.m) + '(' + x.r.guin.map(function (g) { return g.name; }).join('·') + ')'; }).join(', ') + '.' : S.label + ' 중 귀인이 들어오는 달은 없습니다.');
+    out.push('신살은 유파마다 기준이 다르고 점수에는 반영하지 않은 참고 정보입니다.');
+    return { t: out, src: '사주 귀인·신살' };
+  }
   function ansToday() {
     var el = $('#today .flow'); if (!el) return null;
     var ps = el.querySelectorAll('p'), out = [];
@@ -1769,6 +1856,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
     var o = parseQ(q), a = null;
     if (o.topic === 'change') a = ansChange(o);
     else if (o.topic === 'tarot') a = ansTarot(o);
+    else if (o.topic === 'guin') a = ansGuin(o);
     else if (o.topic === 'today') a = ansToday();
     else if (o.topic) a = ansTopic(o);
     else if (o.cat >= 0) a = ansCat(o.cat, o);
@@ -1789,7 +1877,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
   }
   function chatReset() {
     mrc = {}; $('#ask-log').innerHTML = '';
-    var qs = ['올해 재물운 어때?', '내년 직장운 언제가 좋아?', '이직해도 될까?', '이번 달 전체 흐름은?', '앞으로 조심할 달은?', '내 보강 오행은?', '오늘 타로는?', '지금 대운은?'];
+    var qs = ['올해 재물운 어때?', '내년 직장운 언제가 좋아?', '이직해도 될까?', '이번 달 전체 흐름은?', '앞으로 조심할 달은?', '내 귀인운은?', '오늘 타로는?', '지금 대운은?'];
     $('#ask-chips').innerHTML = qs.map(function (q) { return '<button type="button" data-q="' + esc(q) + '">' + esc(q) + '</button>'; }).join('');
     chatAdd('b', ['위에서 계산된 내 결과를 바탕으로 답해 드립니다. 아래 예시를 누르거나 직접 물어보세요.'], '');
   }
