@@ -72,6 +72,11 @@ h1 { font-size: clamp(30px, 5.2vw, 48px); line-height: 1.2; margin: 0 0 14px; }
   background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; width: 100%; min-width: 0; min-height: 42px;
 }
 .field input:disabled { opacity: .45; }
+.mbgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 12px; }
+.mbgrid .seg span { padding: 6px 12px; font-size: 13px; }
+.mbbox { margin-top: 18px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; }
+.mbbox p { margin: 8px 0 0; font-size: 14px; }
+.mbbox .ssnote { font-size: 12.5px; color: var(--ink2); }
 .seg { display: flex; gap: 6px; flex-wrap: wrap; }
 .seg label { cursor: pointer; }
 .seg input { position: absolute; opacity: 0; pointer-events: none; }
@@ -310,6 +315,14 @@ table.heat { border-collapse: separate; border-spacing: 3px; width: 100%; min-wi
             </div>
           </div>
         </div>
+        <div class="field"><span class="lab" id="mb-lab">MBTI (선택 · 모르는 글자는 ‘모름’ 그대로 두세요)</span>
+          <div class="mbgrid" role="group" aria-labelledby="mb-lab">
+            <div class="seg"><label><input type="radio" name="mb0" value="E"><span>E</span></label><label><input type="radio" name="mb0" value="I"><span>I</span></label><label><input type="radio" name="mb0" value="" checked><span>모름</span></label></div>
+            <div class="seg"><label><input type="radio" name="mb1" value="S"><span>S</span></label><label><input type="radio" name="mb1" value="N"><span>N</span></label><label><input type="radio" name="mb1" value="" checked><span>모름</span></label></div>
+            <div class="seg"><label><input type="radio" name="mb2" value="T"><span>T</span></label><label><input type="radio" name="mb2" value="F"><span>F</span></label><label><input type="radio" name="mb2" value="" checked><span>모름</span></label></div>
+            <div class="seg"><label><input type="radio" name="mb3" value="J"><span>J</span></label><label><input type="radio" name="mb3" value="P"><span>P</span></label><label><input type="radio" name="mb3" value="" checked><span>모름</span></label></div>
+          </div>
+        </div>
         <div class="row2">
           <div class="field"><label for="f-date">생년월일 (양력)</label><input id="f-date" type="date" value="1990-05-15" min="1900-01-01" max="2100-12-31" required></div>
           <div class="field"><label for="f-time">태어난 시각</label><input id="f-time" type="time" value="14:30"></div>
@@ -363,6 +376,7 @@ table.heat { border-collapse: separate; border-spacing: 3px; width: 100%; min-wi
       <li><b>서양 점성 · 플라시더스</b>태양·달, 수성~명왕성, 라후·케투(평균 교점), 상승궁, MC, 플라시더스 하우스. 행성은 근사 궤도요소로 계산해 다른 천문 라이브러리와 대조했을 때 대부분 0.02° 이내, 목성 약 0.1°, 토성 약 0.3° 이내(1900~2100)입니다. 각도 간 어스펙트와 소행성은 포함하지 않습니다.</li>
       <li><b>인도 점성</b>라히리 아야남샤 기준 항성 라시와 나크샤트라·파다, 라그나, 각 행성의 라시와 항성 하우스(통별자리 방식). 다샤(시기 주기)는 포함하지 않습니다.</li>
       <li><b>태국 점성</b>출생 요일의 행성·색·성향(수요일 18시 이후는 라후). 세부 길흉 일 계산은 포함하지 않습니다.</li>
+      <li><b>MBTI (선택)</b>입력한 글자만 사용합니다. 모르는 글자는 ‘모름’으로 두면 그 축은 해석에서 빠집니다. 전통 체계가 아니라 스스로 고른 성향 검사라서, 사주 구조(신강·신약, 십성 분포, 올해 세운)와 규칙으로 엮은 참고 문장만 덧붙이고 점수와 카드 선정에는 반영하지 않습니다.</li>
       <li><b>수비학</b>생년월일로 계산하는 생명수(타고난 방향), 개인년수와 개인월수(그해·그달의 주제), 생일 카드와 오늘의 수를 계산합니다. 이름의 글자를 숫자로 바꾸는 이름수는 변환 방식(한글·영문)이 유파마다 달라 넣지 않았습니다.</li>
       <li><b>자미두수</b>음력 변환, 명궁, 오행국, 자미·천부 계열 14주성 배치와 12궁 중 해당 궁. 보조성과 사화는 포함하지 않습니다.</li>
       <li><b>휴먼디자인 (일부)</b>태양·지구의 게이트와 라인, 프로파일. 타입·권위·센터는 모든 행성 위치가 필요해 포함하지 않습니다.</li>
@@ -819,6 +833,55 @@ function guinAt(rep, br) {
   sinsalRules(rep.P).forEach(function (r) {
     if (r.br && r.br.indexOf(br) >= 0 && ['천을귀인', '문창귀인', '학당귀인', '금여록', '천의성', '도화', '역마', '화개', '태극귀인'].indexOf(r.name) >= 0) out.push({ name: r.name, text: SS_INFO[r.name][1] });
   });
+  return out;
+}
+
+/* ---------- MBTI: 입력은 선택, 아는 글자만 사용 ---------- */
+var MB_AX = [['E', 'I'], ['S', 'N'], ['T', 'F'], ['J', 'P']];
+var MB_DESC = { E: '사람 속에서 에너지를 얻는', I: '혼자 있는 시간에서 에너지를 얻는', S: '구체적이고 현실적인 것을 믿는', N: '가능성과 큰 그림을 보는', T: '논리와 분석으로 판단하는', F: '가치와 공감으로 판단하는', J: '계획하고 마무리하는', P: '유연하고 상황에 맞춰 움직이는' };
+var MB_CAT = [
+  [[0, { E: '사람들과 함께 움직일 때 컨디션이 오르는 타입이라 운동도 같이 하는 방식이 맞습니다.', I: '혼자 회복하는 시간이 있어야 컨디션이 유지되니 일정에 쉬는 시간을 미리 넣어 두세요.' }], [3, { J: '정해진 루틴이 있을 때 몸이 안정되니 수면과 식사 시간을 고정하세요.', P: '루틴이 흐트러지기 쉬운 타입이라 지킬 규칙을 하나만 정해 두는 편이 낫습니다.' }]],
+  [[0, { E: '먼저 다가가고 표현하는 편이라 인연의 폭이 넓지만, 깊이 사귈 한 사람에게 시간을 쓰는 것이 중요합니다.', I: '천천히 깊어지는 관계를 선호하니, 마음이 있다면 신호를 한 번은 먼저 주는 편이 좋습니다.' }], [2, { T: '문제를 논리로 풀려는 경향이 있어, 해결책보다 감정을 먼저 받아 주는 말이 관계를 살립니다.', F: '공감과 정서적 연결을 중시해 깊은 관계를 만들지만, 서운함을 쌓아 두지 말고 말로 꺼내세요.' }]],
+  [[3, { J: '계획과 마감을 지키는 데 강해 신뢰를 얻지만, 갑작스러운 변경에 대비해 여유 시간을 확보해 두세요.', P: '상황에 맞춰 유연하게 움직이는 데 강하지만, 마감과 우선순위는 눈에 보이게 적어 두세요.' }], [2, { T: '객관적 판단이 강점이라 의사결정 자리에서 빛나며, 동료에게는 판단의 이유를 풀어 설명하세요.', F: '사람 사이의 조율에 강해 팀 분위기를 살리지만, 거절해야 할 때를 미리 정해 두세요.' }]],
+  [[1, { S: '구체적 경험과 검증된 방법에 강해, 실무와 기술이 쌓이는 분야에서 성과가 납니다.', N: '큰 흐름과 가능성을 읽는 데 강해 기획과 새로운 분야에서 힘을 쓰되, 실행 계획을 함께 세우세요.' }], [2, { T: '분석과 구조, 시스템을 다루는 일에서 만족도가 높습니다.', F: '사람과 가치에 의미를 두는 일, 돕고 가르치고 이끄는 일에서 만족도가 높습니다.' }]],
+  [[1, { S: '눈에 보이는 수입과 지출을 꼼꼼히 관리하는 편이라 고정비 점검과 저축 자동화가 잘 맞습니다.', N: '기회와 가능성에 끌려 큰 그림을 그리는 편이라, 투자나 큰 지출은 근거를 한 번 더 확인하세요.' }], [3, { J: '계획적으로 모으는 데 강하니 목표 금액과 기한을 정해 두면 힘을 발휘합니다.', P: '충동적 지출이 생기기 쉬운 편이라 지출 한도를 정해 두는 것이 도움이 됩니다.' }]],
+  [[3, { J: '이동은 일정과 준비를 정해 놓고 진행할 때 안정적입니다.', P: '변화에 적응은 빠르지만 준비가 느슨하면 막판에 부담이 생기니 체크리스트를 만드세요.' }], [1, { S: '교통, 동선, 비용 같은 실제 생활 조건을 현실적으로 따져 보세요.', N: '분위기와 가능성에 끌려 결정하기 쉬우니 현실 조건을 꼭 대조하세요.' }]]
+];
+function mbValid(t) { return typeof t === 'string' && /^[EI?][SN?][TF?][JP?]$/.test(t) && t !== '????'; }
+function mbKnown(t) { var k = []; for (var i = 0; i < 4; i++) if (t[i] !== '?') k.push(t[i]); return k; }
+function mbtiCat(t, ci) {
+  if (!mbValid(t)) return '';
+  var out = [];
+  MB_CAT[ci].forEach(function (a) { var l = t[a[0]]; if (l !== '?' && a[1][l]) out.push(a[1][l]); });
+  return out.join(' ');
+}
+function mbtiMonth(t, r) {
+  if (!mbValid(t)) return '';
+  var b = mbtiCat(t, r.best), l = mbtiCat(t, r.low), out = [];
+  if (l) out.push('주의 분야(' + CATS[r.low] + '): ' + l);
+  if (b && r.best !== r.low) out.push('강점 분야(' + CATS[r.best] + '): ' + b);
+  return out.join(' ');
+}
+function mbtiOverview(rep, t, Y) {
+  if (!mbValid(t)) return null;
+  var S = rep.S, G = S.groups, out = [], known = mbKnown(t);
+  var full = t.indexOf('?') < 0;
+  out.push((full ? t : known.join('·') + ' 성향') + ': ' + known.map(function (c) { return MB_DESC[c]; }).join(', ') + ' 성향입니다.');
+  var yg = (monthRows(rep, Y).god || ''), chg = ['상관', '식신', '편인', '편재'].indexOf(yg) >= 0;
+  if (t[0] !== '?') out.push(t[0] === 'I'
+    ? (S.strong ? '사주에서는 자기 기운이 강한 편인데 I 성향이라, 힘이 안에 머물러 표현이 적어 보일 수 있습니다. 의견을 말하는 통로를 정해 두세요.' : '사주에서는 주변의 도움에서 힘을 얻는 편인데 I 성향이라, 소수의 믿을 사람을 정해 두고 도움을 청하는 것이 중요합니다.')
+    : (S.strong ? '자기 기운이 강한 편에 E 성향이 겹쳐 추진력이 큽니다. 주변을 끌고 가다 과열되지 않게 속도를 조절하세요.' : '사람들 속에서 에너지를 얻는 성향이 주변에서 힘을 얻는 사주 구조와 잘 맞습니다. 사람을 통해 기회가 열립니다.'));
+  if (t[2] !== '?') {
+    if (G[3] >= 2) out.push(t[2] === 'T' ? '책임과 규칙의 압박이 큰 사주를 논리로 정리하는 힘이 있습니다.' : '책임과 규칙의 압박이 큰 사주에서 감정 소모가 쌓이기 쉬우니 해소하는 시간이 필요합니다.');
+    else if (G[1] >= 2) out.push(t[2] === 'T' ? '표현과 재주가 많은 사주에 분석력이 더해져 전문성으로 이어지기 쉽습니다.' : '표현과 재주가 많은 사주에 공감 능력이 더해져 사람을 움직이는 힘이 큽니다.');
+  }
+  if (t[1] !== '?') {
+    if (G[2] >= 2) out.push(t[1] === 'S' ? '재성이 많은 현실적인 사주와 S 성향이 겹쳐 실속을 챙기는 힘이 큽니다.' : '현실 기반이 두터운 사주에 N 성향이 더해져 아이디어를 수익으로 연결하기 좋습니다.');
+    else if (G[4] >= 2) out.push(t[1] === 'S' ? '인성이 많은 배움의 사주에 S 성향이 더해져 검증된 지식을 쌓는 데 강합니다.' : '인성이 많은 사주에 N 성향이 겹쳐 생각이 깊어지니, 실행으로 옮기는 시점을 정해 두세요.');
+  }
+  if (t[3] !== '?') out.push(chg
+    ? (t[3] === 'J' ? '올해(' + Y + '년)는 변화의 기운이 있어, 계획을 세우되 중간 점검 시점을 넣어 두는 편이 안전합니다.' : '올해(' + Y + '년)는 변화의 기운이 있어, 유연함이라는 강점이 잘 작동합니다.')
+    : (t[3] === 'J' ? '올해(' + Y + '년)는 틀과 규칙이 요구되는 기운이라 계획적인 성향이 잘 맞습니다.' : '올해(' + Y + '년)는 틀과 규칙이 요구되는 기운이라, 느슨해지지 않게 마감을 정해 두세요.'));
   return out;
 }
 
@@ -1349,7 +1412,7 @@ var E = {
   planetLon: planetLon, allBodies: allBodies, meanNode: meanNode, ayanamsa: ayanamsa,
   buildReport: buildReport, monthRows: monthRows, pillars: pillars, sunLon: sunLon, moonLon: moonLon, jd: jd, jdn: jdn,
   angles: angles, houseOf: houseOf, ziwei: ziwei, lunarOf: lunarOf, gateOf: gateOf, humanDesign: humanDesign,
-  tenGod: tenGod, sinsal: sinsal, guinAt: guinAt, g: g, gk: gk, quoteFor: function (el, seed) { var q = QUOTES[el]; return q[seed % q.length]; }, stemEl: stemEl,
+  tenGod: tenGod, mbti: { valid: mbValid, overview: mbtiOverview, cat: mbtiCat, month: mbtiMonth }, sinsal: sinsal, guinAt: guinAt, g: g, gk: gk, quoteFor: function (el, seed) { var q = QUOTES[el]; return q[seed % q.length]; }, stemEl: stemEl,
   data: { STEM_KO: STEM_KO, STEM_HJ: STEM_HJ, BR_KO: BR_KO, BR_HJ: BR_HJ, ANIMAL: ANIMAL, EL: EL, EL_HJ: EL_HJ, EL_INFO: EL_INFO, SIGNS: SIGNS, CATS: CATS, GOD_GROUP: GOD_GROUP, JU_NAME: JU_NAME }
 };
 if (typeof module !== 'undefined' && module.exports) module.exports = E; else root.Engine = E;
@@ -1476,6 +1539,8 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
       (gu.length ? '<div class="sshead">귀인 ' + gu.length + '개</div>' + gu.map(ssRow).join('') : '<p class="ssnone">원국에는 이 페이지가 계산하는 귀인이 없습니다. 귀인이 없는 것은 흠이 아니며, 대운·세운·월운에서 들어올 때 작용합니다. 월별 상세에서 귀인이 들어오는 달을 볼 수 있습니다.</p>') +
       (ot.length ? '<div class="sshead">그 밖의 신살</div>' + ot.map(ssRow).join('') : '') +
       '<p class="ssnote">천을·태극·문창·학당귀인, 금여록, 천덕·월덕귀인, 천의성, 도화·역마·화개를 계산합니다. 신살은 유파마다 기준표가 다르고 보조 참고용이라, 점수 계산에는 넣지 않았습니다.</p></div>';
+    var mbo = E.mbti.overview(rep, rep.input.mbti, TY);
+    if (mbo) h += '<div class="mbbox"><p class="kicker">MBTI와 사주를 함께 보면</p>' + mbo.map(function (l) { return '<p>' + esc(l) + '</p>'; }).join('') + '<p class="ssnote">MBTI는 스스로 고른 성향 검사이고 사주·점성 같은 전통 체계가 아닙니다. 위 문장은 입력한 글자와 사주의 구조를 규칙으로 엮은 참고 해석이며, 분야별 풀이와 월별 상세에도 한 줄씩 더해집니다.</p></div>';
     $('#traits').innerHTML = h;
   }
 
@@ -1496,6 +1561,8 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
     var c = state.rep.categories[state.tab];
     var h = '<p class="lead">' + esc(c.lead) + '</p><ul class="lines">';
     c.lines.forEach(function (l) { h += '<li><span class="src">' + esc(l.src) + '</span><span>' + esc(l.text) + '</span></li>'; });
+    var mbl = E.mbti.cat(state.rep.input.mbti, CAT_KEYS.indexOf(state.tab));
+    if (mbl) h += '<li><span class="src">MBTI</span><span>' + esc(mbl) + '</span></li>';
     h += '</ul>';
     if (c.note) h += '<p class="pnote">' + esc(c.note) + '</p>';
     $('#panel').innerHTML = h;
@@ -1644,6 +1711,8 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
       h += '<div class="sumbox">' + esc(r.summary) + '</div>';
       h += tcard(monthTarot(it.Y, r), it.Y + '년 ' + r.month + '월의 카드');
       if (r.guin && r.guin.length) h += '<div class="guin"><b>이달에 들어오는 귀인·신살</b>' + r.guin.map(function (g) { return '<p><span class="chip acc">' + g.name + '</span> ' + esc(g.text) + '</p>'; }).join('') + '</div>';
+      var mbm = E.mbti.month(state.rep.input.mbti, r);
+      if (mbm) h += '<div class="guin"><b>MBTI 관점</b><p>' + esc(mbm) + '</p></div>';
       h += '<div class="tags"><span class="chip acc nums">개인월수 ' + r.pm + '</span><span class="chip">' + (r.fav ? '원국에 도움이 되는 흐름' : '원국에 부담이 되는 흐름') + '</span>' + r.flags.map(function (f) { return '<span class="chip">' + FLAG_TXT[f] + '</span>'; }).join('') + '</div>';
       for (var i = 0; i < 6; i++) {
         h += '<div class="nrow' + (i === r.best ? ' hl' : '') + '"><div><span class="c">' + D.CATS[i] + '</span>' + dots(r.scores[i]) + '</div><p>' + esc(r.notes[i]) + (i === r.best ? ' <span class="chip acc">이달의 강점</span>' : i === r.low && r.scores[i] <= 2 ? ' <span class="chip warn">주의</span>' : '') + '</p></div>';
@@ -1691,7 +1760,9 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
     }
     var c = CITIES[+$('#f-city').value] || CITIES[0];
     var g = (document.querySelector('input[name=gender]:checked') || {}).value || '';
-    return { name: $('#f-name').value.trim(), gender: g, y: y, m: mo, d: d, h: h, mi: mi, hk: hk, city: { lat: c[1], lon: c[2] } };
+    var mb = [0, 1, 2, 3].map(function (i) { return (document.querySelector('input[name=mb' + i + ']:checked') || {}).value || '?'; }).join('');
+    if (mb === '????') mb = '';
+    return { mbti: mb, name: $('#f-name').value.trim(), gender: g, y: y, m: mo, d: d, h: h, mi: mi, hk: hk, city: { lat: c[1], lon: c[2] } };
   }
 
   /* ---------- 이벤트 ---------- */
@@ -1741,6 +1812,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
     var my = /(20\d\d|19\d\d)\s*년/.exec(q), mm = /(\d{1,2})\s*월/.exec(q);
     if (/이직|퇴사|그만두|옮기|전직/.test(q)) o.topic = 'change';
     else if (/귀인|신살|천을|문창|학당|도화|역마|화개|금여록|천덕|월덕|태극|천운|복이 있|도와줄 사람/.test(q)) o.topic = 'guin';
+    else if (/mbti|엠비티아이/i.test(q)) o.topic = 'mbti';
     else if (/타로|카드/.test(q)) o.topic = 'tarot';
     else if (/오늘|금일/.test(q)) o.topic = 'today';
     else if (/용신|보강|오행|부족한 기운|필요한 기운/.test(q)) o.topic = 'el';
@@ -1782,6 +1854,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
     out.push('가장 좋은 달: ' + top.map(function (x) { return mtxt(x, ci); }).join(', ') + '.');
     if (low.length) out.push('조심할 달: ' + low.map(function (x) { return mtxt(x, ci); }).join(', ') + '.');
     if (!o.scope || o.worst === false) out.push(c.lead);
+    var mbc = E.mbti.cat(rep.input.mbti, ci); if (mbc) out.push('MBTI 관점: ' + mbc);
     return { t: out, src: '사주 월별 점수' + (rep.cuspsLon ? ', 서양·자미두수 분야 풀이' : '') };
   }
   function ansGeneral(o) {
@@ -1841,6 +1914,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
   function ansTopic(o) {
     var rep = state.rep, S = rep.S, out = [];
     switch (o.topic) {
+      case 'mbti': var mo = E.mbti.overview(rep, rep.input.mbti, TY); if (!mo) return { t: ['MBTI를 입력하지 않았습니다. 입력란에서 아는 글자만 골라 나침반을 다시 돌리면 MBTI를 반영한 해석이 나옵니다.'], src: 'MBTI' }; return { t: mo, src: 'MBTI와 사주 구조를 엮은 규칙' };
       case 'el': out.push('보강 오행은 ' + EL[S.yong] + '(' + D.EL_INFO[S.yong].color + ' · ' + D.EL_INFO[S.yong].dir + ' · ' + D.EL_INFO[S.yong].season + ')이고, 가장 많은 오행은 ' + EL[S.most] + '입니다.'); out.push(D.EL_INFO[S.yong].care + '.'); out.push('오행 개수: ' + EL.map(function (e, i) { return e + ' ' + S.cnt[i]; }).join(', ') + '.'); return { t: out, src: '사주 오행 분포' };
       case 'luck': var L = E.monthRows(rep, TY).luck; if (!L) return { t: ['대운은 성별을 선택해야 계산됩니다.'], src: '사주 대운' }; out.push('현재 대운은 ' + L.gz + '(만 ' + L.from + '~' + L.to + '세)로 천간 ' + L.god + ', 지지 ' + L.bgod + '입니다.'); out.push(L.note); out.push('올해 세운: ' + mrows(TY).theme); return { t: out, src: '사주 대운·세운' };
       case 'self': out.push(rep.overview.headline); rep.overview.lines.slice(0, 3).forEach(function (l) { if (out.indexOf(l) < 0) out.push(l); }); return { t: out, src: '사주 일간·오행' };
@@ -1889,7 +1963,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
   function saveInfo(inp) {
     try {
       if ($('#f-save').checked) {
-        localStorage.setItem(SKEY, JSON.stringify({ name: inp.name, gender: inp.gender, date: $('#f-date').value, time: $('#f-time').value, unk: $('#f-unk').checked, city: $('#f-city').value }));
+        localStorage.setItem(SKEY, JSON.stringify({ name: inp.name, gender: inp.gender, date: $('#f-date').value, time: $('#f-time').value, unk: $('#f-unk').checked, city: $('#f-city').value, mbti: inp.mbti || '' }));
         $('#f-clear').hidden = false;
       } else { localStorage.removeItem(SKEY); $('#f-clear').hidden = true; }
     } catch (x) {}
@@ -1900,6 +1974,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
       $('#f-name').value = s.name || ''; $('#f-date').value = s.date; if (s.time) $('#f-time').value = s.time;
       $('#f-unk').checked = !!s.unk; $('#f-time').disabled = !!s.unk; $('#f-city').value = s.city || '0';
       var rd = document.querySelector('input[name=gender][value="' + (s.gender || '') + '"]'); if (rd) rd.checked = true;
+      for (var mi2 = 0; mi2 < 4; mi2++) { var ch = (s.mbti || '')[mi2]; var rb = document.querySelector('input[name=mb' + mi2 + '][value="' + (ch && ch !== '?' ? ch : '') + '"]'); if (rb) rb.checked = true; }
       $('#f-save').checked = true; $('#f-clear').hidden = false;
       return readForm();
     } catch (x) { return null; }
