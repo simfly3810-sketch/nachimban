@@ -130,6 +130,8 @@ h2 { font-size: clamp(22px, 3.4vw, 30px); margin: 0; }
 .ssrow { display: grid; grid-template-columns: 90px auto minmax(0, 1fr); gap: 4px 10px; align-items: baseline; padding: 6px 0; border-top: 1px solid var(--line); font-size: 14px; }
 .ssrow p { margin: 0; color: var(--ink2); font-size: 13px; grid-column: 1 / -1; }
 .ssnone, .ssnote { margin: 8px 0 0; font-size: 12.5px; color: var(--ink2); }
+.yflags { margin: 10px 0 0; font-size: 13px; }
+.yflags p { margin: 6px 0 0; }
 .guin { margin: 10px 0; padding: 10px 12px; background: var(--surface2); border-radius: 10px; font-size: 13px; }
 .guin p { margin: 6px 0 0; }
 .linkbtn { background: none; border: 0; padding: 0; font: inherit; font-size: 13px; color: var(--ink2); text-decoration: underline; cursor: pointer; }
@@ -396,7 +398,7 @@ table.heat { border-collapse: separate; border-spacing: 3px; width: 100%; min-wi
   <section class="block" aria-labelledby="c-h">
     <div class="head"><h2 id="c-h">계산 범위</h2><p class="sub">체계마다 계산한 항목과 아직 넣지 못한 항목입니다. 2026년 10월 16일 기준입니다.</p></div>
     <ul class="cover">
-      <li><b>사주명리</b>연·월·일·시주를 태양 황경으로 절기 경계까지 분 단위로 계산합니다. 연·월주는 천문 계산과 1,500건, 일·시주는 다른 만세력 라이브러리와 1,500건을 대조해 모두 일치했습니다(1905~2094년 무작위 입력). 고급 설정에서 당시 한국 표준시·일광절약시간 보정, 출생지 경도 보정, 조자시·야자시 선택을 할 수 있습니다. 오행 분포, 십성, 12운성, 신강·신약과 보강 오행(간이 판정), 대운(성별 선택 시)과 세운, 원국의 천간합·충과 지지 합·충·형·파·해, 공망을 표시합니다. 월별 점수는 월 천간 1, 월지 0.6, 세운 0.4, 대운 0.3 비중으로 합산하고 원국에 도움이 되는지 여부를 더합니다. 귀인·신살(천을·태극·문창·학당귀인, 금여록, 천덕·월덕귀인, 천의성, 도화·역마·화개, 양인·백호·괴강·홍염)과 합충·공망·12운성은 월별 상세에 참고로 보여 주기만 하고 점수에는 넣지 않습니다. 신살과 관계 해석은 유파마다 기준이 달라 참고용입니다.</li>
+      <li><b>사주명리</b>연·월·일·시주를 태양 황경으로 절기 경계까지 분 단위로 계산합니다. 연·월주는 천문 계산과 1,500건, 일·시주는 다른 만세력 라이브러리와 1,500건을 대조해 모두 일치했습니다(1905~2094년 무작위 입력). 고급 설정에서 당시 한국 표준시·일광절약시간 보정, 출생지 경도 보정, 조자시·야자시 선택을 할 수 있습니다. 오행 분포, 십성, 12운성, 신강·신약과 보강 오행(간이 판정), 대운(성별 선택 시)과 세운, 원국의 천간합·충과 지지 합·충·형·파·해, 공망을 표시합니다. 월별 점수는 월 천간 1, 월지 0.6, 세운 0.4, 대운 0.3 비중으로 합산하고 원국에 도움이 되는지 여부를 더합니다. 여기에 세운이 원국의 월지와 충·합하는지, 형·삼형이 완성되는지, 관살혼잡(정관과 편관이 함께 드러남)이 생기는지, 대운이 바뀌는 해인지를 해 단위로 보정해 직장·건강·이사 점수에 반영합니다(보정 폭은 분야별로 최대 −1.0~+0.8점). 귀인·신살(천을·태극·문창·학당귀인, 금여록, 천덕·월덕귀인, 천의성, 도화·역마·화개, 양인·백호·괴강·홍염)과 12운성, 공망은 참고로 보여 주기만 하고 점수에는 넣지 않습니다. 월별 상세의 합·충·형 표시도 참고용이고, 위에 적은 해 단위 보정만 점수에 들어갑니다. 신살과 관계 해석은 유파마다 기준이 달라 참고용입니다.</li>
       <li><b>서양 점성 · 플라시더스</b>태양·달, 수성~명왕성, 라후·케투(평균 교점), 상승궁, MC, 플라시더스 하우스. 행성은 근사 궤도요소로 계산해 다른 천문 라이브러리와 대조했을 때 대부분 0.02° 이내, 목성 약 0.1°, 토성 약 0.3° 이내(1900~2100)입니다. 각도 간 어스펙트와 소행성은 포함하지 않습니다.</li>
       <li><b>인도 점성</b>라히리 아야남샤 기준 항성 라시와 나크샤트라·파다, 라그나, 각 행성의 라시와 항성 하우스(통별자리 방식). 다샤(시기 주기)는 포함하지 않습니다.</li>
       <li><b>태국 점성</b>출생 요일의 행성·색·성향(수요일 18시 이후는 라후). 세부 길흉 일 계산은 포함하지 않습니다.</li>
@@ -1132,12 +1134,51 @@ function monthSummary(sc) {
   return s.join(' ');
 }
 
+/* 세운이 원국과 만나는 관계(월지 충·합, 형·삼형), 관살혼잡, 대운 교체기를 해 전체 보정으로 반영 */
+var SAMHYUNG = [[2, 5, 8], [1, 10, 7]];
+function strongFlags(fl) { return fl.filter(function (f) { return ['삼형 완성', '관살혼잡', '월지 충', '대운 교체'].indexOf(f.name) >= 0; }); }
+function yearAdjust(rep, Y, yp, yg) {
+  var P = rep.P, dS = P.day[0], adj = [0, 0, 0, 0, 0, 0], flags = [], note = ['', '', '', '', '', ''];
+  var cols = [['년', P.year], ['월', P.month], ['일', P.day], ['시', P.hour]].filter(function (c) { return c[1]; });
+  var yb = yp[1], sn = 0, hyung = 0, hyungTo = [];
+  cols.forEach(function (c) {
+    var ks = brRels(yb, c[1][1]);
+    if (ks.indexOf('충') >= 0 && c[0] !== '일') {
+      if (c[0] === '월') { adj[2] -= 0.5; adj[3] -= 0.2; adj[5] -= 0.3; flags.push({ name: '월지 충', text: '세운 지지가 월지(직장·사회의 자리)와 충합니다. 직장 환경과 역할의 변동이 크게 오는 해입니다.' }); note[2] = '세운이 월지와 충해 직장 환경의 변동이 큰 해입니다.'; }
+      else { adj[2] -= 0.2; adj[5] -= 0.3; flags.push({ name: c[0] + '지 충', text: '세운 지지가 ' + c[0] + '지(' + REL_DOMAIN[c[0]] + ')와 충합니다. 해당 영역과 이동·변동에 신경 쓸 해입니다.' }); }
+    }
+    if (ks.indexOf('합') >= 0 && ks.indexOf('형') < 0 && c[0] === '월') { adj[2] += 0.4; adj[4] += 0.2; flags.push({ name: '월지 합', text: '세운 지지가 월지와 합합니다. 직장·사회 영역에서 협력과 조율이 잘 되는 해입니다.' }); note[2] = note[2] || '세운이 월지와 합해 직장에서 협력이 잘 맺어집니다.'; }
+    if (ks.indexOf('형') >= 0) { hyung++; hyungTo.push(c[0] + '지'); }
+  });
+  if (hyung) {
+    adj[2] -= Math.min(0.5, 0.3 * hyung); adj[0] -= Math.min(0.3, 0.15 * hyung);
+    SAMHYUNG.forEach(function (g) {
+      if (g.indexOf(yb) < 0) return;
+      var oth = g.filter(function (b) { return b !== yb; });
+      if (oth.every(function (b) { return cols.some(function (c) { return c[1][1] === b; }); })) { sn = 1; adj[2] -= 0.4; adj[0] -= 0.3; adj[4] -= 0.2; }
+    });
+    flags.push({ name: sn ? '삼형 완성' : '형', text: sn ? '세운 지지가 원국의 두 지지와 함께 삼형(' + SAMHYUNG.filter(function (g) { return g.indexOf(yb) >= 0; })[0].map(function (b) { return BR_HJ[b]; }).join('') + ')을 이룹니다. 마찰, 시험, 구설과 관재, 건강 점검에 유의해야 하는 해입니다.' : '세운 지지가 원국의 ' + hyungTo.join('·') + '와 형합니다. 마찰과 시험이 따르기 쉬운 해입니다.' });
+    note[2] = note[2] || (sn ? '삼형이 완성되는 해라 직장에서 마찰과 시험이 따르기 쉽습니다.' : '형이 걸려 직장에서 마찰이 따르기 쉽습니다.');
+    note[0] = sn ? '삼형이 겹쳐 몸과 마음의 점검이 필요한 해입니다.' : '';
+  }
+  var other = yg.name === '정관' ? '편관' : yg.name === '편관' ? '정관' : null;
+  if (other) {
+    var hasO = [P.year, P.month, P.hour].some(function (p) { return p && tenGod(dS, p[0]).name === other; });
+    if (hasO) { adj[2] -= 0.4; adj[0] -= 0.1; flags.push({ name: '관살혼잡', text: '세운의 ' + yg.name + '과 원국에 드러난 ' + other + '이 함께 있습니다. 직장에서 기준과 요구가 엇갈리고 이중 부담이 생기기 쉬운 해입니다.' }); note[2] = note[2] || '정관과 편관이 섞여 요구가 엇갈리기 쉬운 해입니다.'; }
+  }
+  var a0 = luckAt(rep, lifeAge(rep, jd(Y, 1, 1, 3, 0))), a1 = luckAt(rep, lifeAge(rep, jd(Y, 12, 31, 3, 0)));
+  if (a0 && a1 && (a0.start !== a1.start)) { adj[2] -= 0.2; adj[3] -= 0.2; adj[5] -= 0.2; flags.push({ name: '대운 교체', text: '이 해에 대운이 ' + gk([a0.stem, a0.branch]) + '에서 ' + gk([a1.stem, a1.branch]) + '로 바뀝니다. 환경과 방향이 바뀌는 시기라 직장·직업·거처에 변동이 따르기 쉽습니다.' }); }
+  for (var i = 0; i < 6; i++) adj[i] = Math.max(-1.0, Math.min(0.8, adj[i]));
+  return { adj: adj, flags: flags, note: note };
+}
+
 function monthRows(rep, Y) {
   var P = rep.P, S = rep.S, dS = P.day[0], dB = P.day[1], gender = rep.input.gender;
   var yp = [mod(Y - 4, 10), mod(Y - 4, 12)];
   var yg = tenGod(dS, yp[0]), ybg = tenGod(dS, BR_MAIN[yp[1]]);
   var yFav = favOf(rep, yg.group);
   var yRel = mod(dB + 6, 12) === yp[1] ? -1 : ((dB + yp[1]) % 12 === 1 ? 1 : 0);
+  var ya = yearAdjust(rep, Y, yp, yg);
   var rows = [];
   for (var m = 1; m <= 12; m++) {
     var MP = pillars(Y, m, 15, 12, 0, true), ms = MP.month[0], mb = MP.month[1];
@@ -1151,7 +1192,7 @@ function monthRows(rep, Y) {
       var v = 3 - CENTER[i] * wsum + DELTA[god.name][i] + 0.6 * DELTA[bgod.name][i] + 0.4 * DELTA[yg.name][i] + 0.2 * DELTA[ybg.name][i]
         + (fs ? 0.4 : -0.4) + (fb ? 0.2 : -0.2) + (yFav ? 0.3 : -0.3);
       if (luck) v += 0.3 * DELTA[lg.name][i] + 0.15 * DELTA[lbg.name][i] + (lf ? 0.2 : -0.2);
-      x.push(v);
+      x.push(v + ya.adj[i]);
     }
     if (gender === 'm' && god.group === 2) x[1] += 1;
     if (gender === 'f' && god.group === 3) x[1] += 1;
@@ -1165,6 +1206,7 @@ function monthRows(rep, Y) {
     if (be === S.yong || me === S.yong) { x[0] += 1; x[4] += 1; flags.push('보강'); notes[0] += ' 보강 오행(' + EL[S.yong] + ')이 들어와 몸이 가벼운 달입니다.'; notes[4] += ' 보강 오행이 들어와 흐름이 받쳐줍니다.'; }
     else if (S.cnt[be] >= 3) { x[0] -= 1; flags.push('쏠림'); notes[0] += ' 이미 많은 ' + EL[be] + ' 기운이 더해져 쏠림에 주의하세요.'; }
     if (yRel === -1) { x[0] -= 0.4; x[1] -= 0.4; x[5] -= 0.4; } else if (yRel === 1) { x[1] += 0.3; x[2] += 0.3; }
+    for (var yi = 0; yi < 6; yi++) if (ya.note[yi]) notes[yi] += ' ' + ya.note[yi];
     var sc = x.map(clampRound), best = 0, low = 0;
     for (var k = 1; k < 6; k++) { if (sc[k] > sc[best]) best = k; if (sc[k] < sc[low]) low = k; }
     rows.push({ month: m, hj: g(MP.month), ko: gk(MP.month), god: god.name, bgod: bgod.name, group: god.group, tag: GOD_TAG[god.name], fav: fs,
@@ -1181,7 +1223,7 @@ function monthRows(rep, Y) {
   var py = reduceNum(reduceNum(rep.numerology.m, false) + reduceNum(rep.numerology.d, false) + reduceNum(Y, false), false);
   var yl = luckInfo(rep, luckAt(rep, lifeAge(rep, jd(Y, 7, 1, 3, 0))));
   return { year: Y, ganji: g(yp), ko: gk(yp), animal: ANIMAL[yp[1]], god: yg.name, bgod: ybg.name, fav: yFav,
-    theme: YEAR_THEME[yg.name] + '.' + rel + favText, personalYear: py, br: yp[1], guin: guinAt(rep, yp[1]), rel: monthRel(rep, yp[1]), rows: rows, luck: yl,
+    theme: YEAR_THEME[yg.name] + '.' + rel + favText + (strongFlags(ya.flags).length ? ' 다만 ' + strongFlags(ya.flags).map(function (f) { return f.name; }).join('·') + ' 요인이 겹쳐 직장과 환경에 변동·부담이 따를 수 있습니다.' : ''), yflags: ya.flags, personalYear: py, br: yp[1], guin: guinAt(rep, yp[1]), rel: monthRel(rep, yp[1]), rows: rows, luck: yl,
     transit: { start: transitInfo(rep, jd(Y, 1, 1, 3, 0)), end: transitInfo(rep, jd(Y, 12, 31, 3, 0)) } };
 }
 
@@ -1922,6 +1964,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
     h += '<span class="chip acc">세운 ' + Y.ganji + ' ' + Y.god + (Y.fav ? ' · 원국에 도움' : ' · 원국에 부담') + '</span>';
     h += Y.luck ? '<span class="chip acc">대운 ' + Y.luck.gz + ' (만 ' + Y.luck.from + '~' + Y.luck.to + '세) 천간 ' + Y.luck.god + '·지지 ' + Y.luck.bgod + '</span>' : '<span class="chip">대운은 성별을 선택하면 반영됩니다</span>';
     h += '<span class="chip nums">수비학 개인년수 ' + Y.personalYear + '</span>' + (Y.guin && Y.guin.length ? '<span class="chip acc">올해 들어오는 기운: ' + Y.guin.map(function (g) { return g.name; }).join('·') + '</span>' : '') + '</div>';
+    if (Y.yflags && Y.yflags.length) h += '<div class="yflags">' + Y.yflags.map(function (f) { return '<p><span class="chip warn">' + esc(f.name) + '</span> ' + esc(f.text) + '</p>'; }).join('') + '</div>';
     h += '<p class="ysub">' + (Y.luck ? esc(Y.luck.note) + ' ' : '') + esc(transitLine(Y)) + '</p></div>';
     return h;
   }
@@ -2085,6 +2128,8 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
     else if (/이번\s*달|이달|금월/.test(q)) o.scope = { t: 'month', Y: TY, m: TM };
     else if (/다음\s*달|내달/.test(q)) { var nm = TM === 12 ? [TY + 1, 1] : [TY, TM + 1]; o.scope = { t: 'month', Y: nm[0], m: nm[1] }; }
     else if (my) o.scope = { t: 'year', Y: +my[1] };
+    else if (/재작년/.test(q)) o.scope = { t: 'year', Y: TY - 2 };
+    else if (/작년|지난해|전년/.test(q)) o.scope = { t: 'year', Y: TY - 1 };
     else if (/내후년/.test(q)) o.scope = { t: 'year', Y: TY + 2 };
     else if (/내년|명년/.test(q)) o.scope = { t: 'year', Y: TY + 1 };
     else if (/올해|금년|올 한 해/.test(q)) o.scope = { t: 'year', Y: TY };
@@ -2108,7 +2153,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
     }
     var av = r1(avgOf(S.list, ci)), rk = ranked(S.list, ci), kk = Math.min(3, Math.ceil(rk.length / 2)), top = rk.slice(0, kk), low = rk.slice(kk).slice(-2).reverse();
     out.push(S.label + ' ' + CATN[ci] + '운 평균은 ' + av + '점(' + (av >= 3.5 ? '좋은 편' : av >= 2.8 ? '보통' : '조심이 필요') + ')입니다.');
-    if (S.year) out.push(mrows(S.year).theme);
+    if (S.year) { out.push(mrows(S.year).theme); (mrows(S.year).yflags || []).slice(0, 3).forEach(function (f) { out.push(f.name + ': ' + f.text); }); }
     out.push('가장 좋은 달: ' + top.map(function (x) { return mtxt(x, ci); }).join(', ') + '.');
     if (low.length) out.push('조심할 달: ' + low.map(function (x) { return mtxt(x, ci); }).join(', ') + '.');
     if (!o.scope || o.worst === false) out.push(c.lead);
