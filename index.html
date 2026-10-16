@@ -113,6 +113,21 @@ h2 { font-size: clamp(22px, 3.4vw, 30px); margin: 0; }
 .adv .check { display: flex; gap: 8px; align-items: flex-start; margin-top: 8px; }
 .savebox { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-top: 4px; }
 .chat { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+
+.xsum { margin-top: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 18px; }
+.xsum p { margin: 6px 0 0; font-size: 13.5px; }
+table.xt { border-collapse: separate; border-spacing: 3px; min-width: 520px; width: 100%; }
+.xt th { font-weight: 500; font-size: 12px; color: var(--ink2); padding: 4px 2px; text-align: center; white-space: nowrap; }
+.xt th.rh { text-align: left; padding-left: 6px; }
+.xt td { text-align: center; font-size: 13px; padding: 6px 2px; border-radius: 6px; background: var(--surface2); color: var(--ink2); }
+.xt td.p { background: color-mix(in srgb, var(--accent) 22%, var(--surface)); color: var(--accent); }
+.xt td.n { background: color-mix(in srgb, var(--seal) 20%, var(--surface)); color: var(--seal); }
+.xt tr.tot td { font-size: 11.5px; font-weight: 600; }
+.xcard { margin-top: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 18px; }
+.xcard h4 { margin: 0 0 4px; font-size: 15px; }
+.xcard p, .xcard li { font-size: 13.5px; margin: 6px 0 0; }
+.xcard ul { margin: 6px 0 0; padding-left: 18px; }
+.xsys p { margin: 4px 0 0; font-size: 12.5px; color: var(--ink2); }
 .chips-q { display: flex; gap: 6px; flex-wrap: wrap; }
 .chips-q button { font: inherit; font-size: 12.5px; padding: 5px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface2); color: var(--ink); cursor: pointer; }
 .chat-log { display: grid; gap: 10px; max-height: 460px; overflow-y: auto; }
@@ -316,7 +331,7 @@ table.heat { border-collapse: separate; border-spacing: 3px; width: 100%; min-wi
   <header class="top">
     <div class="brand"><span class="seal" aria-hidden="true">羅</span><b>나침반</b><small>羅盤</small></div>
     <nav class="nav" aria-label="섹션 이동">
-      <a href="#today">오늘</a><a href="#traits">전체 특성</a><a href="#planets">행성</a><a href="#tarot">타로</a><a href="#fields">분야별</a><a href="#year">월별</a>
+      <a href="#today">오늘</a><a href="#traits">전체 특성</a><a href="#planets">행성</a><a href="#tarot">타로</a><a href="#fields">분야별</a><a href="#year">월별</a><a href="#cross">교차 검토</a>
     </nav>
   </header>
 
@@ -380,6 +395,7 @@ table.heat { border-collapse: separate; border-spacing: 3px; width: 100%; min-wi
     <section class="block" id="tarot" aria-labelledby="tr-h"></section>
     <section class="block" id="fields" aria-labelledby="f-h"></section>
     <section class="block" id="year" aria-labelledby="y-h"></section>
+    <section class="block" id="cross" aria-labelledby="x-h"></section>
   </div>
 
   <section class="block" id="ask" aria-labelledby="ask-h">
@@ -400,12 +416,13 @@ table.heat { border-collapse: separate; border-spacing: 3px; width: 100%; min-wi
     <ul class="cover">
       <li><b>사주명리</b>연·월·일·시주를 태양 황경으로 절기 경계까지 분 단위로 계산합니다. 연·월주는 천문 계산과 1,500건, 일·시주는 다른 만세력 라이브러리와 1,500건을 대조해 모두 일치했습니다(1905~2094년 무작위 입력). 고급 설정에서 당시 한국 표준시·일광절약시간 보정, 출생지 경도 보정, 조자시·야자시 선택을 할 수 있습니다. 오행 분포, 십성, 12운성, 신강·신약과 보강 오행(간이 판정), 대운(성별 선택 시)과 세운, 원국의 천간합·충과 지지 합·충·형·파·해, 공망을 표시합니다. 월별 점수는 월 천간 1, 월지 0.6, 세운 0.4, 대운 0.3 비중으로 합산하고 원국에 도움이 되는지 여부를 더합니다. 여기에 세운이 원국의 월지와 충·합하는지, 형·삼형이 완성되는지, 관살혼잡(정관과 편관이 함께 드러남)이 생기는지, 대운이 바뀌는 해인지를 해 단위로 보정해 직장·건강·이사 점수에 반영합니다(보정 폭은 분야별로 최대 −1.0~+0.8점). 귀인·신살(천을·태극·문창·학당귀인, 금여록, 천덕·월덕귀인, 천의성, 도화·역마·화개, 양인·백호·괴강·홍염)과 12운성, 공망은 참고로 보여 주기만 하고 점수에는 넣지 않습니다. 월별 상세의 합·충·형 표시도 참고용이고, 위에 적은 해 단위 보정만 점수에 들어갑니다. 신살과 관계 해석은 유파마다 기준이 달라 참고용입니다.</li>
       <li><b>서양 점성 · 플라시더스</b>태양·달, 수성~명왕성, 라후·케투(평균 교점), 상승궁, MC, 플라시더스 하우스. 행성은 근사 궤도요소로 계산해 다른 천문 라이브러리와 대조했을 때 대부분 0.02° 이내, 목성 약 0.1°, 토성 약 0.3° 이내(1900~2100)입니다. 각도 간 어스펙트와 소행성은 포함하지 않습니다.</li>
-      <li><b>인도 점성</b>라히리 아야남샤 기준 항성 라시와 나크샤트라·파다, 라그나, 각 행성의 라시와 항성 하우스(통별자리 방식). 다샤(시기 주기)는 포함하지 않습니다.</li>
+      <li><b>인도 점성</b>라히리 아야남샤 기준 항성 라시와 나크샤트라·파다, 라그나, 각 행성의 라시와 항성 하우스(통별자리 방식). 다샤는 빔쇼타리(120년 주기)의 마하다샤·안타르다샤를 계산하며 교차 검토에서만 쓰이고, 다른 프로그램과 대조하지는 않았습니다.</li>
       <li><b>태국 점성</b>출생 요일의 행성·색·성향(수요일 18시 이후는 라후). 세부 길흉 일 계산은 포함하지 않습니다.</li>
       <li><b>MBTI (선택)</b>입력한 글자만 사용합니다. 모르는 글자는 ‘모름’으로 두면 그 축은 해석에서 빠집니다. 전통 체계가 아니라 스스로 고른 성향 검사라서, 사주 구조(신강·신약, 십성 분포, 올해 세운)와 규칙으로 엮은 참고 문장만 덧붙이고 점수와 카드 선정에는 반영하지 않습니다.</li>
       <li><b>수비학</b>생년월일로 계산하는 생명수(타고난 방향), 개인년수와 개인월수(그해·그달의 주제), 생일 카드와 오늘의 수를 계산합니다. 이름의 글자를 숫자로 바꾸는 이름수는 변환 방식(한글·영문)이 유파마다 달라 넣지 않았습니다.</li>
       <li><b>자미두수</b>음력 변환(표 방식), 명궁·신궁, 오행국, 자미·천부 계열 14주성 배치, 보조성 14개(좌보·우필·문창·문곡·천괴·천월·록존·경양·타라·천마·화성·영성·지공·지겁), 태어난 해의 사화(화록·화권·화과·화기), 대한(10년 운)과 현재 대한을 계산해 12궁 명반으로 보여 줍니다. 별 배치·사화·대한은 다른 자미두수 프로그램(iztro)과 2,000건을 대조해 모두 일치했습니다. 사화표는 유파마다 일부 다르고 여기서는 iztro 기준입니다. 유년(해마다 운), 유월, 소한과 사화를 활용한 세부 풀이는 넣지 않았습니다.</li>
       <li><b>휴먼디자인 (일부)</b>태양·지구의 게이트와 라인, 프로파일. 타입·권위·센터는 모든 행성 위치와 채널 계산이 필요해 아직 포함하지 않습니다.</li>
+      <li><b>교차 검토</b>사주 월 점수, 자미두수 유년사화(해 단위), 서양 트랜짓(목성·토성·천왕성·해왕성·명왕성이 분야별 출생 지점에 닿는지), 인도 빔쇼타리 다샤를 각각 신호로 만든 뒤 일치와 엇갈림을 나눕니다. 판정 규칙과 가중치는 단순화한 것이고 검증하지 않았으며, 체계끼리 일치해도 맞는다는 증명은 아닙니다. 트랜짓 표시는 이 섹션에서만 사용합니다.</li>
       <li><b>질문하기</b>화면 중간의 ‘내 결과에 대해 물어보기’는 AI가 아니라 계산된 점수와 풀이문을 질문에 맞게 찾아 보여 주는 규칙 기반 기능입니다. 분야·시기·타로·귀인·MBTI·보강 오행·대운 등 계산 범위 안의 질문에만 답합니다.</li>
       <li><b>타로</b>메이저 아르카나 22장만 씁니다. 전체·오늘·월별 카드는 뽑는 것이 아니라 계산 결과에서 정해집니다. 사주(십성·오행·대운), 서양 점성(태양·달·상승궁·행성), 태국 요일 행성, 수비학(생명수·개인월수), 자미두수 주성, 휴먼디자인 라인이 각각 가리키는 카드를 ‘주도·추진 / 감정·관계 / 질서·안정 / 변화·시험’ 네 흐름으로 묶고, 가장 무게가 큰 흐름 안에서 가장 많이 겹친 카드를 고릅니다. 사주 월별 점수가 낮은 달과 오늘 일진이 내게 부담이 되는 날은 역방향으로 읽습니다. 정통 대응표가 없는 항목(십성·오행·자미두수·휴먼디자인)은 의미가 비슷한 카드를 연결한 것입니다.</li>
     </ul>
@@ -1069,6 +1086,179 @@ function monthRel(rep, br) {
   return { list: out, gm: gm.indexOf(br) >= 0 };
 }
 
+/* ================= 교차 검토: 사주·자미두수·서양 트랜짓·인도 다샤를 따로 분석해 비교 ================= */
+var VD_ID = ['ketu', 'p1', 'sun', 'moon', 'p2', 'rahu', 'p3', 'p4', 'p0'];
+var VD_KO = ['케투', '금성', '태양', '달', '화성', '라후', '목성', '토성', '수성'];
+var VD_YRS = [7, 20, 6, 10, 7, 18, 16, 19, 17];
+var SIGN_LORD = ['p2', 'p1', 'p0', 'moon', 'sun', 'p0', 'p1', 'p2', 'p3', 'p4', 'p4', 'p3'];
+var YEAR_D = 365.2425;
+function vimshottari(rep) {
+  if (rep._vd) return rep._vd;
+  var nl = 360 / 27, ms = rep.vedic.moonSid, nk = Math.floor(ms / nl), frac = (ms - nk * nl) / nl, li = nk % 9;
+  var t = rep.J - frac * VD_YRS[li] * YEAR_D, mds = [];
+  for (var i = 0; i < 18; i++) { var L = (li + i) % 9, len = VD_YRS[L] * YEAR_D; mds.push({ li: L, start: t, end: t + len }); t += len; }
+  rep._vd = mds; return mds;
+}
+function dashaAt(rep, J) {
+  var mds = vimshottari(rep), md = null, i;
+  for (i = 0; i < mds.length; i++) if (J >= mds[i].start && J < mds[i].end) { md = mds[i]; break; }
+  if (!md) return null;
+  var t = md.start, ad = null;
+  for (i = 0; i < 9; i++) {
+    var L = (md.li + i) % 9, len = VD_YRS[md.li] * VD_YRS[L] / 120 * YEAR_D;
+    if (J >= t && J < t + len) { ad = { li: L, start: t, end: t + len }; break; }
+    t += len;
+  }
+  return { md: md, ad: ad };
+}
+var VH_CAT = [[1, 6], [5, 7], [6, 10], [10, 1], [2, 11], [4, 12]];
+function vedicSignal(rep, J, ci) {
+  var d = dashaAt(rep, J); if (!d || !d.ad) return null;
+  var lag = rep.vedic.lagna, hs = VH_CAT[ci];
+  function one(li) {
+    var id = VD_ID[li], p = plOf(rep, id), hv = p ? p.vhouse : 0, owned = [];
+    for (var n = 1; n <= 12; n++) if (SIGN_LORD[(lag + n - 1) % 12] === id) owned.push(n);
+    var act = hs.indexOf(hv) >= 0 || owned.some(function (n) { return hs.indexOf(n) >= 0; });
+    var bad = [6, 8, 12].indexOf(hv) >= 0, good = [1, 2, 4, 5, 7, 9, 10, 11].indexOf(hv) >= 0;
+    var s = (good ? 0.5 : bad ? -0.7 : 0) + (act ? (bad ? -0.5 : 0.7) : 0);
+    return { s: s, act: act, bad: bad, hv: hv };
+  }
+  var a = one(d.md.li), b = one(d.ad.li), v = 0.55 * a.s + 0.45 * b.s;
+  var why = VD_KO[d.md.li] + ' 마하다샤·' + VD_KO[d.ad.li] + ' 안타르다샤';
+  var det = [];
+  if (b.act) det.push(VD_KO[d.ad.li] + '이 ' + CATS[ci] + ' 관련 하우스를 맡거나 머물러 이 주제가 활성화됩니다');
+  if (b.bad) det.push(VD_KO[d.ad.li] + '이 6·8·12하우스에 있어 방해와 지연 요소가 따릅니다');
+  if (a.bad) det.push(VD_KO[d.md.li] + ' 마하다샤의 행성이 6·8·12하우스에 있어 큰 흐름에 부담이 있습니다');
+  return { v: v, sig: v >= 0.5 ? 1 : v <= -0.5 ? -1 : 0, why: why, det: det, obstacle: (a.bad || b.bad) && (a.act || b.act), md: VD_KO[d.md.li], ad: VD_KO[d.ad.li] };
+}
+var TR_P = [['p3', '목성'], ['p4', '토성'], ['p5', '천왕성'], ['p6', '해왕성'], ['p7', '명왕성']];
+var TR_ASP = [[0, '합'], [60, '육분'], [90, '사각'], [120, '삼분'], [180, '충']];
+var TR_W = { p3: { 합: 1, 육분: 1, 삼분: 1, 사각: 0.4, 충: 0.4 }, p4: { 합: -0.9, 육분: 0.3, 삼분: 0.3, 사각: -1, 충: -1 }, p5: { 합: -0.7, 육분: 0.3, 삼분: 0.3, 사각: -0.7, 충: -0.7 }, p6: { 합: -0.5, 육분: 0, 삼분: 0, 사각: -0.5, 충: -0.5 }, p7: { 합: -0.7, 육분: 0.2, 삼분: 0.2, 사각: -0.7, 충: -0.7 } };
+var TR_PTS = [['asc', 'sun', 'c6'], ['p1', 'c7', 'moon'], ['mc', 'sun', 'p4'], ['mc', 'p0', 'sun'], ['c2', 'p1', 'p3'], ['c4', 'moon']];
+function natalPoint(rep, key) {
+  if (key === 'asc') return rep.cuspsLon ? { lon: rep.cuspsLon[0], ko: '상승궁' } : null;
+  if (key === 'mc') return rep.cuspsLon ? { lon: rep.cuspsLon[9], ko: 'MC' } : null;
+  if (/^c\d+$/.test(key)) { var h = +key.slice(1); return rep.cuspsLon ? { lon: rep.cuspsLon[h - 1], ko: h + '하우스 시작점' } : null; }
+  var p = plOf(rep, key); return p ? { lon: p.lon, ko: '출생 ' + p.ko } : null;
+}
+function transitSignal(rep, Y, m, ci) {
+  var days = [5, 15, 25], tot = 0, best = {}, retro = false;
+  days.forEach(function (d) {
+    var bodies = allBodies(jd(Y, m, d, 3, 0)), sum = 0;
+    if (d === 15) bodies.forEach(function (b) { if (b.id === 'p0' && b.retro) retro = true; });
+    TR_P.forEach(function (tp) {
+      var b = null; bodies.forEach(function (x) { if (x.id === tp[0]) b = x; });
+      if (!b) return;
+      TR_PTS[ci].forEach(function (k) {
+        var np = natalPoint(rep, k); if (!np) return;
+        var diff = Math.abs(mod(b.lon - np.lon + 180, 360) - 180);
+        TR_ASP.forEach(function (a) {
+          var orb = Math.abs(diff - a[0]);
+          if (orb <= 3) { var w = TR_W[tp[0]][a[1]] * (1 - orb / 6); sum += w; var key = tp[1] + ' ' + a[1] + ' ' + np.ko; if (!best[key] || Math.abs(w) > Math.abs(best[key].w)) best[key] = { w: w, txt: tp[1] + ' ' + a[1] + ' ' + np.ko + '(오차 ' + orb.toFixed(1) + '°)', pl: tp[0], asp: a[1] }; }
+        });
+      });
+    });
+    tot += sum;
+  });
+  var v = tot / days.length;
+  var list = Object.keys(best).map(function (k) { return best[k]; }).sort(function (a, b) { return Math.abs(b.w) - Math.abs(a.w); });
+  return { v: v, sig: v >= 0.5 ? 1 : v <= -0.5 ? -1 : 0, asp: list.slice(0, 3), retro: retro, noAngles: !rep.cuspsLon };
+}
+var ZW_KP = [5, 2, 8, 8, 4, 6];
+var ZW_MW = [1, 0.7, 0.5, -1];
+function zwYearSignal(rep, Y, ci) {
+  var zw = rep.zw; if (!zw) return null;
+  var ys = mod(Y - 4, 10), K = ZW_KP[ci], tot = 0, det = [];
+  ZW_MUT[ys].forEach(function (star, i) {
+    var b = null, q;
+    for (q = 0; q < 12; q++) { if ((zw.at[q] || []).indexOf(star) >= 0 || (zw.ax[q] || []).indexOf(star) >= 0) b = q; }
+    if (b === null) return;
+    var k = mod(zw.ming - b, 12);
+    if (k === K || (ci === 5 && k === 9)) { tot += ZW_MW[i]; det.push('유년 ' + star + ' ' + ZW_MUT_NAME[i] + '이 ' + PALACES[k] + '에 들어옵니다'); }
+    else if (i === 3 && k === mod(K + 6, 12)) { tot -= 0.5; det.push('유년 ' + star + ' 화기가 맞은편 ' + PALACES[k] + '에 있어 ' + PALACES[K] + '를 충합니다'); }
+  });
+  var dd = zwDecade(rep, Y), dec = null;
+  if (dd && !dd.none) { dec = dd.name; if (dd.k === K) { tot *= 1.3; det.push('현재 대한이 ' + PALACES[K] + '라 이 분야가 10년의 주제입니다'); } }
+  var yk = mod(zw.ming - mod(Y - 4, 12), 12);
+  if (yk === K) { tot *= 1.2; det.push('유년 명궁이 ' + PALACES[K] + '에 놓여 이 분야가 올해의 주제입니다'); }
+  return { v: tot, sig: tot >= 0.5 ? 1 : tot <= -0.5 ? -1 : 0, det: det, dec: dec, badMut: det.some(function (t) { return t.indexOf('화기') >= 0; }) };
+}
+var CROSS_ACT = [
+  { up: ['검진·운동 계획을 이 구간에 시작하면 이어가기 쉽습니다.', '미뤄 둔 검사나 생활 습관 정리를 앞당기세요.'], mix: ['무리한 목표보다 수면·식사 같은 기본 루틴을 먼저 고정하세요.', '증상이 있으면 구간과 상관없이 진료를 우선하세요.'], down: ['과로와 일정 과밀을 줄이고 회복 시간을 먼저 잡으세요.', '정기 검진과 비상 연락처를 미리 점검하세요.'] },
+  { up: ['새 만남이나 관계 진전은 이 구간에 시도하기 좋습니다.', '마음을 정했다면 표현의 시점을 미루지 마세요.'], mix: ['관계의 속도는 상대와 맞추고 중요한 약속은 서두르지 마세요.', '서로의 기대를 대화로 확인하는 데 시간을 쓰세요.'], down: ['큰 결정(동거, 결혼, 이별)은 이 구간 밖으로 미루세요.', '오해가 쌓이지 않게 말로 풀고 감정이 격할 때는 결론을 미루세요.'] },
+  { up: ['면담, 평가 제출, 이직 지원은 이 구간 안에 일정을 잡으세요.', '조건(연봉·역할·시작일)은 서면으로 확인한 뒤 결정하세요.'], mix: ['지원서와 포트폴리오 같은 준비 작업을 먼저 하고 결정은 보류하세요.', '퇴사처럼 되돌릴 수 없는 결정은 근거가 더 모일 때까지 미루세요.'], down: ['현 상태 유지가 기본입니다. 퇴사와 부서 이동은 미루세요.', '업무 범위와 합의를 기록으로 남기고 생활비 여유분을 점검하세요.'] },
+  { up: ['새 분야 탐색, 자격 취득, 포트폴리오 공개를 이 구간에 진행하세요.', '작게 시작해 반응을 보고 확장하세요.'], mix: ['방향을 정하기 전에 두세 가지 선택지를 작은 규모로 시험하세요.', '큰 투자나 전업은 결정을 보류하세요.'], down: ['방향 전환은 미루고 지금 하는 일의 기술과 기록을 쌓으세요.', '수입이 줄어도 버틸 수 있는지 먼저 확인하세요.'] },
+  { up: ['수입 확대나 계약 협상은 이 구간에 진행하세요.', '고정 지출과 저축 계획을 함께 정리하세요.'], mix: ['큰 지출과 투자는 보류하고 현금 흐름부터 확인하세요.', '조건이 불분명한 거래는 서류로 확인한 뒤 진행하세요.'], down: ['큰 지출, 보증, 투자는 이 구간에서 피하세요.', '비상금을 확보하고 새는 지출을 점검하세요.'] },
+  { up: ['이사나 이동은 이 구간에 일정을 잡으면 수월합니다.', '계약 조건과 비용을 미리 비교해 두세요.'], mix: ['후보지를 보되 계약은 서두르지 마세요.', '이동 시기를 유연하게 열어 두세요.'], down: ['이사 계약과 큰 이동은 미루는 편이 안전합니다.', '이동 비용과 일정 지연에 대비한 여유를 두세요.'] }
+];
+var CROSS_MODE = { up: '실행·확장', mix: '확인·준비', down: '방어·유지' };
+function sajuCheck(rep) {
+  var P = rep.P, out = [];
+  var cols = [['년', P.year], ['월', P.month], ['일', P.day], ['시', P.hour]];
+  out.push('원국: ' + cols.map(function (c) { return c[0] + ' ' + (c[1] ? g(c[1]) : '(시각 모름)'); }).join(' · '));
+  var t0 = findTerm(rep.J, -1), t1 = findTerm(rep.J, 1), hrs = Math.min(rep.J - t0, t1 - rep.J) * 24;
+  out.push(hrs < 36 ? '절기 경계까지 약 ' + Math.round(hrs) + '시간입니다. 태어난 시각이 조금만 달라도 월주(와 대운 시작 나이)가 바뀔 수 있으니 시각을 확인하세요.' : '가까운 절기 경계까지 약 ' + (hrs / 24).toFixed(1) + '일이라 월주는 안정적입니다.');
+  if (rep.input.hk) {
+    var r = mod(rep.input.h * 60 + (rep.input.mi || 0) - 1380, 120), dist = Math.min(r, 120 - r);
+    out.push(dist < 20 ? '입력 시각이 시주 경계(2시간 단위)에서 ' + dist + '분 떨어져 있어, 시각이 조금만 달라도 시주가 바뀔 수 있습니다.' : '입력 시각은 시주 경계에서 ' + dist + '분 떨어져 있어 시주가 안정적입니다.');
+  } else out.push('태어난 시각을 몰라 시주 없이 세 기둥으로 계산했습니다. 시주가 필요한 해석(자식궁, 말년, 상승궁·하우스, 자미두수 명궁)은 정확도가 떨어집니다.');
+  var d = rep.daeun;
+  if (d) {
+    var cur = luckAt(rep, lifeAge(rep, nowJ())), nx = null;
+    d.list.forEach(function (x) { if (cur && x.start === cur.end) nx = x; });
+    var ny = nx ? new Date((rep.J + nx.start * YEAR_D - 2440587.5) * 86400000).getUTCFullYear() : null;
+    out.push('대운은 ' + (d.forward ? '순행' : '역행') + ', 시작 ' + d.start.toFixed(1) + '세(절기까지 일수÷3)입니다.' + (cur ? ' 현재 ' + gk([cur.stem, cur.branch]) + ' 대운(만 ' + Math.floor(cur.start) + '~' + Math.floor(cur.end) + '세)' + (nx ? ', 다음 ' + gk([nx.stem, nx.branch]) + ' 대운은 ' + ny + '년 무렵 시작합니다.' : '입니다.') : ''));
+  } else out.push('성별을 선택하지 않아 대운은 계산하지 않았습니다.');
+  out.push('개발 단계에서 연·월주는 천문 계산과 1,500건, 일·시주는 다른 만세력 라이브러리와 1,500건을 대조해 모두 일치했습니다.');
+  return out;
+}
+function crossCheck(rep, Y0, M0, n, ci) {
+  var months = [], Y = Y0, m = M0, i, sy = {};
+  var sysNames = ['사주', '자미두수', '서양 트랜짓', '인도 다샤'];
+  for (i = 0; i < n; i++) {
+    var rows = monthRows(rep, Y);
+    var r = rows.rows[m - 1], J = jd(Y, m, 15, 3, 0), yr = rows;
+    var sc = r.scores[ci], s0 = { sig: sc <= 2 ? -1 : sc >= 4 ? 1 : 0, txt: CATS[ci] + ' ' + sc + '점 · ' + r.tag + (r.flags.length ? ' (' + r.flags.join('·') + ')' : '') };
+    if (!sy[Y]) sy[Y] = zwYearSignal(rep, Y, ci);
+    var z = sy[Y];
+    var s1 = z ? { sig: z.sig, txt: z.det.length ? z.det.join(' / ') : '유년 사화가 이 분야 궁에 닿지 않습니다', yearly: true } : { sig: 0, txt: '시각 정보가 없어 자미두수 명반이 없습니다', none: true };
+    var t = transitSignal(rep, Y, m, ci);
+    var s2 = { sig: t.sig, txt: t.asp.length ? t.asp.map(function (a) { return a.txt; }).join(' / ') : '이 분야와 닿는 느린 행성 트랜짓이 없습니다', retro: t.retro };
+    if (t.noAngles) s2.txt += ' (시각 모름: 앵글·하우스 지점 제외)';
+    var v = vedicSignal(rep, J, ci);
+    var s3 = v ? { sig: v.sig, txt: v.why + (v.det.length ? ': ' + v.det.join('; ') : ': 이 분야와 직접 닿지 않습니다') } : { sig: 0, txt: '다샤 범위 밖', none: true };
+    var sg = [s0, s1, s2, s3], pos = 0, neg = 0, avail = 0;
+    sg.forEach(function (x) { if (!x.none) { avail++; if (x.sig > 0) pos++; if (x.sig < 0) neg++; } });
+    var cls = (pos >= 3 && neg === 0) ? '공통 호재' : (pos >= 2 && neg === 0) ? '대체로 호재' : (neg >= 3 && pos === 0) ? '공통 주의' : (neg >= 2 && pos === 0) ? '대체로 주의' : (pos >= 1 && neg >= 1) ? '의견 갈림' : '중립';
+    var risks = [];
+    if (s0.sig < 0) risks.push('사주 월 점수가 낮아 ' + CATS[ci] + ' 흐름이 약합니다.');
+    if (r.flags.indexOf('충') >= 0) risks.push('일지와 충이 들어 변동과 이동에 드는 비용이 늘 수 있습니다.');
+    t.asp.forEach(function (a) {
+      if (a.w < 0) risks.push(a.pl === 'p4' ? '토성 ' + a.asp + ': 승인과 일정이 늦어지고 책임이 늘 수 있습니다.' : a.pl === 'p5' ? '천왕성 ' + a.asp + ': 갑작스러운 변경으로 계획이 흔들릴 수 있습니다.' : a.pl === 'p7' ? '명왕성 ' + a.asp + ': 압박과 힘겨루기가 생길 수 있습니다.' : '해왕성 ' + a.asp + ': 정보가 불분명해 착오가 생기기 쉽습니다.');
+    });
+    if (t.retro) risks.push('수성 역행 시기라 계약과 서류 확인이 지연되거나 수정될 수 있습니다.');
+    if (v && v.obstacle) risks.push('다샤 행성이 6·8·12하우스에 걸려 방해와 지연 요소가 따릅니다.');
+    if (z && z.badMut) risks.push('유년 화기가 걸려 막힘, 손실, 문서·구설 점검이 필요합니다.');
+    var yf = yr.yflags || []; yf.forEach(function (f) { if (['삼형 완성', '관살혼잡', '월지 충', '대운 교체'].indexOf(f.name) >= 0 && risks.length < 8) risks.push('사주 세운: ' + f.name + '.'); });
+    months.push({ Y: Y, m: m, hj: r.hj, sig: sg, pos: pos, neg: neg, cls: cls, risks: risks, mode: (cls === '공통 호재' || cls === '대체로 호재') ? 'up' : (cls === '공통 주의' || cls === '대체로 주의') ? 'down' : 'mix' });
+    m++; if (m > 12) { m = 1; Y++; }
+  }
+  var phases = [], cur = null;
+  months.forEach(function (x) {
+    if (!cur || cur.mode !== x.mode) { cur = { mode: x.mode, from: x, to: x, months: [] }; phases.push(cur); }
+    cur.to = x; cur.months.push(x);
+  });
+  phases.forEach(function (p) {
+    var rs = {}; p.months.forEach(function (x) { x.risks.forEach(function (t) { rs[t] = (rs[t] || 0) + 1; }); });
+    p.risks = Object.keys(rs).sort(function (a, b) { return rs[b] - rs[a]; }).slice(0, 3);
+    p.acts = CROSS_ACT[ci][p.mode]; p.label = CROSS_MODE[p.mode];
+    p.conflict = p.months.filter(function (x) { return x.cls === '의견 갈림'; }).length;
+  });
+  var agree = months.filter(function (x) { return x.cls === '공통 호재' || x.cls === '공통 주의'; });
+  var split = months.filter(function (x) { return x.cls === '의견 갈림'; });
+  return { ci: ci, systems: sysNames, months: months, phases: phases, agree: agree, split: split, check: sajuCheck(rep) };
+}
+
 function lifeAge(rep, J) { return (J - rep.J) / 365.2425; }
 function nowJ() { var n = new Date(); return jd(n.getUTCFullYear(), n.getUTCMonth() + 1, n.getUTCDate(), 0, 0); }
 
@@ -1682,7 +1872,7 @@ var E = {
   planetLon: planetLon, allBodies: allBodies, meanNode: meanNode, ayanamsa: ayanamsa,
   buildReport: buildReport, monthRows: monthRows, pillars: pillars, sunLon: sunLon, moonLon: moonLon, jd: jd, jdn: jdn,
   angles: angles, houseOf: houseOf, ziwei: ziwei, lunarOf: lunarOf, gateOf: gateOf, humanDesign: humanDesign,
-  tenGod: tenGod, zwDecade: zwDecade, zwTheme: ZW_PAL_THEME, zwMutText: ZW_MUT_TEXT, zwAuxKw: ZW_AUX_KW, unseong: unseong, relations: relations, gongmang: gongmang, mbti: { valid: mbValid, overview: mbtiOverview, cat: mbtiCat, month: mbtiMonth }, sinsal: sinsal, guinAt: guinAt, g: g, gk: gk, quoteFor: function (el, seed) { var q = QUOTES[el]; return q[seed % q.length]; }, stemEl: stemEl,
+  tenGod: tenGod, crossCheck: crossCheck, dashaAt: dashaAt, vimshottari: vimshottari, zwDecade: zwDecade, zwTheme: ZW_PAL_THEME, zwMutText: ZW_MUT_TEXT, zwAuxKw: ZW_AUX_KW, unseong: unseong, relations: relations, gongmang: gongmang, mbti: { valid: mbValid, overview: mbtiOverview, cat: mbtiCat, month: mbtiMonth }, sinsal: sinsal, guinAt: guinAt, g: g, gk: gk, quoteFor: function (el, seed) { var q = QUOTES[el]; return q[seed % q.length]; }, stemEl: stemEl,
   data: { STEM_KO: STEM_KO, STEM_HJ: STEM_HJ, BR_KO: BR_KO, BR_HJ: BR_HJ, ANIMAL: ANIMAL, EL: EL, EL_HJ: EL_HJ, EL_INFO: EL_INFO, SIGNS: SIGNS, CATS: CATS, GOD_GROUP: GOD_GROUP, JU_NAME: JU_NAME }
 };
 if (typeof module !== 'undefined' && module.exports) module.exports = E; else root.Engine = E;
@@ -2001,6 +2191,40 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
     $('#year').innerHTML = h;
     renderDetail(items);
   }
+
+  /* ---------- 교차 검토 ---------- */
+  var xs = { ci: 2, per: 'span' };
+  function renderCross() {
+    var sec = $('#cross'); if (!sec || !state.rep) return;
+    var Y0 = TY, M0 = TM, n = 15;
+    if (xs.per === 'year') { M0 = 1; n = 12; } else if (xs.per === 'next') { Y0 = TY + 1; M0 = 1; n = 12; }
+    if (xs.per === 'year' && TM > 1) { M0 = TM; n = 13 - TM; }
+    var X = E.crossCheck(state.rep, Y0, M0, n, xs.ci);
+    var h = '<div class="head"><h2 id="x-h">교차 검토</h2><p class="sub">사주·자미두수·서양 트랜짓·인도 다샤를 따로 읽고, 같은 시기를 가리키는 곳과 엇갈리는 곳을 나눠 봅니다. 기회뿐 아니라 지연·비용·실패 조건도 함께 봅니다.</p></div>';
+    h += '<div class="ctrl"><label for="x-cat" class="sub">분야</label><select id="x-cat">' + D.CATS.map(function (c, i) { return '<option value="' + i + '"' + (i === xs.ci ? ' selected' : '') + '>' + c + '</option>'; }).join('') + '</select>';
+    h += '<label for="x-per" class="sub">기간</label><select id="x-per"><option value="span"' + (xs.per === 'span' ? ' selected' : '') + '>앞으로 15개월</option><option value="year"' + (xs.per === 'year' ? ' selected' : '') + '>올해 남은 기간</option><option value="next"' + (xs.per === 'next' ? ' selected' : '') + '>내년</option></select></div>';
+    h += '<div class="xsum"><b>1단계 · 사주 원국과 대운 검증</b>' + X.check.map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('') + '</div>';
+    var sym = { '1': '▲', '-1': '▼', '0': '·' };
+    h += '<div class="xcard"><h4>2단계 · 체계별 신호 (▲ 호재 · ▼ 주의 · · 중립)</h4><div class="tscroll"><table class="xt"><thead><tr><th class="rh" scope="col">체계</th>' + X.months.map(function (m) { return '<th scope="col">' + String(m.Y).slice(2) + '.' + m.m + '</th>'; }).join('') + '</tr></thead><tbody>';
+    X.systems.forEach(function (nm, si) {
+      h += '<tr><th class="rh" scope="row">' + nm + (si === 1 ? '<small> (연 단위)</small>' : '') + '</th>' + X.months.map(function (m) { var s = m.sig[si]; return '<td class="' + (s.sig > 0 ? 'p' : s.sig < 0 ? 'n' : '') + '" title="' + esc(s.txt) + '">' + (s.none ? '–' : sym[s.sig]) + '</td>'; }).join('') + '</tr>';
+    });
+    h += '<tr class="tot"><th class="rh" scope="row">종합</th>' + X.months.map(function (m) { var c = m.cls; return '<td class="' + (/호재/.test(c) ? 'p' : /주의/.test(c) ? 'n' : '') + '" title="' + c + '">' + (c === '공통 호재' ? '공통▲' : c === '공통 주의' ? '공통▼' : c === '대체로 호재' ? '▲' : c === '대체로 주의' ? '▼' : c === '의견 갈림' ? '갈림' : '·') + '</td>'; }).join('') + '</tr></tbody></table></div>';
+    h += '<p class="ssnote sub">칸에 마우스를 올리거나 길게 누르면 근거가 보입니다. 자미두수는 월 단위가 아닌 해 단위 신호라 같은 해에는 같은 값입니다.</p></div>';
+    function fl(arr) { return arr.map(function (m) { return String(m.Y).slice(2) + '.' + m.m; }).join(', '); }
+    h += '<div class="xcard"><h4>3단계 · 같이 가리키는 시기와 엇갈리는 시기</h4>';
+    h += '<p><span class="chip acc">공통</span> ' + (X.agree.length ? esc(fl(X.agree)) + ' — ' + X.agree.map(function (m) { return m.cls; }).filter(function (v, i, a) { return a.indexOf(v) === i; }).join('·') + '. 세 체계 이상이 같은 방향입니다.' : '세 체계 이상이 같은 방향을 가리키는 달은 없습니다. 어느 한 체계만으로 결정하지 말라는 뜻에 가깝습니다.') + '</p>';
+    h += '<p><span class="chip warn">갈림</span> ' + (X.split.length ? esc(fl(X.split)) + ' — 호재와 주의 신호가 함께 있습니다. 이 달은 결론을 서두르지 않는 것이 안전합니다.' : '호재와 주의가 맞서는 달은 없습니다.') + '</p>';
+    h += '<p class="ssnote sub">체계끼리 일치한다고 해서 맞는다는 증명은 아닙니다. 같은 생년월일에서 나온 규칙이라 서로 독립적인 검증이 아닙니다.</p></div>';
+    h += '<div class="xcard"><h4>4단계 · 시기별 대응 (시간 순서)</h4>';
+    X.phases.forEach(function (ph, i) {
+      var a = ph.from, b = ph.to, rng = String(a.Y).slice(2) + '.' + a.m + (a === b ? '' : '~' + String(b.Y).slice(2) + '.' + b.m);
+      h += '<div class="nrow"><div><span class="c nums">' + rng + '</span></div><p><b>' + '구간 ' + (i + 1) + ' · ' + ph.label + '</b>' + (ph.conflict ? ' <span class="chip">의견 갈림 ' + ph.conflict + '개월</span>' : '') + '<br>' + ph.acts.map(esc).join('<br>') + (ph.risks.length ? '<br><span class="chip warn">지연·비용·실패 조건</span> ' + ph.risks.map(esc).join(' ') : '') + '</p></div>';
+    });
+    h += '</div>';
+    h += '<p class="disc">이 비교의 규칙(다샤 하우스 판정, 트랜짓 가중치, 자미두수 유년사화 판정)은 전통 이론을 단순화한 것이며 다른 프로그램과 대조·검증하지 않았습니다. 지금은 결정을 대신하는 도구가 아니라 생각을 정리하는 참고용입니다.</p>';
+    sec.innerHTML = h;
+  }
   function renderDetail(items) {
     var d = $('#detail'), h;
     if (state.cat === -1) {
@@ -2043,6 +2267,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
     renderTarot(state.rep);
     renderFields();
     renderYear();
+    renderCross();
     if (typeof chatReset === 'function') chatReset();
   }
   function readForm() {
@@ -2083,6 +2308,8 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
     else if (t.dataset.k) { var kk = t.dataset.k.split('-'); state.sel = { Y: +kk[0], m: +kk[1] }; state.cat = -1; renderYear(); }
   });
   document.addEventListener('change', function (e) {
+    if (e.target.id === 'x-cat') { xs.ci = +e.target.value; renderCross(); return; }
+    if (e.target.id === 'x-per') { xs.per = e.target.value; renderCross(); return; }
     if (e.target.id === 'sel-year') { state.view = e.target.value; state.sel = null; renderYear(); }
   });
   document.addEventListener('keydown', function (e) {
@@ -2115,6 +2342,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
     else if (/공망|운성|합충|삼합|육합|충돌|형살|원국 관계|지지 관계/.test(q)) o.topic = 'rel';
     else if (/mbti|엠비티아이/i.test(q)) o.topic = 'mbti';
     else if (/타로|카드/.test(q)) o.topic = 'tarot';
+    else if (/교차|종합 ?검토|우선순위|전략|다샤|트랜짓|대응/.test(q)) o.topic = 'cross';
     else if (/오늘|금일/.test(q)) o.topic = 'today';
     else if (/용신|보강|오행|부족한 기운|필요한 기운/.test(q)) o.topic = 'el';
     else if (/대운|10년/.test(q)) o.topic = 'luck';
@@ -2228,6 +2456,16 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
     out.push('오늘의 카드는 ' + c.name + (td.entry.rev ? ' (역방향)' : '') + '입니다. ' + (td.entry.rev ? c.advRev : c.advUp));
     return { t: out, src: '사주 일진 · 타로' };
   }
+  function ansCross(o) {
+    var ci = o.cat >= 0 ? o.cat : xs.ci, X = E.crossCheck(state.rep, TY, TM, 15, ci), out = [];
+    out.push('앞으로 15개월 ' + CATN[ci] + ' 교차 검토입니다.');
+    function fl(arr) { return arr.map(function (m) { return String(m.Y).slice(2) + '.' + m.m; }).join(', '); }
+    out.push(X.agree.length ? '체계들이 같은 방향인 달: ' + fl(X.agree) + '.' : '세 체계 이상이 같은 방향인 달은 없습니다.');
+    if (X.split.length) out.push('호재와 주의가 엇갈리는 달: ' + fl(X.split) + '. 이 달은 결론을 서두르지 마세요.');
+    X.phases.slice(0, 3).forEach(function (ph) { out.push(String(ph.from.Y).slice(2) + '.' + ph.from.m + '~' + String(ph.to.Y).slice(2) + '.' + ph.to.m + ' ' + ph.label + ': ' + ph.acts[0] + (ph.risks.length ? ' 주의: ' + ph.risks[0] : '')); });
+    out.push('자세한 표는 위 ‘교차 검토’에서 볼 수 있습니다.');
+    return { t: out, src: '사주·자미두수·서양 트랜짓·인도 다샤 교차 비교' };
+  }
   function ansTopic(o) {
     var rep = state.rep, S = rep.S, out = [];
     switch (o.topic) {
@@ -2254,6 +2492,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
     else if (o.topic === 'rel') a = ansRel(o);
     else if (o.topic === 'guin') a = ansGuin(o);
     else if (o.topic === 'today') a = ansToday();
+    else if (o.topic === 'cross') a = ansCross(o);
     else if (o.topic) a = ansTopic(o);
     else if (o.cat >= 0) a = ansCat(o.cat, o);
     else if (o.scope || o.best || o.worst) a = ansGeneral(o);
