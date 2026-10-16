@@ -103,6 +103,8 @@ h2 { font-size: clamp(22px, 3.4vw, 30px); margin: 0; }
 .chip.warn { border-color: var(--seal); color: var(--seal); }
 .chip.acc { border-color: var(--accent); color: var(--accent); }
 .sample { margin: 0 0 18px; }
+.savebox { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-top: 4px; }
+.linkbtn { background: none; border: 0; padding: 0; font: inherit; font-size: 13px; color: var(--ink2); text-decoration: underline; cursor: pointer; }
 
 .today { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 20px; }
 .quote { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 26px 26px 22px; }
@@ -296,9 +298,13 @@ table.heat { border-collapse: separate; border-spacing: 3px; width: 100%; min-wi
           <label class="check" for="f-unk"><input id="f-unk" type="checkbox">시각을 모릅니다</label>
           <div class="field"><label for="f-city">출생지</label><select id="f-city"></select></div>
         </div>
+        <div class="savebox">
+          <label class="check" for="f-save"><input id="f-save" type="checkbox">이 기기에 내 정보 저장</label>
+          <button type="button" class="linkbtn" id="f-clear" hidden>저장된 정보 지우기</button>
+        </div>
         <p class="err" id="err" role="alert"></p>
         <button class="go" type="submit">나침반 돌리기</button>
-        <p class="fine">입력한 정보는 이 페이지 안에서만 계산되고 저장하거나 전송하지 않습니다. 시각은 한국 표준시 기준입니다.</p>
+        <p class="fine">입력한 정보는 서버로 전송되지 않고 이 브라우저 안에서만 계산됩니다. ‘이 기기에 내 정보 저장’을 선택한 경우에만 이 기기의 브라우저에 보관되며, 공용 컴퓨터에서는 선택하지 마세요. 시각은 한국 표준시 기준입니다.</p>
       </form>
     </div>
     <div class="dial">
@@ -1591,6 +1597,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
   $('#form').addEventListener('submit', function (e) {
     e.preventDefault();
     var inp = readForm(); if (!inp) return;
+    saveInfo(inp);
     run(inp, false);
     var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
     $('#today').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
@@ -1613,8 +1620,35 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
     e.preventDefault(); state.tab = CAT_KEYS[n]; renderFields(); $('#tab-' + state.tab).focus();
   });
 
-  /* 예시 입력으로 시작 */
-  run({ name: '', gender: '', y: 1990, m: 5, d: 15, h: 14, mi: 30, hk: true, city: { lat: CITIES[0][1], lon: CITIES[0][2] } }, true);
+  /* 이 기기에 저장 (브라우저 localStorage, 서버 전송 없음) */
+  var SKEY = 'nachimban.profile.v1';
+  function saveInfo(inp) {
+    try {
+      if ($('#f-save').checked) {
+        localStorage.setItem(SKEY, JSON.stringify({ name: inp.name, gender: inp.gender, date: $('#f-date').value, time: $('#f-time').value, unk: $('#f-unk').checked, city: $('#f-city').value }));
+        $('#f-clear').hidden = false;
+      } else { localStorage.removeItem(SKEY); $('#f-clear').hidden = true; }
+    } catch (x) {}
+  }
+  function loadInfo() {
+    try {
+      var s = JSON.parse(localStorage.getItem(SKEY) || 'null'); if (!s || !s.date) return null;
+      $('#f-name').value = s.name || ''; $('#f-date').value = s.date; if (s.time) $('#f-time').value = s.time;
+      $('#f-unk').checked = !!s.unk; $('#f-time').disabled = !!s.unk; $('#f-city').value = s.city || '0';
+      var rd = document.querySelector('input[name=gender][value="' + (s.gender || '') + '"]'); if (rd) rd.checked = true;
+      $('#f-save').checked = true; $('#f-clear').hidden = false;
+      return readForm();
+    } catch (x) { return null; }
+  }
+  $('#f-clear').addEventListener('click', function () {
+    try { localStorage.removeItem(SKEY); } catch (x) {}
+    $('#f-save').checked = false; this.hidden = true;
+    $('#err').textContent = '저장된 정보를 지웠습니다.';
+  });
+
+  /* 저장된 정보가 있으면 그 정보로, 없으면 예시 입력으로 시작 */
+  var saved = loadInfo();
+  if (saved) run(saved, false); else run({ name: '', gender: '', y: 1990, m: 5, d: 15, h: 14, mi: 30, hk: true, city: { lat: CITIES[0][1], lon: CITIES[0][2] } }, true);
 })();
 </script>
 
