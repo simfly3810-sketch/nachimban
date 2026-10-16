@@ -190,6 +190,20 @@ h2 { font-size: clamp(22px, 3.4vw, 30px); margin: 0; }
 .tdet { margin: 0 0 20px; font-size: 13px; color: var(--ink2); }
 .tdet summary { cursor: pointer; }
 .tdet .tnote { margin: 10px 0 0; }
+.tpair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.tcard { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px 22px; display: grid; gap: 10px; align-content: start; }
+.tcard-main { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 16px; align-items: center; }
+.tcard .tface { width: 64px; }
+.tcname { margin: 0; font-family: var(--f-display); font-size: 22px; font-weight: 600; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.tkw { margin: 4px 0 0; font-size: 13px; color: var(--ink2); }
+.tadv { margin: 0; font-size: 15px; line-height: 1.7; }
+.tnote2, .tsj, .twhy { margin: 0; font-size: 13px; color: var(--ink2); }
+.tcard .tdet { margin: 0; }
+.tcard .tdet ul { margin: 8px 0 0; padding-left: 18px; font-size: 12px; }
+.tcell { white-space: nowrap; }
+.tm { font: inherit; font-size: 12px; background: var(--surface2); border: 0; border-radius: 6px; padding: 4px 8px; color: var(--ink); cursor: pointer; }
+.tm small { color: var(--seal); margin-left: 3px; }
+@media (max-width: 720px) { .tpair { grid-template-columns: minmax(0, 1fr); } }
 .tbasis { font-size: 14px; margin: 26px 0 0; color: var(--ink2); font-weight: 500; }
 .tsum { margin: 10px 0 0; font-size: 13px; color: var(--ink2); }
 .tnote { font-size: 13px; color: var(--ink2); margin: 0 0 20px; max-width: 60em; }
@@ -313,7 +327,7 @@ table.heat { border-collapse: separate; border-spacing: 3px; width: 100%; min-wi
       <li><b>수비학</b>생명수, 개인년수·개인월수. 이름수는 포함하지 않습니다.</li>
       <li><b>자미두수</b>음력 변환, 명궁, 오행국, 자미·천부 계열 14주성 배치와 12궁 중 해당 궁. 보조성과 사화는 포함하지 않습니다.</li>
       <li><b>휴먼디자인 (일부)</b>태양·지구의 게이트와 라인, 프로파일. 타입·권위·센터는 모든 행성 위치가 필요해 포함하지 않습니다.</li>
-      <li><b>타로</b>메이저 아르카나 22장을 사용하고, 카드를 뽑는 기능 없이 계산된 결과에 대응하는 카드를 보여 줍니다. 별자리·행성·요일·수비학은 골든던 계열 대응, 십성·오행 슈트·자미두수 주성·휴먼디자인 라인은 의미가 비슷한 카드를 연결한 것으로 정통 대응표가 아닙니다. 마이너 아르카나는 슈트 단위로만 쓰고 개별 카드는 해석하지 않습니다. 종합 해석은 카드별 톤 점수(−2~+2)의 평균과 사주 월별 점수의 15개월 평균을 비교한 규칙 기반 결과입니다.</li>
+      <li><b>타로</b>메이저 아르카나 22장만 씁니다. 전체·오늘·월별 카드는 뽑는 것이 아니라 계산 결과에서 정해집니다. 사주(십성·오행·대운), 서양 점성(태양·달·상승궁·행성), 태국 요일 행성, 수비학(생명수·개인월수), 자미두수 주성, 휴먼디자인 라인이 각각 가리키는 카드를 ‘주도·추진 / 감정·관계 / 질서·안정 / 변화·시험’ 네 흐름으로 묶고, 가장 무게가 큰 흐름 안에서 가장 많이 겹친 카드를 고릅니다. 사주 월별 점수가 낮은 달과 오늘 일진이 내게 부담이 되는 날은 역방향으로 읽습니다. 정통 대응표가 없는 항목(십성·오행·자미두수·휴먼디자인)은 의미가 비슷한 카드를 연결한 것입니다.</li>
       <li><b>토정비결</b>144괘 원문 데이터가 필요해 아직 포함하지 않았습니다.</li>
     </ul>
     <p class="disc">이 페이지의 풀이는 전통 이론을 규칙으로 옮긴 참고 정보입니다. 건강, 재물, 이사 같은 중요한 결정은 전문가와 상담하고 본인의 판단을 우선하세요.</p>
@@ -1148,8 +1162,89 @@ function tarotSynth(rep, Y0, M0) {
 function tarotYearCard(rep, Y) { return rep.numerology ? reduceNum(reduceNum(rep.numerology.m, false) + reduceNum(rep.numerology.d, false) + reduceNum(Y, false), false) : 1; }
 
 
+/* ---------- 종합 카드 선정: 여러 체계의 결과를 4가지 흐름으로 묶어 가장 무게가 큰 흐름의 카드를 고른다 ---------- */
+var CARD_GROUP = [0, 0, 1, 1, 0, 2, 1, 0, 0, 2, 3, 2, 3, 3, 1, 3, 3, 1, 1, 0, 3, 2];
+var GROUP_NAME = ['주도·추진', '감정·관계', '질서·안정', '변화·시험'];
+var EL_CARD = [3, 20, 21, 11, 12];
+var CAT_CARD = [8, 6, 4, 1, 3, 7];
+function vote(e, w) { return e ? { e: e, w: w } : null; }
+function pickCard(votes) {
+  votes = votes.filter(function (v) { return v; });
+  var gs = [0, 0, 0, 0], gn = [0, 0, 0, 0], byCard = {};
+  votes.forEach(function (v) { var g = CARD_GROUP[v.e.id]; gs[g] += v.w; gn[g]++; byCard[v.e.id] = (byCard[v.e.id] || 0) + v.w; });
+  var bg = 0;
+  for (var g = 1; g < 4; g++) if (gs[g] > gs[bg]) bg = g;
+  var best = null, bw = -1;
+  votes.forEach(function (v) { if (CARD_GROUP[v.e.id] === bg && byCard[v.e.id] > bw) { bw = byCard[v.e.id]; best = v.e; } });
+  var why = votes.filter(function (v) { return CARD_GROUP[v.e.id] === bg; }).map(function (v) { return v.e.src.replace(/ · /, ' ') + ' → ' + cardOf(v.e.id).name; });
+  var all = votes.map(function (v) { return v.e.src.replace(/ · /, ' ') + ' → ' + cardOf(v.e.id).name; });
+  return { entry: best, group: GROUP_NAME[bg], n: gn[bg], total: votes.length, why: why, all: all };
+}
+function elCardEntry(src, role, el) { return tEntry(src, role, EL_CARD[el], false, 'keyword'); }
+function tarotOverallPick(rep) {
+  var P = rep.P, S = rep.S, w = rep.west, v = rep.vedic, T = rep.tarot, hasT = !!rep.cuspsLon;
+  var sys = T.systems, flat = {};
+  sys.forEach(function (s) { s.entries.forEach(function (x) { if (x.kind === 'card') flat[x.src] = x; }); });
+  var gLuck = luckInfo(rep, luckAt(rep, lifeAge(rep, nowJ())));
+  var votes = [];
+  T.birth.forEach(function (b, i) { votes.push(vote(b, i === 0 ? 1.5 : 0.8)); });
+  sys.forEach(function (s) {
+    s.entries.forEach(function (x) {
+      if (x.kind !== 'card') return;
+      if (x.src.indexOf('수비학 타로') === 0) return;
+      var wt = 1;
+      if (x.src.indexOf('생명수') >= 0) wt = 1.5;
+      else if (x.src.indexOf('대운') >= 0) wt = 1.5;
+      else if (x.src.indexOf('태양궁') >= 0 || x.src.indexOf('달궁') >= 0) wt = 1.2;
+      else if (x.src.indexOf('명궁') >= 0) wt = 1.2;
+      votes.push(vote(x, wt));
+    });
+  });
+  votes.push(vote(elCardEntry('사주 · 보강 오행 ' + EL[S.yong], '채울 기운', S.yong), 1.2));
+  var pick = pickCard(votes);
+  pick.entry = tEntry(pick.entry.src, '전체를 대표하는 카드', pick.entry.id, false, pick.entry.basis);
+  return pick;
+}
+function tarotTodayPick(rep, Y, M, D) {
+  var tp = pillars(Y, M, D, 12, 0, false), god = tenGod(rep.P.day[0], tp.day[0]), S = rep.S;
+  var te = stemEl(tp.day[0]), J = jd(Y, M, D, 3, 0), dow = new Date(Date.UTC(Y, M - 1, D)).getUTCDay();
+  var moonSign = Math.floor(moonLon(J) / 30) % 12;
+  var votes = [
+    vote(tEntry('사주 · 오늘 일진 ' + gk(tp.day) + ' (나에게 ' + god.name + ')', '오늘의 십성', GOD_CARD[god.group], false, 'keyword'), 1.5),
+    vote(elCardEntry('사주 · 오늘 일진 오행 ' + EL[te], '오늘의 기운', te), 1),
+    vote(tEntry('수비학 · 생일과 오늘 날짜의 합', '오늘의 수', tarotDay(rep, Y, M, D), false, 'tradition'), 1.2),
+    vote(tEntry('서양 · 오늘의 달 ' + SIGNS[moonSign], '오늘의 감정', SIGN_CARD[moonSign], false, 'tradition'), 1),
+    vote(tEntry('태국 · ' + ['일', '월', '화', '수', '목', '금', '토'][dow] + '요일 행성', '오늘의 요일', THAI_CARD[dow], false, 'tradition'), 0.8),
+    vote(tEntry('나의 전체 카드 ' + cardOf(rep.tarot.pick.entry.id).name, '타고난 바탕', rep.tarot.pick.entry.id, false, 'tradition'), 0.7)
+  ];
+  var pick = pickCard(votes);
+  var warn = (te + 2) % 5 === S.yong || (te === S.most && S.maxC >= 3);
+  pick.entry = tEntry(pick.entry.src, '오늘의 카드', pick.entry.id, warn, pick.entry.basis);
+  pick.note = warn ? '오늘 일진 기운이 내게 부담이 되는 쪽이라 역방향으로 읽었습니다.' : '';
+  return pick;
+}
+function tarotMonthPick(rep, Y, r) {
+  var S = rep.S, J = jd(Y, r.month, 15, 3, 0), lk = luckInfo(rep, luckAt(rep, lifeAge(rep, J)));
+  var sl = Math.floor(sunLon(J) / 30) % 12;
+  var votes = [
+    vote(tEntry('사주 · ' + r.hj + '월 천간 ' + r.god, '이달의 십성', GOD_CARD[r.group], false, 'keyword'), 1.5),
+    vote(elCardEntry('사주 · 월지 오행 ' + EL[r.be], '이달의 기운', r.be), 1),
+    vote(tEntry('수비학 · 개인월수 ' + r.pm, '이달의 수', tarotNumber(r.pm), false, 'tradition'), 1.2),
+    vote(tEntry('서양 · 태양 ' + SIGNS[sl], '이달의 계절', SIGN_CARD[sl], false, 'tradition'), 1),
+    vote(tEntry('분야 · 가장 강한 ' + CATS[r.best], '이달의 강점', CAT_CARD[r.best], false, 'keyword'), 1),
+    lk ? vote(tEntry('사주 · 현재 대운 ' + lk.gz + ' ' + lk.god, '10년의 배경', GOD_CARD[lk.group], false, 'keyword'), 0.4) : null
+  ];
+  var pick = pickCard(votes);
+  var avg = r.scores.reduce(function (a, b) { return a + b; }, 0) / 6;
+  var warn = avg <= 2.5;
+  pick.entry = tEntry(pick.entry.src, '이달의 카드', pick.entry.id, warn, pick.entry.basis);
+  pick.avg = Math.round(avg * 10) / 10;
+  pick.note = warn ? '이달의 사주 점수가 낮아(평균 ' + pick.avg + '점) 역방향으로 읽었습니다.' : '';
+  return pick;
+}
+
 var E = {
-  tarot: { card: cardOf, text: tText, name: tName, birth: tarotBirth, day: tarotDay, report: tarotReport, synth: tarotSynth, yearCard: tarotYearCard, roman: ROMAN, suits: SUITS, number: tarotNumber },
+  tarot: { overallPick: tarotOverallPick, todayPick: tarotTodayPick, monthPick: tarotMonthPick, card: cardOf, text: tText, name: tName, birth: tarotBirth, day: tarotDay, report: tarotReport, synth: tarotSynth, yearCard: tarotYearCard, roman: ROMAN, suits: SUITS, number: tarotNumber },
   planetLon: planetLon, allBodies: allBodies, meanNode: meanNode, ayanamsa: ayanamsa,
   buildReport: buildReport, monthRows: monthRows, pillars: pillars, sunLon: sunLon, moonLon: moonLon, jd: jd, jdn: jdn,
   angles: angles, houseOf: houseOf, ziwei: ziwei, lunarOf: lunarOf, gateOf: gateOf, humanDesign: humanDesign,
@@ -1245,7 +1340,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
       '<div class="head"><h2 id="t-h">오늘의 명언</h2><p class="sub nums">' + TY + '년 ' + TM + '월 ' + TD + '일 (' + dow + ') · 일진 ' + E.g(tp.day) + '일</p></div>' +
       (state.sample ? '<p class="sample"><span class="chip warn">예시</span> <span class="sub">1990년 5월 15일 14:30 입력으로 계산한 결과입니다. 본인 정보를 넣고 나침반을 돌리면 바뀝니다.</span></p>' : '') +
       '<div class="today"><figure class="quote" style="margin:0"><blockquote>“' + esc(q[0]) + '”</blockquote><cite>— ' + esc(q[1]) + '</cite><p class="qbasis">고르는 기준: 내 사주에서 보강이 필요한 오행(' + EL[yo] + ')에 맞는 문장 중, 내 일주와 오늘 날짜로 한 구절을 정합니다. 사람마다, 날마다 달라집니다.</p></figure>' +
-      '<div class="flow"><p class="kicker">' + nm + '오늘의 흐름</p><div class="big">' + god.name + '</div><p>' + tags[god.name] + '. 오늘의 일진이 내 일간(' + D.STEM_HJ[rep.P.day[0]] + ')에게 ' + god.name + '으로 작용합니다.</p><p><b>' + rel + '</b></p>' + todayTarot(rep) + '</div></div>';
+      '<div class="flow"><p class="kicker">' + nm + '오늘의 흐름</p><div class="big">' + god.name + '</div><p>' + tags[god.name] + '. 오늘의 일진이 내 일간(' + D.STEM_HJ[rep.P.day[0]] + ')에게 ' + god.name + '으로 작용합니다.</p><p><b>' + rel + '</b></p></div></div>';
   }
 
   /* ---------- 전체 특성 ---------- */
@@ -1272,7 +1367,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
     }
     h += '</div><p class="elnote">굵은 글씨는 보강 오행(' + EL[S.yong] + '), 붉은 막대는 가장 많은 오행(' + EL[S.most] + ')입니다. 월지는 계절의 힘이 커서 강약 계산에서 두 배로 봅니다.</p></div></div>';
     h += '<div class="systems">' + o.systems.map(function (s, i) {
-      return '<div class="sys"><span class="n">' + esc(s.name) + '</span><span class="v">' + esc(s.value) + '</span><span class="d">' + esc(s.note) + '</span>' + tchips(i) + '</div>';
+      return '<div class="sys"><span class="n">' + esc(s.name) + '</span><span class="v">' + esc(s.value) + '</span><span class="d">' + esc(s.note) + '</span>' + '</div>';
     }).join('') + '</div>';
     $('#traits').innerHTML = h;
   }
@@ -1295,7 +1390,6 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
     var h = '<p class="lead">' + esc(c.lead) + '</p><ul class="lines">';
     c.lines.forEach(function (l) { h += '<li><span class="src">' + esc(l.src) + '</span><span>' + esc(l.text) + '</span></li>'; });
     h += '</ul>';
-    h += tarotBlock(CAT_KEYS.indexOf(state.tab));
     if (c.note) h += '<p class="pnote">' + esc(c.note) + '</p>';
     $('#panel').innerHTML = h;
   }
@@ -1318,50 +1412,32 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
     var basis = e.basis === 'tradition' ? '<span class="chip acc">전통 대응</span>' : '<span class="chip">키워드 대응</span>';
     return '<div class="trow">' + tface(e) + '<div><div class="tname"><b>' + esc(E.tarot.name(e)) + '</b>' + basis + '</div><p class="tsrc">' + esc(e.src) + (e.role ? ' · ' + esc(e.role) : '') + '</p><p>' + esc(E.tarot.text(e, cat)) + '</p></div></div>';
   }
-  function synthHtml(sy, title, big) {
-    if (!sy) return '';
-    var rel = { same: '사주와 같은 방향', near: '사주와 대체로 비슷', diff: '사주와 다른 방향' }[sy.saju.relation];
-    return '<div class="tsyn' + (big ? ' big' : '') + '"><p class="kicker">' + title + ' <span class="chip acc">타로 흐름: ' + sy.label + '</span><span class="chip ' + (sy.saju.relation === 'diff' ? 'warn' : 'acc') + '">' + rel + '</span></p>' +
-      sy.lines.map(function (l) { return '<p>' + esc(l) + '</p>'; }).join('') +
-      '<p><b>' + esc(sy.saju.text) + '</b></p><p class="best">' + esc(sy.saju.bestText) + '</p></div>';
-  }
-  function tarotBlock(ci) {
-    var es = state.rep.tarot.cats[ci];
-    if (!es.length) return '';
-    var rv = es.filter(function (e) { return e.rev; }).length;
-    var h = '<div class="tblock"><p class="kicker">타로로 읽기</p>';
-    es.forEach(function (e) { h += trow(e, ci); });
-    h += synthHtml(state.rep.tarot.synth.cats[ci], '타로 종합 해석');
-    if (rv) h += '<p class="tsum">역방향 ' + rv + '장은 그 에너지가 막히거나 과하게 나타나 점검이 필요한 부분입니다.</p>';
-    h += '</div>';
+  function tcard(pk, title, extra) {
+    var e = pk.entry, c = E.tarot.card(e.id), kw = e.rev ? c.kwRev : c.kwUp, adv = e.rev ? c.advRev : c.advUp;
+    var h = '<article class="tcard"><p class="kicker">' + title + '</p><div class="tcard-main">' + tface(e) +
+      '<div><h3 class="tcname">' + esc(c.name) + (e.rev ? ' <span class="chip warn">역방향</span>' : '') + '</h3><p class="tkw">' + esc(kw) + '</p></div></div>' +
+      '<p class="tadv">' + esc(adv) + '</p>';
+    if (pk.note) h += '<p class="tnote2">' + esc(pk.note) + '</p>';
+    if (extra) h += extra;
+    h += '<p class="twhy">참고한 계산 결과 ' + pk.total + '개 중 ' + pk.n + '개가 ‘' + pk.group + '’ 흐름을 가리켜 이 카드를 골랐습니다.</p>' +
+      '<details class="tdet"><summary>참고한 결과 보기</summary><ul>' + pk.all.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ul></details></article>';
     return h;
   }
-  function todayTarot(rep) {
-    var id = E.tarot.day(rep, TY, TM, TD);
-    return trow({ kind: 'card', id: id, rev: false, src: '수비학 타로 · 생일과 오늘 날짜의 합', role: '오늘의 카드', basis: 'tradition' }, null);
+  function tface(e) {
+    return '<div class="tface su-major' + (e.rev ? ' rev' : '') + '" role="img" aria-label="' + esc(E.tarot.name(e)) + '"><span class="rn">' + E.tarot.roman[e.id] + '</span>' +
+      '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.2 7.8L22 12l-7.8 2.2L12 22l-2.2-7.8L2 12l7.8-2.2z"/></svg></div>';
   }
-  function tchips(i) {
-    var s = state.rep.tarot.systems[i];
-    if (!s || !s.entries.length) return '';
-    return '<div class="tchips" aria-label="타로 대응 카드">' + s.entries.map(function (e) {
-      return '<span class="tchip">' + (e.kind === 'suit' ? esc(E.tarot.name(e)) : E.tarot.roman[e.id] + ' ' + esc(E.tarot.name(e))) + '</span>';
-    }).join('') + '</div>';
+  function monthTarot(Y, r) {
+    var k = Y + '-' + r.month;
+    return state.tc[k] || (state.tc[k] = E.tarot.monthPick(state.rep, Y, r));
   }
   function renderTarot(rep) {
-    var T = rep.tarot, h = '<div class="head"><h2 id="tr-h">타로로 읽는 종합 해석</h2><p class="sub">사주·점성·수비학 등 계산 결과를 타로 카드로 옮겨, 하나의 흐름으로 요약했습니다.</p></div>';
-    h += '<div class="tover">' + synthHtml(T.synth.overall, '전체 종합 해석', true) + '</div>';
-    h += '<details class="tdet"><summary>대응 기준과 점수 계산 방법 보기</summary><p class="tnote"><span class="chip acc">전통 대응</span> 별자리, 행성, 요일, 수비학 숫자는 골든던 계열의 대응표를 따릅니다. <span class="chip">키워드 대응</span> 십성, 오행 슈트, 자미두수 주성, 휴먼디자인 라인은 정통 대응표가 없어 의미가 비슷한 카드를 연결한 것입니다. 역행하는 행성은 역방향 카드로 읽습니다. 종합 해석의 순풍·혼재·긴장은 카드마다 제가 정한 점수(−2~+2)의 평균이 높은 쪽, 중간, 낮은 쪽을 나눈 것이고, 사주 쪽은 앞으로 15개월의 월별 점수 평균(3.3점 이상 순풍, 2.7점 이하 긴장)입니다.</p></details>';
-    h += '<h3 class="tbasis">종합 해석의 근거가 된 카드</h3>';
-    h += '<div class="tfixed"><div><p class="kicker" style="margin:12px 0 0">생일 카드</p>' + T.birth.map(function (e) { return trow(e, null); }).join('') + '</div>';
-    h += '<div><p class="kicker" style="margin:12px 0 0">오늘의 카드</p>' + todayTarot(rep) + '</div></div>';
-    h += '<div class="tsysgrid">';
-    T.systems.forEach(function (s) {
-      h += '<div class="tsys"><h3>' + esc(s.name) + '</h3>';
-      if (!s.entries.length) h += '<p class="sub" style="padding:10px 0">태어난 시각을 입력하면 대응 카드가 나옵니다.</p>';
-      s.entries.forEach(function (e) { h += trow(e, null); });
-      h += '</div>';
-    });
-    h += '</div>';
+    var T = rep.tarot, ov = T.pick, td = T.today;
+    rep.tarot.overall = [ov.entry];
+    var sj = E.tarot.synth(rep, TY, TM).overall;
+    var h = '<div class="head"><h2 id="tr-h">타로</h2><p class="sub">사주·점성·수비학·자미두수·휴먼디자인 등 계산한 결과를 종합해서 고른 카드입니다. 뽑기가 아니라 계산 결과에서 정해집니다.</p></div>';
+    h += '<div class="tpair">' + tcard(ov, '나의 전체 카드', '<p class="tsj">' + esc(sj.saju.text) + ' ' + esc(sj.saju.bestText) + '</p>') + tcard(td, '오늘의 카드 · ' + TY + '년 ' + TM + '월 ' + TD + '일') + '</div>';
+    h += '<p class="sub" style="margin-top:14px">월별 카드는 아래 ‘월별’ 표의 마지막 열과 월 상세에서 볼 수 있습니다.</p>';
     $('#tarot').innerHTML = h;
   }
 
@@ -1415,7 +1491,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
     var h = '<div class="yhead"><span class="big">' + Y.ganji + '年 · ' + Y.animal + '띠</span><p>' + esc(Y.theme) + '</p><div class="ychips">';
     h += '<span class="chip acc">세운 ' + Y.ganji + ' ' + Y.god + (Y.fav ? ' · 원국에 도움' : ' · 원국에 부담') + '</span>';
     h += Y.luck ? '<span class="chip acc">대운 ' + Y.luck.gz + ' (만 ' + Y.luck.from + '~' + Y.luck.to + '세) 천간 ' + Y.luck.god + '·지지 ' + Y.luck.bgod + '</span>' : '<span class="chip">대운은 성별을 선택하면 반영됩니다</span>';
-    h += '<span class="chip nums">수비학 개인년수 ' + Y.personalYear + ' · 타로 ' + E.tarot.card(Y.personalYear).name + '</span></div>';
+    h += '<span class="chip nums">수비학 개인년수 ' + Y.personalYear + '</span></div>';
     h += '<p class="ysub">' + (Y.luck ? esc(Y.luck.note) + ' ' : '') + esc(transitLine(Y)) + '</p></div>';
     return h;
   }
@@ -1438,14 +1514,15 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
     D.CATS.forEach(function (c, i) { h += '<button data-cat="' + i + '" aria-pressed="' + (state.cat === i) + '">' + c + '</button>'; });
     h += '</div></div>';
     B.list.forEach(function (yr) { h += yearHead(B.years[yr]); });
-    h += '<div class="ygrid"><div class="tscroll"><table class="heat"><thead><tr><th class="mh" scope="col">월</th>' + D.CATS.map(function (c, i) { return '<th scope="col"' + (state.cat !== -1 && state.cat !== i ? ' class="dim"' : '') + '>' + c + '</th>'; }).join('') + '</tr></thead><tbody>';
+    h += '<div class="ygrid"><div class="tscroll"><table class="heat"><thead><tr><th class="mh" scope="col">월</th>' + D.CATS.map(function (c, i) { return '<th scope="col"' + (state.cat !== -1 && state.cat !== i ? ' class="dim"' : '') + '>' + c + '</th>'; }).join('') + '<th scope="col">타로</th></tr></thead><tbody>';
     items.forEach(function (it) {
       var r = it.r, sel = it.Y === state.sel.Y && it.m === state.sel.m, lab = state.view === 'span' ? String(it.Y).slice(2) + '.' + it.m : it.m + '월';
       h += '<tr class="' + (sel ? 'sel' : '') + '"><td class="mh nums">' + lab + '<small>' + r.hj + '</small></td>';
       r.scores.forEach(function (sc, i) {
         h += '<td><button class="cell s' + sc + (state.cat !== -1 && state.cat !== i ? ' dim' : '') + ' nums" data-k="' + it.Y + '-' + it.m + '" aria-label="' + it.Y + '년 ' + it.m + '월 ' + D.CATS[i] + ' ' + sc + '점">' + sc + '</button></td>';
       });
-      h += '</tr>';
+      var mt = monthTarot(it.Y, r);
+      h += '<td class="tcell"><button class="tm" data-k="' + it.Y + '-' + it.m + '">' + esc(E.tarot.card(mt.entry.id).name) + (mt.entry.rev ? '<small>역</small>' : '') + '</button></td></tr>';
     });
     h += '</tbody></table></div><div class="detail" id="detail"></div></div>';
     $('#year').innerHTML = h;
@@ -1458,8 +1535,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
       var r = it.r;
       h = '<p class="kicker">' + it.Y + '년 ' + r.month + '월</p><h3>' + r.hj + '月 · ' + r.god + ' — ' + r.tag + '</h3>';
       h += '<div class="sumbox">' + esc(r.summary) + '</div>';
-      var SU = E.tarot.suits[['w', 'w', 'p', 's', 'c'][r.be]];
-      h += trow({ kind: 'card', id: r.pm, rev: false, src: '수비학 타로 · 개인월수 ' + r.pm + ' · 월지 오행 ' + D.EL[r.be] + '은 ' + SU.ko + '(' + SU.domain + ') 기운', role: '이달의 배경', basis: 'tradition' }, null);
+      h += tcard(monthTarot(it.Y, r), it.Y + '년 ' + r.month + '월의 카드');
       h += '<div class="tags"><span class="chip acc nums">개인월수 ' + r.pm + '</span><span class="chip">' + (r.fav ? '원국에 도움이 되는 흐름' : '원국에 부담이 되는 흐름') + '</span>' + r.flags.map(function (f) { return '<span class="chip">' + FLAG_TXT[f] + '</span>'; }).join('') + '</div>';
       for (var i = 0; i < 6; i++) {
         h += '<div class="nrow' + (i === r.best ? ' hl' : '') + '"><div><span class="c">' + D.CATS[i] + '</span>' + dots(r.scores[i]) + '</div><p>' + esc(r.notes[i]) + (i === r.best ? ' <span class="chip acc">이달의 강점</span>' : i === r.low && r.scores[i] <= 2 ? ' <span class="chip warn">주의</span>' : '') + '</p></div>';
@@ -1479,7 +1555,9 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
   function run(inp, sample) {
     state.sample = !!sample;
     state.rep = E.buildReport(inp);
-    state.rep.tarot.synth = E.tarot.synth(state.rep, TY, TM);
+    state.rep.tarot.pick = E.tarot.overallPick(state.rep);
+    state.rep.tarot.today = E.tarot.todayPick(state.rep, TY, TM, TD);
+    state.tc = {};
     state.view = String(TY); state.sel = null; state.cat = -1;
     compass(state.rep);
     renderToday(state.rep);
