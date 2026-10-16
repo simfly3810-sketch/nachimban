@@ -104,6 +104,19 @@ h2 { font-size: clamp(22px, 3.4vw, 30px); margin: 0; }
 .chip.acc { border-color: var(--accent); color: var(--accent); }
 .sample { margin: 0 0 18px; }
 .savebox { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-top: 4px; }
+.chat { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: grid; gap: 12px; }
+.chips-q { display: flex; gap: 6px; flex-wrap: wrap; }
+.chips-q button { font: inherit; font-size: 12.5px; padding: 5px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface2); color: var(--ink); cursor: pointer; }
+.chat-log { display: grid; gap: 10px; max-height: 460px; overflow-y: auto; }
+.msg { max-width: 92%; padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.7; }
+.msg p { margin: 0 0 6px; } .msg p:last-child { margin: 0; }
+.msg.u { justify-self: end; background: var(--ink); color: var(--bg, #fff); }
+.msg.b { justify-self: start; background: var(--surface2); }
+.msg .src { font-size: 11.5px; color: var(--ink2); }
+.chat-form { display: flex; gap: 8px; }
+.chat-form input { flex: 1; min-width: 0; font: inherit; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); }
+.chat-form .go { width: auto; padding: 0 18px; margin: 0; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 .linkbtn { background: none; border: 0; padding: 0; font: inherit; font-size: 13px; color: var(--ink2); text-decoration: underline; cursor: pointer; }
 
 .today { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 20px; }
@@ -270,7 +283,7 @@ table.heat { border-collapse: separate; border-spacing: 3px; width: 100%; min-wi
   <header class="top">
     <div class="brand"><span class="seal" aria-hidden="true">羅</span><b>나침반</b><small>羅盤</small></div>
     <nav class="nav" aria-label="섹션 이동">
-      <a href="#today">오늘</a><a href="#traits">전체 특성</a><a href="#planets">행성</a><a href="#tarot">타로 종합</a><a href="#fields">분야별</a><a href="#year">월별</a>
+      <a href="#today">오늘</a><a href="#traits">전체 특성</a><a href="#planets">행성</a><a href="#tarot">타로</a><a href="#fields">분야별</a><a href="#year">월별</a>
     </nav>
   </header>
 
@@ -322,6 +335,19 @@ table.heat { border-collapse: separate; border-spacing: 3px; width: 100%; min-wi
     <section class="block" id="fields" aria-labelledby="f-h"></section>
     <section class="block" id="year" aria-labelledby="y-h"></section>
   </div>
+
+  <section class="block" id="ask" aria-labelledby="ask-h">
+    <div class="head"><h2 id="ask-h">내 결과에 대해 물어보기</h2><p class="sub">위에서 계산된 내 결과를 바탕으로 답합니다. AI가 새로 풀이하는 것이 아니라, 계산된 점수와 풀이문을 질문에 맞게 찾아 보여 주는 방식이어서 계산 범위 안의 질문에만 답할 수 있습니다.</p></div>
+    <div class="chat">
+      <div class="chips-q" id="ask-chips"></div>
+      <div class="chat-log" id="ask-log" role="log" aria-live="polite"></div>
+      <form class="chat-form" id="ask-form" autocomplete="off">
+        <label class="sr" for="ask-in">질문 입력</label>
+        <input id="ask-in" type="text" maxlength="80" placeholder="예: 내년 재물운 언제가 좋아? / 이직해도 될까? / 오늘 타로는?">
+        <button type="submit" class="go">질문</button>
+      </form>
+    </div>
+  </section>
 
   <section class="block" aria-labelledby="c-h">
     <div class="head"><h2 id="c-h">계산 범위</h2><p class="sub">체계마다 계산한 항목과 아직 넣지 못한 항목입니다.</p></div>
@@ -1572,6 +1598,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
     renderTarot(state.rep);
     renderFields();
     renderYear();
+    if (typeof chatReset === 'function') chatReset();
   }
   function readForm() {
     var v = $('#f-date').value, err = $('#err');
@@ -1619,6 +1646,156 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
     if (n < 0) return;
     e.preventDefault(); state.tab = CAT_KEYS[n]; renderFields(); $('#tab-' + state.tab).focus();
   });
+
+
+  /* ---------- 결과 기반 질문 답변 (규칙 기반, 서버 없음) ---------- */
+  var CATN = D.CATS, CATRX = [/건강|몸|컨디션|아프|체력|병/, /연애|사랑|결혼|인연|애인|남자친구|여자친구|배우자|이성/, /직장|회사|상사|조직|승진|동료/, /직업|진로|커리어|적성|사업|창업|전직|일의 방향/, /재물|돈|재정|수입|투자|지출|월급|재테크|부동산|금전/, /이사|거처|이동|집|이주|주거|해외/];
+  var SCW = ['', '조심', '주의', '보통', '좋음', '매우 좋음'];
+  var mrc = {};
+  function mrows(Y) { return mrc[Y] || (mrc[Y] = E.monthRows(state.rep, Y)); }
+  function fm(Y, m) { return Y + '년 ' + m + '월'; }
+  function span(Y0, M0, n) { var a = [], Y = Y0, m = M0; for (var i = 0; i < n; i++) { a.push({ Y: Y, m: m, r: mrows(Y).rows[m - 1] }); m++; if (m > 12) { m = 1; Y++; } } return a; }
+  function avgOf(list, ci) { var s = 0; list.forEach(function (x) { s += ci >= 0 ? x.r.scores[ci] : x.r.scores.reduce(function (a, b) { return a + b; }, 0) / 6; }); return s / list.length; }
+  function r1(v) { return Math.round(v * 10) / 10; }
+  function ranked(list, ci) { return list.slice().sort(function (a, b) { return (ci >= 0 ? b.r.scores[ci] - a.r.scores[ci] : avgOf([b], -1) - avgOf([a], -1)) || (a.Y * 12 + a.m) - (b.Y * 12 + b.m); }); }
+  function mtxt(x, ci) { return fm(x.Y, x.m) + '(' + r1(ci >= 0 ? x.r.scores[ci] : avgOf([x], -1)) + '점)'; }
+  function parseQ(q) {
+    var o = { cat: -1, scope: null, topic: null }, t = q.replace(/\s+/g, '');
+    CATRX.forEach(function (rx, i) { if (o.cat < 0 && rx.test(q)) o.cat = i; });
+    var my = /(20\d\d|19\d\d)\s*년/.exec(q), mm = /(\d{1,2})\s*월/.exec(q);
+    if (/이직|퇴사|그만두|옮기|전직/.test(q)) o.topic = 'change';
+    else if (/타로|카드/.test(q)) o.topic = 'tarot';
+    else if (/오늘|금일/.test(q)) o.topic = 'today';
+    else if (/용신|보강|오행|부족한 기운|필요한 기운/.test(q)) o.topic = 'el';
+    else if (/대운|10년/.test(q)) o.topic = 'luck';
+    else if (/신강|신약|일간|성격|특성|나는 어떤|나 어떤|기질|타고난/.test(q)) o.topic = 'self';
+    else if (/상승궁|태양궁|태양 별자리|달궁|달 별자리|별자리|행성|점성|서양|인도|라시|나크샤트라|태국/.test(q)) o.topic = 'astro';
+    else if (/자미|명궁|주성/.test(q)) o.topic = 'zw';
+    else if (/휴먼|프로파일|게이트/.test(q)) o.topic = 'hd';
+    else if (/수비|생명수|개인년|숫자/.test(q)) o.topic = 'num';
+    else if (/정확|믿을|계산|근거|어떻게 알|기준|오차/.test(q)) o.topic = 'how';
+    if (my && mm) o.scope = { t: 'month', Y: +my[1], m: Math.min(12, Math.max(1, +mm[1])) };
+    else if (/이번\s*달|이달|금월/.test(q)) o.scope = { t: 'month', Y: TY, m: TM };
+    else if (/다음\s*달|내달/.test(q)) { var nm = TM === 12 ? [TY + 1, 1] : [TY, TM + 1]; o.scope = { t: 'month', Y: nm[0], m: nm[1] }; }
+    else if (my) o.scope = { t: 'year', Y: +my[1] };
+    else if (/내후년/.test(q)) o.scope = { t: 'year', Y: TY + 2 };
+    else if (/내년|명년/.test(q)) o.scope = { t: 'year', Y: TY + 1 };
+    else if (/올해|금년|올 한 해/.test(q)) o.scope = { t: 'year', Y: TY };
+    else if (mm) { var yy = (+mm[1] < TM) ? TY + 1 : TY; o.scope = { t: 'month', Y: yy, m: Math.min(12, Math.max(1, +mm[1])) }; }
+    o.best = /좋은 ?달|언제.*(좋|유리|괜찮)|가장 좋|최고|기회|시기|타이밍/.test(q);
+    o.worst = /조심|나쁜|약한|위험|주의|힘든|불안|안 좋/.test(q);
+    return o;
+  }
+  function scopeList(sc) {
+    if (!sc) return { list: span(TY, TM, 15), label: '앞으로 15개월' };
+    if (sc.t === 'year') { var a = [], m0 = sc.Y === TY ? TM : 1; for (var m = m0; m <= 12; m++) a.push({ Y: sc.Y, m: m, r: mrows(sc.Y).rows[m - 1] }); return { list: a, label: sc.Y + '년' + (m0 > 1 ? ' ' + m0 + '월~12월(남은 기간)' : ''), year: sc.Y }; }
+    return { list: [{ Y: sc.Y, m: sc.m, r: mrows(sc.Y).rows[sc.m - 1] }], label: fm(sc.Y, sc.m), month: true };
+  }
+  function ansCat(ci, o) {
+    var S = scopeList(o.scope), rep = state.rep, out = [], c = rep.categories[CAT_KEYS[ci]];
+    if (S.month) {
+      var x = S.list[0], sc = x.r.scores[ci];
+      out.push(S.label + ' ' + CATN[ci] + '운은 ' + sc + '점(' + SCW[sc] + ')입니다. ' + x.r.notes[ci]);
+      out.push('이달 흐름: ' + x.r.hj + '월 ' + x.r.god + ', ' + x.r.tag + '. ' + (x.r.fav ? '원국에 도움이 되는 달입니다.' : '원국에 부담이 되는 달입니다.'));
+      return { t: out, src: '사주 월운·세운·대운 점수' };
+    }
+    var av = r1(avgOf(S.list, ci)), rk = ranked(S.list, ci), kk = Math.min(3, Math.ceil(rk.length / 2)), top = rk.slice(0, kk), low = rk.slice(kk).slice(-2).reverse();
+    out.push(S.label + ' ' + CATN[ci] + '운 평균은 ' + av + '점(' + (av >= 3.5 ? '좋은 편' : av >= 2.8 ? '보통' : '조심이 필요') + ')입니다.');
+    if (S.year) out.push(mrows(S.year).theme);
+    out.push('가장 좋은 달: ' + top.map(function (x) { return mtxt(x, ci); }).join(', ') + '.');
+    if (low.length) out.push('조심할 달: ' + low.map(function (x) { return mtxt(x, ci); }).join(', ') + '.');
+    if (!o.scope || o.worst === false) out.push(c.lead);
+    return { t: out, src: '사주 월별 점수' + (rep.cuspsLon ? ', 서양·자미두수 분야 풀이' : '') };
+  }
+  function ansGeneral(o) {
+    var S = scopeList(o.scope), out = [];
+    if (S.month) {
+      var r = S.list[0].r;
+      out.push(S.label + ': ' + r.hj + '월 ' + r.god + ', ' + r.tag + '. ' + r.summary);
+      out.push('분야별 점수 — ' + CATN.map(function (c, i) { return c + ' ' + r.scores[i]; }).join(' · ') + '. 강점은 ' + CATN[r.best] + ', 주의는 ' + CATN[r.low] + '입니다.');
+      return { t: out, src: '사주 월운' };
+    }
+    var avs = CATN.map(function (c, i) { return { c: c, v: avgOf(S.list, i) }; }).sort(function (a, b) { return b.v - a.v; });
+    out.push(S.label + ' 분야별 평균입니다. ' + avs.map(function (a) { return a.c + ' ' + r1(a.v); }).join(' · ') + '.');
+    out.push('가장 좋은 분야는 ' + avs[0].c + ', 가장 조심할 분야는 ' + avs[5].c + '입니다.');
+    var rk = ranked(S.list, -1);
+    var k2 = Math.min(3, Math.ceil(rk.length / 2)), lw = rk.slice(k2).slice(-2).reverse();
+    out.push('전체적으로 좋은 달: ' + rk.slice(0, k2).map(function (x) { return mtxt(x, -1); }).join(', ') + (lw.length ? ' / 약한 달: ' + lw.map(function (x) { return mtxt(x, -1); }).join(', ') : '') + '.');
+    if (S.year) out.push(mrows(S.year).theme);
+    return { t: out, src: '사주 월별 점수' };
+  }
+  function ansChange(o) {
+    var S = scopeList(o.scope && o.scope.t !== 'month' ? o.scope : null), L = S.list, out = [];
+    var w = r1(avgOf(L, 2)), j = r1(avgOf(L, 3)), mo = r1(avgOf(L, 4));
+    out.push(S.label + ' 평균은 직장 ' + w + '점, 직업 ' + j + '점, 재물 ' + mo + '점입니다.');
+    var go = L.filter(function (x) { return x.r.scores[3] >= 3 && x.r.scores[4] >= 3 && x.r.scores[2] >= 3; });
+    var hold = L.filter(function (x) { return x.r.scores[4] <= 2; });
+    out.push(go.length ? '직장·직업·재물이 모두 보통 이상이라 이동을 시도하기에 무리가 적은 달: ' + go.slice(0, 5).map(function (x) { return fm(x.Y, x.m); }).join(', ') + '.' : '직장·직업·재물이 모두 받쳐 주는 달이 거의 없어, 서둘러 옮기기보다 준비 기간으로 쓰는 편이 안전합니다.');
+    if (hold.length) out.push('재물 점수가 낮아 수입이 끊기는 결정(퇴사)을 피하는 편이 좋은 달: ' + hold.slice(0, 5).map(function (x) { return fm(x.Y, x.m); }).join(', ') + '.');
+    out.push('이 결과는 시기의 유불리를 보는 참고일 뿐, 이직·퇴사는 조건과 재정 상황을 함께 보고 직접 판단하세요.');
+    return { t: out, src: '사주 월별 직장·직업·재물 점수' };
+  }
+  function ansTarot(o) {
+    var T = state.rep.tarot, out = [], sc = o.scope;
+    function line(pk, lab) { var e = pk.entry, c = E.tarot.card(e.id); return lab + ': ' + c.name + (e.rev ? ' (역방향)' : '') + ' — ' + (e.rev ? c.kwRev : c.kwUp) + '. ' + (e.rev ? c.advRev : c.advUp); }
+    if (sc && sc.t === 'month') { var r = mrows(sc.Y).rows[sc.m - 1]; out.push(line(E.tarot.monthPick(state.rep, sc.Y, r), fm(sc.Y, sc.m) + '의 카드')); }
+    else if (sc && sc.t === 'year') { var rs = mrows(sc.Y).rows; out.push(sc.Y + '년 월별 카드: ' + rs.map(function (r) { var k = E.tarot.monthPick(state.rep, sc.Y, r); return r.month + '월 ' + E.tarot.card(k.entry.id).name + (k.entry.rev ? '(역)' : ''); }).join(', ') + '.'); }
+    else { out.push(line(T.today, '오늘의 카드')); out.push(line(T.pick, '나의 전체 카드')); }
+    return { t: out, src: '타로 · 계산 결과를 종합해 정해진 카드' };
+  }
+  function ansToday() {
+    var el = $('#today .flow'); if (!el) return null;
+    var ps = el.querySelectorAll('p'), out = [];
+    out.push('오늘의 흐름은 ' + (el.querySelector('.big') ? el.querySelector('.big').textContent : '') + '입니다.');
+    for (var i = 1; i < ps.length; i++) out.push(ps[i].textContent);
+    var td = state.rep.tarot.today, c = E.tarot.card(td.entry.id);
+    out.push('오늘의 카드는 ' + c.name + (td.entry.rev ? ' (역방향)' : '') + '입니다. ' + (td.entry.rev ? c.advRev : c.advUp));
+    return { t: out, src: '사주 일진 · 타로' };
+  }
+  function ansTopic(o) {
+    var rep = state.rep, S = rep.S, out = [];
+    switch (o.topic) {
+      case 'el': out.push('보강 오행은 ' + EL[S.yong] + '(' + D.EL_INFO[S.yong].color + ' · ' + D.EL_INFO[S.yong].dir + ' · ' + D.EL_INFO[S.yong].season + ')이고, 가장 많은 오행은 ' + EL[S.most] + '입니다.'); out.push(D.EL_INFO[S.yong].care + '.'); out.push('오행 개수: ' + EL.map(function (e, i) { return e + ' ' + S.cnt[i]; }).join(', ') + '.'); return { t: out, src: '사주 오행 분포' };
+      case 'luck': var L = E.monthRows(rep, TY).luck; if (!L) return { t: ['대운은 성별을 선택해야 계산됩니다.'], src: '사주 대운' }; out.push('현재 대운은 ' + L.gz + '(만 ' + L.from + '~' + L.to + '세)로 천간 ' + L.god + ', 지지 ' + L.bgod + '입니다.'); out.push(L.note); out.push('올해 세운: ' + mrows(TY).theme); return { t: out, src: '사주 대운·세운' };
+      case 'self': out.push(rep.overview.headline); rep.overview.lines.slice(0, 3).forEach(function (l) { if (out.indexOf(l) < 0) out.push(l); }); return { t: out, src: '사주 일간·오행' };
+      case 'astro': rep.overview.systems.forEach(function (s) { if (/서양|인도|태국/.test(s.name)) out.push(s.name + ': ' + s.value + ' (' + s.note + ')'); }); return { t: out, src: '서양·인도·태국 점성' };
+      case 'zw': rep.overview.systems.forEach(function (s) { if (/자미/.test(s.name)) out.push('자미두수: ' + s.value + ' (' + s.note + ')'); }); out.push('현재는 주성 배치까지만 계산하며 보조성과 사화는 반영하지 않았습니다.'); return { t: out, src: '자미두수' };
+      case 'hd': rep.overview.systems.forEach(function (s) { if (/휴먼/.test(s.name)) out.push('휴먼디자인: ' + s.value + ' (' + s.note + ')'); }); out.push('타입·권위·센터는 아직 계산하지 않습니다.'); return { t: out, src: '휴먼디자인(일부)' };
+      case 'num': rep.overview.systems.forEach(function (s) { if (/수비/.test(s.name)) out.push('수비학: ' + s.value + ' (' + s.note + ')'); }); out.push('올해 개인년수는 ' + mrows(TY).personalYear + '입니다.'); return { t: out, src: '수비학' };
+      case 'how': return { t: ['사주는 태양 황경으로 절기를 계산하고, 행성은 근사 궤도요소로 계산해 다른 천문 라이브러리와 대조했습니다(대부분 0.02° 이내). 월별 점수는 월 천간·월지·세운·대운과 원국 보강 여부를 합산한 규칙 기반입니다.', '토정비결과 일부 자미두수·휴먼디자인 항목은 아직 계산하지 않습니다. 자세한 범위는 아래 계산 범위를 확인하세요.'], src: '계산 범위' };
+    }
+    return null;
+  }
+  function answer(q) {
+    var o = parseQ(q), a = null;
+    if (o.topic === 'change') a = ansChange(o);
+    else if (o.topic === 'tarot') a = ansTarot(o);
+    else if (o.topic === 'today') a = ansToday();
+    else if (o.topic) a = ansTopic(o);
+    else if (o.cat >= 0) a = ansCat(o.cat, o);
+    else if (o.scope || o.best || o.worst) a = ansGeneral(o);
+    if (!a) return { t: ['그 질문은 아직 계산한 결과에서 찾을 수 없습니다. 분야(건강·연애·직장·직업·재물·이사)나 시기(올해·내년·이번 달·2027년 3월), 또는 보강 오행·대운·타로·오늘의 흐름을 넣어 물어봐 주세요.'], src: '' };
+    return a;
+  }
+  function chatAdd(cls, paras, src) {
+    var log = $('#ask-log'), d = document.createElement('div'); d.className = 'msg ' + cls;
+    d.innerHTML = paras.map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('') + (src ? '<p class="src">근거: ' + esc(src) + '</p>' : '');
+    log.appendChild(d); log.scrollTop = log.scrollHeight;
+  }
+  function ask(q) {
+    q = (q || '').trim(); if (!q || !state.rep) return;
+    chatAdd('u', [q]);
+    var a; try { a = answer(q); } catch (x) { a = { t: ['답을 만드는 중 오류가 났습니다. 질문을 조금 바꿔 다시 물어봐 주세요.'], src: '' }; }
+    chatAdd('b', a.t, a.src);
+  }
+  function chatReset() {
+    mrc = {}; $('#ask-log').innerHTML = '';
+    var qs = ['올해 재물운 어때?', '내년 직장운 언제가 좋아?', '이직해도 될까?', '이번 달 전체 흐름은?', '앞으로 조심할 달은?', '내 보강 오행은?', '오늘 타로는?', '지금 대운은?'];
+    $('#ask-chips').innerHTML = qs.map(function (q) { return '<button type="button" data-q="' + esc(q) + '">' + esc(q) + '</button>'; }).join('');
+    chatAdd('b', ['위에서 계산된 내 결과를 바탕으로 답해 드립니다. 아래 예시를 누르거나 직접 물어보세요.'], '');
+  }
+  $('#ask-form').addEventListener('submit', function (e) { e.preventDefault(); var i = $('#ask-in'); ask(i.value); i.value = ''; });
+  $('#ask-chips').addEventListener('click', function (e) { var b = e.target.closest('[data-q]'); if (b) ask(b.dataset.q); });
 
   /* 이 기기에 저장 (브라우저 localStorage, 서버 전송 없음) */
   var SKEY = 'nachimban.profile.v1';
