@@ -128,6 +128,18 @@ table.xt { border-collapse: separate; border-spacing: 3px; min-width: 520px; wid
 .xcard p, .xcard li { font-size: 13.5px; margin: 6px 0 0; }
 .xcard ul { margin: 6px 0 0; padding-left: 18px; }
 .xsys p { margin: 4px 0 0; font-size: 12.5px; color: var(--ink2); }
+
+.fbrow { display: flex; gap: 6px; margin-top: 6px; }
+.fbrow button, .rcbtn { font: inherit; font-size: 12px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface2); color: var(--ink2); cursor: pointer; }
+.fbrow button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); background: var(--surface); }
+.fbrow button.no[aria-pressed="true"] { border-color: var(--seal); color: var(--seal); }
+.fbbox { margin-top: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 18px; }
+.fbbox p { margin: 6px 0 0; font-size: 13.5px; }
+.rcev { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1.3fr); gap: 8px; margin-top: 8px; }
+.rcev select { font: inherit; font-size: 14px; padding: 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); min-width: 0; }
+.rctab { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13.5px; }
+.rctab th, .rctab td { text-align: left; padding: 6px 4px; border-bottom: 1px solid var(--line); }
+.rcbtn { margin-top: 10px; margin-right: 6px; }
 .chips-q { display: flex; gap: 6px; flex-wrap: wrap; }
 .chips-q button { font: inherit; font-size: 12.5px; padding: 5px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface2); color: var(--ink); cursor: pointer; }
 .chat-log { display: grid; gap: 10px; max-height: 460px; overflow-y: auto; }
@@ -393,6 +405,7 @@ table.heat { border-collapse: separate; border-spacing: 3px; width: 100%; min-wi
     <section class="block" id="tarot" aria-labelledby="tr-h"></section>
     <section class="block" id="fields" aria-labelledby="f-h"></section>
     <section class="block" id="year" aria-labelledby="y-h"></section>
+    <section class="block" id="rect" aria-labelledby="rc-h" hidden></section>
   </div>
 
   <section class="block" id="ask" aria-labelledby="ask-h">
@@ -419,6 +432,8 @@ table.heat { border-collapse: separate; border-spacing: 3px; width: 100%; min-wi
       <li><b>수비학</b>생년월일로 계산하는 생명수(타고난 방향), 개인년수와 개인월수(그해·그달의 주제), 생일 카드와 오늘의 수를 계산합니다. 이름의 글자를 숫자로 바꾸는 이름수는 변환 방식(한글·영문)이 유파마다 달라 넣지 않았습니다.</li>
       <li><b>자미두수</b>음력 변환(표 방식), 명궁·신궁, 오행국, 자미·천부 계열 14주성 배치, 보조성 14개(좌보·우필·문창·문곡·천괴·천월·록존·경양·타라·천마·화성·영성·지공·지겁), 태어난 해의 사화(화록·화권·화과·화기), 대한(10년 운)과 현재 대한을 계산해 12궁 명반으로 보여 줍니다. 별 배치·사화·대한은 다른 자미두수 프로그램(iztro)과 2,000건을 대조해 모두 일치했습니다. 사화표는 유파마다 일부 다르고 여기서는 iztro 기준입니다. 유년(해마다 운), 유월, 소한과 사화를 활용한 세부 풀이는 넣지 않았습니다.</li>
       <li><b>휴먼디자인 (일부)</b>태양·지구의 게이트와 라인, 프로파일. 타입·권위·센터는 모든 행성 위치와 채널 계산이 필요해 아직 포함하지 않습니다.</li>
+      <li><b>시주 후보 비교</b>태어난 시각을 모를 때, 지난 사건(해·분야·좋았는지 힘들었는지)을 입력하면 시주 후보 13개의 해당 연도 분야 점수가 그해 전후 평균보다 높았는지 낮았는지를 사건과 맞춰 봅니다. 월별 점수 규칙을 그대로 쓰므로 그 규칙의 한계를 그대로 가지며, 사건이 적으면 후보 사이 차이가 나지 않아 가려내지 못했다고 알려 드립니다. 입력은 저장·전송하지 않습니다.</li>
+      <li><b>내 피드백</b>지난달까지의 분야별 풀이에 ‘맞았어요/달랐어요’를 남기면 분야별·점수대별 맞음 비율을 이 기기에서만 계산해 보여 줍니다. “이 기기에 내 정보 저장”을 켠 경우에만 브라우저에 남고, 서버로 보내지 않으며 점수 계산에 반영하지도 않습니다.</li>
       <li><b>질문하기</b>화면 중간의 ‘내 결과에 대해 물어보기’는 AI가 아니라 계산된 점수와 풀이문을 질문에 맞게 찾아 보여 주는 규칙 기반 기능입니다. 분야·시기·타로·귀인·MBTI·보강 오행·대운 등 계산 범위 안의 질문에만 답합니다.</li>
       <li><b>타로</b>메이저 아르카나 22장만 씁니다. 전체·오늘·월별 카드는 뽑는 것이 아니라 계산 결과에서 정해집니다. 사주(십성·오행·대운), 서양 점성(태양·달·상승궁·행성), 태국 요일 행성, 수비학(생명수·개인월수), 자미두수 주성, 휴먼디자인 라인이 각각 가리키는 카드를 ‘주도·추진 / 감정·관계 / 질서·안정 / 변화·시험’ 네 흐름으로 묶고, 가장 무게가 큰 흐름 안에서 가장 많이 겹친 카드를 고릅니다. 사주 월별 점수가 낮은 달과 오늘 일진이 내게 부담이 되는 날은 역방향으로 읽습니다. 정통 대응표가 없는 항목(십성·오행·자미두수·휴먼디자인)은 의미가 비슷한 카드를 연결한 것입니다.</li>
     </ul>
@@ -1299,6 +1314,47 @@ function crossCheck(rep, Y0, M0, n, ci) {
   return { ci: ci, systems: sysNames, months: months, phases: phases, agree: agree, split: split, check: sajuCheck(rep) };
 }
 
+
+/* ================= 사건으로 시주 후보 비교 (태어난 시각을 모를 때) ================= */
+function rectifyCandidates(inp) {
+  var base = buildReport(Object.assign({}, inp, { hk: false, h: 12, mi: 0 })), dayK = base.P.day[0] + '-' + base.P.day[1];
+  var runs = [], cur = null, t;
+  for (t = 0; t < 48; t++) {
+    var h = Math.floor(t / 2), mi = (t % 2) * 30;
+    var r = buildReport(Object.assign({}, inp, { hk: true, h: h, mi: mi }));
+    var ok = (r.P.day[0] + '-' + r.P.day[1]) === dayK, key = ok ? r.P.hour[0] + '-' + r.P.hour[1] : null;
+    if (key && cur && cur.key === key) { cur.end = t; }
+    else if (key) { cur = { key: key, start: t, end: t, hour: r.P.hour }; runs.push(cur); }
+    else cur = null;
+  }
+  return runs.map(function (c) {
+    var mid = Math.floor((c.start + c.end) / 2);
+    function tt(x) { var hh = Math.floor(x / 2), mm = (x % 2) * 30; return (hh < 10 ? '0' : '') + hh + ':' + (mm ? '30' : '00'); }
+    return { hour: c.hour, label: tt(c.start) + '~' + tt(c.end + 1 > 47 ? 48 : c.end + 1), h: Math.floor(mid / 2), mi: (mid % 2) * 30, br: c.hour[1] };
+  });
+}
+function rectify(inp, events) {
+  var cands = rectifyCandidates(inp), win = 5;
+  events = events.filter(function (v) { return v && v.Y && v.ci >= 0 && v.good; });
+  var res = cands.map(function (c) {
+    var rep = buildReport(Object.assign({}, inp, { hk: true, h: c.h, mi: c.mi })), cache = {};
+    function ym(Y, ci) { if (!cache[Y]) cache[Y] = monthRows(rep, Y).rows; var s = 0; cache[Y].forEach(function (r) { s += r.scores[ci]; }); return s / 12; }
+    var tot = 0, agree = 0, det = [];
+    events.forEach(function (v) {
+      var b = 0, n = 0, Y;
+      for (Y = v.Y - win; Y <= v.Y + win; Y++) { b += ym(Y, v.ci); n++; }
+      var d = ym(v.Y, v.ci) - b / n;
+      tot += d * v.good; if (d * v.good > 0.02) agree++; det.push(d);
+    });
+    return { hour: c.hour, label: c.label, h: c.h, mi: c.mi, br: c.br, score: tot, agree: agree, n: events.length };
+  });
+  var mean = res.reduce(function (a, r) { return a + r.score; }, 0) / (res.length || 1);
+  var am = res.reduce(function (a, r) { return a + r.agree; }, 0) / (res.length || 1);
+  var sorted = res.slice().sort(function (a, b) { return b.score - a.score; });
+  var gap = sorted.length > 1 ? sorted[0].score - sorted[1].score : 0;
+  var spread = sorted.length ? sorted[0].score - sorted[sorted.length - 1].score : 0;
+  return { list: sorted, mean: mean, agreeMean: am, gap: gap, spread: spread, n: events.length, clear: events.length >= 3 && gap >= 0.12 * events.length && sorted[0].agree - am >= 1 };
+}
 function lifeAge(rep, J) { return (J - rep.J) / 365.2425; }
 function nowJ() { var n = new Date(); return jd(n.getUTCFullYear(), n.getUTCMonth() + 1, n.getUTCDate(), 0, 0); }
 
@@ -1912,7 +1968,7 @@ var E = {
   planetLon: planetLon, allBodies: allBodies, meanNode: meanNode, ayanamsa: ayanamsa,
   buildReport: buildReport, monthRows: monthRows, pillars: pillars, sunLon: sunLon, moonLon: moonLon, jd: jd, jdn: jdn,
   angles: angles, houseOf: houseOf, ziwei: ziwei, lunarOf: lunarOf, gateOf: gateOf, humanDesign: humanDesign,
-  joho: johoOf, tenGod: tenGod, crossCheck: crossCheck, dashaAt: dashaAt, vimshottari: vimshottari, zwDecade: zwDecade, zwTheme: ZW_PAL_THEME, zwMutText: ZW_MUT_TEXT, zwAuxKw: ZW_AUX_KW, unseong: unseong, unseongOf: unseongOf, relations: relations, gongmang: gongmang, mbti: { valid: mbValid, overview: mbtiOverview, cat: mbtiCat, month: mbtiMonth }, sinsal: sinsal, guinAt: guinAt, g: g, gk: gk, quoteFor: function (el, seed) { var q = QUOTES[el]; return q[seed % q.length]; }, stemEl: stemEl,
+  joho: johoOf, rectify: rectify, tenGod: tenGod, crossCheck: crossCheck, dashaAt: dashaAt, vimshottari: vimshottari, zwDecade: zwDecade, zwTheme: ZW_PAL_THEME, zwMutText: ZW_MUT_TEXT, zwAuxKw: ZW_AUX_KW, unseong: unseong, unseongOf: unseongOf, relations: relations, gongmang: gongmang, mbti: { valid: mbValid, overview: mbtiOverview, cat: mbtiCat, month: mbtiMonth }, sinsal: sinsal, guinAt: guinAt, g: g, gk: gk, quoteFor: function (el, seed) { var q = QUOTES[el]; return q[seed % q.length]; }, stemEl: stemEl,
   data: { STEM_KO: STEM_KO, STEM_HJ: STEM_HJ, BR_KO: BR_KO, BR_HJ: BR_HJ, ANIMAL: ANIMAL, EL: EL, EL_HJ: EL_HJ, EL_INFO: EL_INFO, SIGNS: SIGNS, CATS: CATS, GOD_GROUP: GOD_GROUP, JU_NAME: JU_NAME }
 };
 if (typeof module !== 'undefined' && module.exports) module.exports = E; else root.Engine = E;
@@ -2214,11 +2270,69 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
       var mt = monthTarot(it.Y, r);
       h += '<td class="tcell"><button class="tm" data-k="' + it.Y + '-' + it.m + '">' + esc(E.tarot.card(mt.entry.id).name) + (mt.entry.rev ? '<small>역</small>' : '') + '</button></td></tr>';
     });
-    h += '</tbody></table></div><div class="detail" id="detail"></div></div>';
+    h += '</tbody></table></div><div class="detail" id="detail"></div></div>' + fbBox();
     $('#year').innerHTML = h;
     renderDetail(items);
   }
 
+
+  /* ---------- 내 피드백 (이 기기에만 저장) ---------- */
+  var FBKEY = 'nachimban.fb.v1';
+  function fbSig() { var i = state.rep.input; return [i.y, i.m, i.d, i.hk ? i.h + ':' + i.mi : '?', i.gender || '', i.city.lon].join('|'); }
+  function fbLoad() {
+    state.fb = {};
+    try { var all = JSON.parse(localStorage.getItem(FBKEY) || '{}'); if ($('#f-save').checked && all[fbSig()]) state.fb = all[fbSig()]; } catch (x) {}
+  }
+  function fbSave() {
+    try { if (!$('#f-save').checked) return; var all = JSON.parse(localStorage.getItem(FBKEY) || '{}'); all[fbSig()] = state.fb; localStorage.setItem(FBKEY, JSON.stringify(all)); } catch (x) {}
+  }
+  function fbBox() {
+    var keys = Object.keys(state.fb || {}); if (!keys.length) return '<div class="fbbox"><p class="kicker">내 피드백</p><p class="ssnote">지난달까지의 분야별 풀이 옆 ‘맞았어요/달랐어요’를 누르면 이 기기에서 점수가 내게 맞았는지 모아 보여 줍니다. “이 기기에 내 정보 저장”을 켜 두면 다음에도 남습니다.</p></div>';
+    var cat = [0, 0, 0, 0, 0, 0], catN = [0, 0, 0, 0, 0, 0], band = { hi: [0, 0], mid: [0, 0], lo: [0, 0] };
+    keys.forEach(function (k) {
+      var q = k.split('-'), Y = +q[0], m = +q[1], ci = +q[2], v = state.fb[k], sc = mrows(Y).rows[m - 1].scores[ci], b = sc >= 4 ? 'hi' : sc <= 2 ? 'lo' : 'mid';
+      catN[ci]++; band[b][1]++; if (v > 0) { cat[ci]++; band[b][0]++; }
+    });
+    var tot = keys.length, ok = cat.reduce(function (a, b) { return a + b; }, 0);
+    var h = '<div class="fbbox"><p class="kicker">내 피드백 · ' + tot + '건 중 ' + ok + '건 맞았어요</p>';
+    h += '<p>분야별: ' + D.CATS.map(function (c, i) { return catN[i] ? c + ' ' + cat[i] + '/' + catN[i] : ''; }).filter(Boolean).join(' · ') + '</p>';
+    h += '<p>점수대별: 4~5점이던 달 ' + band.hi[0] + '/' + band.hi[1] + ' · 3점 ' + band.mid[0] + '/' + band.mid[1] + ' · 1~2점 ' + band.lo[0] + '/' + band.lo[1] + '</p>';
+    h += '<p class="ssnote">' + (tot < 10 ? '아직 ' + tot + '건이라 우연과 구분되지 않습니다. 10건 이상부터 참고하고, ' : '') + '점수가 높은 달의 맞음 비율이 낮은 달보다 확실히 높아야 점수가 내게 의미가 있다고 볼 수 있습니다. 건수가 적으면 우연일 수 있습니다. 서버로 전송되지 않습니다.</p></div>';
+    return h;
+  }
+  function fbRow(Y, m, ci) {
+    if (Y > TY || (Y === TY && m > TM)) return '';
+    var k = Y + '-' + m + '-' + ci, v = (state.fb || {})[k];
+    return '<span class="fbrow"><span class="ssnote">실제로는?</span><button type="button" data-fb="' + k + '" data-v="1" aria-pressed="' + (v === 1) + '">맞았어요</button><button type="button" class="no" data-fb="' + k + '" data-v="-1" aria-pressed="' + (v === -1) + '">달랐어요</button></span>';
+  }
+  /* ---------- 사건으로 시주 추정 ---------- */
+  var RC_CAT = ['건강', '연애', '직장', '직업', '재물', '이사'];
+  function renderRect() {
+    var sec = $('#rect'); if (!sec) return;
+    if (!state.rep || state.rep.input.hk) { sec.hidden = true; sec.innerHTML = ''; return; }
+    sec.hidden = false;
+    var by = state.rep.input.y, yopts = '<option value="">해</option>';
+    for (var y = TY; y >= by + 5; y--) yopts += '<option value="' + y + '">' + y + '년</option>';
+    var row = '';
+    for (var i = 0; i < 4; i++) row += '<div class="rcev"><select aria-label="사건 연도 ' + (i + 1) + '" class="rc-y">' + yopts + '</select><select aria-label="분야" class="rc-c">' + RC_CAT.map(function (c, j) { return '<option value="' + j + '"' + (j === 2 ? ' selected' : '') + '>' + c + '</option>'; }).join('') + '</select><select aria-label="그해의 느낌" class="rc-g"><option value="1">좋았다</option><option value="-1">힘들었다</option></select></div>';
+    sec.innerHTML = '<div class="head"><h2 id="rc-h">시각을 모를 때 · 지난 사건으로 시주 후보 비교</h2><p class="sub">태어난 시각을 몰라 시주 없이 계산했습니다. 지난 일 몇 가지(해, 분야, 좋았는지 힘들었는지)를 넣으면 시주 후보 13개 중 어느 쪽이 내 경험과 가까운지 비교합니다.</p></div>' + row +
+      '<button type="button" class="rcbtn" id="rc-go">후보 비교하기</button><div id="rc-out"></div>' +
+      '<p class="ssnote">사건이 3개 이상은 있어야 의미가 있고, 확정이 아니라 참고 순위입니다. 입력한 내용은 이 브라우저 안에서만 계산되고 저장하거나 전송하지 않습니다.</p>';
+  }
+  function rectGo() {
+    var evs = [], rows = document.querySelectorAll('#rect .rcev');
+    rows.forEach(function (r) { var y = +r.querySelector('.rc-y').value; if (y) evs.push({ Y: y, ci: +r.querySelector('.rc-c').value, good: +r.querySelector('.rc-g').value }); });
+    var out = $('#rc-out');
+    if (evs.length < 2) { out.innerHTML = '<p class="ssnote">사건을 2개 이상, 가능하면 3개 이상 입력해 주세요.</p>'; return; }
+    var inp = readForm(); if (!inp) return;
+    inp.hk = false;
+    var R = E.rectify(inp, evs);
+    var h = '<table class="rctab"><thead><tr><th>후보 시각</th><th>시주</th><th>일치</th></tr></thead><tbody>';
+    R.list.slice(0, 5).forEach(function (c, i) { h += '<tr><td>' + c.label + '</td><td>' + E.g(c.hour) + '</td><td>' + c.agree + '/' + c.n + (i === 0 && R.clear ? ' · 가장 가까움' : '') + '</td></tr>'; });
+    h += '</tbody></table><p class="ssnote">후보 평균 일치는 ' + (Math.round(R.agreeMean * 10) / 10) + '건입니다. 이보다 크게 높아야 의미가 있습니다.</p>';
+    h += R.clear ? '<p>1위 후보가 다른 후보보다 뚜렷하게 앞섭니다. 그래도 확정은 아니므로 가족에게 들은 출생 시각이 있으면 그쪽을 우선하세요.</p><button type="button" class="rcbtn" data-rc="' + R.list[0].h + ':' + R.list[0].mi + '">' + R.list[0].label + '으로 다시 계산</button>' : '<p>후보 사이 차이가 작아 어느 시각이 맞는지 가려내지 못했습니다. 사건을 더 넣거나, 출생증명서·가족에게 시각을 확인하는 편이 정확합니다.</p>';
+    out.innerHTML = h;
+  }
   function renderDetail(items) {
     var d = $('#detail'), h;
     if (state.cat === -1) {
@@ -2236,7 +2350,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
       if (mbm) h += '<div class="guin"><b>MBTI 관점</b><p>' + esc(mbm) + '</p></div>';
       h += '<div class="tags"><span class="chip acc nums">개인월수 ' + r.pm + '</span><span class="chip">' + (r.fav ? '원국에 도움이 되는 흐름' : '원국에 부담이 되는 흐름') + '</span>' + r.flags.map(function (f) { return '<span class="chip">' + FLAG_TXT[f] + '</span>'; }).join('') + '</div>';
       for (var i = 0; i < 6; i++) {
-        h += '<div class="nrow' + (i === r.best ? ' hl' : '') + '"><div><span class="c">' + D.CATS[i] + '</span>' + dots(r.scores[i]) + '</div><p>' + esc(r.notes[i]) + (i === r.best ? ' <span class="chip acc">이달의 강점</span>' : i === r.low && r.scores[i] <= 2 ? ' <span class="chip warn">주의</span>' : '') + '</p></div>';
+        h += '<div class="nrow' + (i === r.best ? ' hl' : '') + '"><div><span class="c">' + D.CATS[i] + '</span>' + dots(r.scores[i]) + '</div><p>' + esc(r.notes[i]) + (i === r.best ? ' <span class="chip acc">이달의 강점</span>' : i === r.low && r.scores[i] <= 2 ? ' <span class="chip warn">주의</span>' : '') + fbRow(it.Y, r.month, i) + '</p></div>';
       }
     } else {
       var ci = state.cat, xcs = E.crossCheck(state.rep, items[0].Y, items[0].m, items.length, ci).months;
@@ -2263,7 +2377,9 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
     renderOverview(state.rep);
     renderTarot(state.rep);
     renderFields();
+    fbLoad();
     renderYear();
+    renderRect();
     if (typeof chatReset === 'function') chatReset();
   }
   function readForm() {
@@ -2298,6 +2414,11 @@ if (typeof module !== 'undefined' && module.exports) module.exports = E; else ro
     $('#today').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
   });
   document.addEventListener('click', function (e) {
+    var rb = e.target.closest('[data-rc]');
+    if (rb) { var tt = rb.dataset.rc.split(':'); $('#f-unk').checked = false; $('#f-time').disabled = false; $('#f-time').value = ('0' + tt[0]).slice(-2) + ':' + ('0' + tt[1]).slice(-2); var inp2 = readForm(); if (inp2) { saveInfo(inp2); run(inp2, false); $('#today').scrollIntoView(); } return; }
+    if (e.target.id === 'rc-go') { rectGo(); return; }
+    var fbb = e.target.closest('[data-fb]');
+    if (fbb) { var fk = fbb.dataset.fb, fv = +fbb.dataset.v; if (state.fb[fk] === fv) delete state.fb[fk]; else state.fb[fk] = fv; fbSave(); renderYear(); return; }
     var t = e.target.closest('[data-tab],[data-cat],[data-k]'); if (!t) return;
     if (t.dataset.tab) { state.tab = t.dataset.tab; renderFields(); var b = $('#tab-' + state.tab); if (b && e.detail === 0) b.focus(); }
     else if (t.dataset.cat !== undefined) { state.cat = +t.dataset.cat; renderYear(); }
